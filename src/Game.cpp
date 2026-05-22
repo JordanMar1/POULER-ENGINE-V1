@@ -152,8 +152,9 @@ void Game::ManageMouse(sfRenderWindow *window, Player &p, Settings *settings)
     sfVector2i center = {(int)(winSize.x / 2), (int)(winSize.y / 2)};
     sfVector2i mousePos = sfMouse_getPositionRenderWindow(window);
     int deltaX = mousePos.x - center.x;
+    int deltaY = mousePos.y - center.y;
     if (deltaX != 0) {
-        float sensitivity = settings->sensitivity;
+        float sensitivity = settings->horizontal_sensitivity;
         double angle = deltaX * sensitivity;
         double oldDirX = p.dirX;
         p.dirX = p.dirX * cos(angle) - p.dirY * sin(angle);
@@ -161,9 +162,19 @@ void Game::ManageMouse(sfRenderWindow *window, Player &p, Settings *settings)
         double oldPlaneX = p.planeX;
         p.planeX = p.planeX * cos(angle) - p.planeY * sin(angle);
         p.planeY = oldPlaneX * sin(angle) + p.planeY * cos(angle);
+    }
+    if (deltaY != 0) {
+        float vertSensitivity = settings->vertical_sensitivity;
+        p.pitch -= deltaY * vertSensitivity;
+        int pitchLimit = (int)(winSize.y / 2);
+        if (p.pitch > pitchLimit)  p.pitch = pitchLimit;
+        if (p.pitch < -pitchLimit) p.pitch = -pitchLimit;
+    }
+    if (deltaX != 0 || deltaY != 0) {
         sfMouse_setPositionRenderWindow(center, window);
     }
 }
+
 
 void Game::HandleInputs(Core *core, Player &p, float dt, int map_rows, std::vector<Weapons *> &weapons, int current_weapon_idx, int &weapon_state, float &weapon_timer)
 {
@@ -234,12 +245,13 @@ void Game::HandleInputs(Core *core, Player &p, float dt, int map_rows, std::vect
 
 void Game::RenderScene(Core *core, sfUint8 *pixels, Player &p, int map_rows)
 {
-    ManageMouse(core->getWindow()->getWindow(), p, core->getSettings());
     sfVector2u winSize = sfRenderWindow_getSize(core->getWindow()->getWindow());
     int w = winSize.x;
     int h = winSize.y;
+    int horizon = (int)(h * 0.5 + p.pitch);
     for (int i = 0; i < w * h * 4; i += 4) {
-        bool sky = (i / 4) < (h / 2 * w);
+        int pixelY = (i / 4) / w;
+        bool sky = pixelY < horizon;
         pixels[i] = pixels[i+1] = pixels[i+2] = sky ? 30 : 50;
         pixels[i+3] = 255;
     }
@@ -257,7 +269,6 @@ void Game::RenderScene(Core *core, sfUint8 *pixels, Player &p, int map_rows)
         int screen_floor_limit = h;
         int lastH = getH(core, mX, mY, map_rows);
         int steps = 0;
-
         while (steps++ < 64) {
             int side = (sX < sY) ? 0 : 1;
             if (side == 0) { sX += dX; mX += stX; }
@@ -266,7 +277,7 @@ void Game::RenderScene(Core *core, sfUint8 *pixels, Player &p, int map_rows)
             if (dist < 0.01) dist = 0.01;
             int curH = getH(core, mX, mY, map_rows);
             double lineH = (double)h / dist;
-            int floor_px = (int)(h * 0.5 - (lastH - p.eyeHeight) * lineH);
+            int floor_px = (int)((h * 0.5 + p.pitch) - (lastH - p.eyeHeight) * lineH);
             if (floor_px < screen_floor_limit) {
                 float dShade = std::min(1.0f, 14.0f / (float)(dist + 1.0f));
                 sfUint8 shade = (sfUint8)std::max(0, (int)((38 + lastH * 9) * dShade));
@@ -279,8 +290,8 @@ void Game::RenderScene(Core *core, sfUint8 *pixels, Player &p, int map_rows)
             if (curH != lastH) {
                 double wallTopH = (curH == 99) ? (double)lastH + 3.0 : (double)std::max(curH, lastH);
                 double wallBotH = (double)std::min(curH, lastH);
-                int pxTop = (int)(h * 0.5 - (wallTopH - p.eyeHeight) * lineH);
-                int pxBot = (int)(h * 0.5 - (wallBotH - p.eyeHeight) * lineH);
+                int pxTop = (int)((h * 0.5 + p.pitch) - (wallTopH - p.eyeHeight) * lineH);
+                int pxBot = (int)((h * 0.5 + p.pitch) - (wallBotH - p.eyeHeight) * lineH);
                 int drawTop = std::max(pxTop, 0);
                 int drawBot = std::min(pxBot, screen_floor_limit);
                 if (drawTop < drawBot) {
@@ -301,6 +312,7 @@ void Game::RenderScene(Core *core, sfUint8 *pixels, Player &p, int map_rows)
         }
     }
 }
+
 
 int Game::Play(Core *core)
 {
@@ -364,6 +376,7 @@ int Game::Play(Core *core)
                 }
             }
         }
+        ManageMouse(window, p, core->getSettings());
         HandleInputs(core, p, dt, map_rows, weapons, current_weapon_idx, weapon_state, weapon_timer);
         RenderScene(core, pixels, p, map_rows);
         sfTexture_updateFromPixels(tex, pixels, size.x, size.y, 0, 0);

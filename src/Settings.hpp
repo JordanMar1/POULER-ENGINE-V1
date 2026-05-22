@@ -25,13 +25,12 @@ class Settings {
             sfMouseButton shoot = sfMouseLeft;
             sfMouseButton aim = sfMouseRight;
         } binds;
-        float sensitivity;
+        float horizontal_sensitivity;
+        float vertical_sensitivity;
         Settings();
         ~Settings();
         void changeSettings(Window& window, Menu& menu);
-
-    protected:
     private:
-        void updateTexts(sfText* mf, sfText* ml, sfText* mb, sfText* mr, sfText* c, sfText* s, sfText* a, sfText* r, sfText* sens);
+        void updateTexts(sfText* mf, sfText* ml, sfText* mb, sfText* mr, sfText* c, sfText* s, sfText* a, sfText* r, sfText* hSens, sfText* vSens);
         void saveSettings();
 };

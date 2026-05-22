@@ -44,106 +44,41 @@ static std::string mouseButtonToString(sfMouseButton button)
 static std::string keyboardKeyToString(sfKeyCode key)
 {
     switch (key) {
-        case sfKeyA: return "A";
-        case sfKeyB: return "B";
-        case sfKeyC: return "C";
-        case sfKeyD: return "D";
-        case sfKeyE: return "E";
-        case sfKeyF: return "F";
-        case sfKeyG: return "G";
-        case sfKeyH: return "H";
-        case sfKeyI: return "I";
-        case sfKeyJ: return "J";
-        case sfKeyK: return "K";
-        case sfKeyL: return "L";
-        case sfKeyM: return "M";
-        case sfKeyN: return "N";
-        case sfKeyO: return "O";
-        case sfKeyP: return "P";
-        case sfKeyQ: return "Q";
-        case sfKeyR: return "R";
-        case sfKeyS: return "S";
-        case sfKeyT: return "T";
-        case sfKeyU: return "U";
-        case sfKeyV: return "V";
-        case sfKeyW: return "W";
-        case sfKeyX: return "X";
-        case sfKeyY: return "Y";
-        case sfKeyZ: return "Z";
-        case sfKeyNum0: return "Num0";
-        case sfKeyNum1: return "Num1";
-        case sfKeyNum2: return "Num2";
-        case sfKeyNum3: return "Num3";
-        case sfKeyNum4: return "Num4";
-        case sfKeyNum5: return "Num5";
-        case sfKeyNum6: return "Num6";
-        case sfKeyNum7: return "Num7";
-        case sfKeyNum8: return "Num8";
-        case sfKeyNum9: return "Num9";
-        case sfKeyEscape: return "Escape";
-        case sfKeyLControl: return "LControl";
-        case sfKeyLShift: return "LShift";
-        case sfKeyLAlt: return "LAlt";
-        case sfKeyLSystem: return "LSystem";
-        case sfKeyRControl: return "RControl";
-        case sfKeyRShift: return "RShift";
-        case sfKeyRAlt: return "RAlt";
-        case sfKeyRSystem: return "RSystem";
-        case sfKeyMenu: return "Menu";
-        case sfKeyLBracket: return "LBracket";
-        case sfKeyRBracket: return "RBracket";
-        case sfKeySemicolon: return "Semicolon";
-        case sfKeyComma: return "Comma";
-        case sfKeyPeriod: return "Period";
-        case sfKeyQuote: return "Quote";
-        case sfKeySlash: return "Slash";
-        case sfKeyBackslash: return "Backslash";
-        case sfKeyTilde: return "Tilde";
-        case sfKeyEqual: return "Equal";
-        case sfKeyHyphen: return "Hyphen";
-        case sfKeySpace: return "Space";
-        case sfKeyEnter: return "Enter";
-        case sfKeyBackspace: return "Backspace";
-        case sfKeyTab: return "Tab";
-        case sfKeyPageUp: return "PageUp";
-        case sfKeyPageDown: return "PageDown";
-        case sfKeyEnd: return "End";
-        case sfKeyHome: return "Home";
-        case sfKeyInsert: return "Insert";
-        case sfKeyDelete: return "Delete";
-        case sfKeyAdd: return "Add";
-        case sfKeySubtract: return "Subtract";
-        case sfKeyMultiply: return "Multiply";
-        case sfKeyDivide: return "Divide";
-        case sfKeyLeft: return "Left";
-        case sfKeyRight: return "Right";
-        case sfKeyUp: return "Up";
-        case sfKeyDown: return "Down";
-        case sfKeyNumpad0: return "Numpad0";
-        case sfKeyNumpad1: return "Numpad1";
-        case sfKeyNumpad2: return "Numpad2";
-        case sfKeyNumpad3: return "Numpad3";
-        case sfKeyNumpad4: return "Numpad4";
-        case sfKeyNumpad5: return "Numpad5";
-        case sfKeyNumpad6: return "Numpad6";
-        case sfKeyNumpad7: return "Numpad7";
-        case sfKeyNumpad8: return "Numpad8";
+        case sfKeyA: return "A"; case sfKeyB: return "B"; case sfKeyC: return "C";
+        case sfKeyD: return "D"; case sfKeyE: return "E"; case sfKeyF: return "F";
+        case sfKeyG: return "G"; case sfKeyH: return "H"; case sfKeyI: return "I";
+        case sfKeyJ: return "J"; case sfKeyK: return "K"; case sfKeyL: return "L";
+        case sfKeyM: return "M"; case sfKeyN: return "N"; case sfKeyO: return "O";
+        case sfKeyP: return "P"; case sfKeyQ: return "Q"; case sfKeyR: return "R";
+        case sfKeyS: return "S"; case sfKeyT: return "T"; case sfKeyU: return "U";
+        case sfKeyV: return "V"; case sfKeyW: return "W"; case sfKeyX: return "X";
+        case sfKeyY: return "Y"; case sfKeyZ: return "Z";
+        case sfKeyNum0: return "Num0"; case sfKeyNum1: return "Num1"; case sfKeyNum2: return "Num2";
+        case sfKeyNum3: return "Num3"; case sfKeyNum4: return "Num4"; case sfKeyNum5: return "Num5";
+        case sfKeyNum6: return "Num6"; case sfKeyNum7: return "Num7"; case sfKeyNum8: return "Num8";
+        case sfKeyNum9: return "Num9"; case sfKeyEscape: return "Escape";
+        case sfKeyLControl: return "LControl"; case sfKeyLShift: return "LShift"; case sfKeyLAlt: return "LAlt";
+        case sfKeyLSystem: return "LSystem"; case sfKeyRControl: return "RControl"; case sfKeyRShift: return "RShift";
+        case sfKeyRAlt: return "RAlt"; case sfKeyRSystem: return "RSystem"; case sfKeyMenu: return "Menu";
+        case sfKeyLBracket: return "LBracket"; case sfKeyRBracket: return "RBracket"; case sfKeySemicolon: return "Semicolon";
+        case sfKeyComma: return "Comma"; case sfKeyPeriod: return "Period"; case sfKeyQuote: return "Quote";
+        case sfKeySlash: return "Slash"; case sfKeyBackslash: return "Backslash"; case sfKeyTilde: return "Tilde";
+        case sfKeyEqual: return "Equal"; case sfKeyHyphen: return "Hyphen"; case sfKeySpace: return "Space";
+        case sfKeyEnter: return "Enter"; case sfKeyBackspace: return "Backspace"; case sfKeyTab: return "Tab";
+        case sfKeyPageUp: return "PageUp"; case sfKeyPageDown: return "PageDown"; case sfKeyEnd: return "End";
+        case sfKeyHome: return "Home"; case sfKeyInsert: return "Insert"; case sfKeyDelete: return "Delete";
+        case sfKeyAdd: return "Add"; case sfKeySubtract: return "Subtract"; case sfKeyMultiply: return "Multiply";
+        case sfKeyDivide: return "Divide"; case sfKeyLeft: return "Left"; case sfKeyRight: return "Right";
+        case sfKeyUp: return "Up"; case sfKeyDown: return "Down";
+        case sfKeyNumpad0: return "Numpad0"; case sfKeyNumpad1: return "Numpad1"; case sfKeyNumpad2: return "Numpad2";
+        case sfKeyNumpad3: return "Numpad3"; case sfKeyNumpad4: return "Numpad4"; case sfKeyNumpad5: return "Numpad5";
+        case sfKeyNumpad6: return "Numpad6"; case sfKeyNumpad7: return "Numpad7"; case sfKeyNumpad8: return "Numpad8";
         case sfKeyNumpad9: return "Numpad9";
-        case sfKeyF1: return "F1";
-        case sfKeyF2: return "F2";
-        case sfKeyF3: return "F3";
-        case sfKeyF4: return "F4";
-        case sfKeyF5: return "F5";
-        case sfKeyF6: return "F6";
-        case sfKeyF7: return "F7";
-        case sfKeyF8: return "F8";
-        case sfKeyF9: return "F9";
-        case sfKeyF10: return "F10";
-        case sfKeyF11: return "F11";
-        case sfKeyF12: return "F12";
-        case sfKeyF13: return "F13";
-        case sfKeyF14: return "F14";
-        case sfKeyF15: return "F15";
+        case sfKeyF1: return "F1"; case sfKeyF2: return "F2"; case sfKeyF3: return "F3";
+        case sfKeyF4: return "F4"; case sfKeyF5: return "F5"; case sfKeyF6: return "F6";
+        case sfKeyF7: return "F7"; case sfKeyF8: return "F8"; case sfKeyF9: return "F9";
+        case sfKeyF10: return "F10"; case sfKeyF11: return "F11"; case sfKeyF12: return "F12";
+        case sfKeyF13: return "F13"; case sfKeyF14: return "F14"; case sfKeyF15: return "F15";
         case sfKeyPause: return "Pause";
         default: return "Unknown";
     }
@@ -152,110 +87,108 @@ static std::string keyboardKeyToString(sfKeyCode key)
 static sfKeyCode keyboardKeyFromString(const std::string &str)
 {
     if (str == "A") return sfKeyA;
-    if (str == "B") return sfKeyB;
-    if (str == "C") return sfKeyC;
-    if (str == "D") return sfKeyD;
-    if (str == "E") return sfKeyE;
-    if (str == "F") return sfKeyF;
-    if (str == "G") return sfKeyG;
-    if (str == "H") return sfKeyH;
-    if (str == "I") return sfKeyI;
-    if (str == "J") return sfKeyJ;
-    if (str == "K") return sfKeyK;
-    if (str == "L") return sfKeyL;
-    if (str == "M") return sfKeyM;
-    if (str == "N") return sfKeyN;
-    if (str == "O") return sfKeyO;
-    if (str == "P") return sfKeyP;
-    if (str == "Q") return sfKeyQ;
-    if (str == "R") return sfKeyR;
-    if (str == "S") return sfKeyS;
-    if (str == "T") return sfKeyT;
-    if (str == "U") return sfKeyU;
-    if (str == "V") return sfKeyV;
-    if (str == "W") return sfKeyW;
-    if (str == "X") return sfKeyX;
-    if (str == "Y") return sfKeyY;
-    if (str == "Z") return sfKeyZ;
-    if (str == "Num0") return sfKeyNum0;
-    if (str == "Num1") return sfKeyNum1;
-    if (str == "Num2") return sfKeyNum2;
-    if (str == "Num3") return sfKeyNum3;
-    if (str == "Num4") return sfKeyNum4;
-    if (str == "Num5") return sfKeyNum5;
-    if (str == "Num6") return sfKeyNum6;
-    if (str == "Num7") return sfKeyNum7;
-    if (str == "Num8") return sfKeyNum8;
-    if (str == "Num9") return sfKeyNum9;
-    if (str == "Escape") return sfKeyEscape;
-    if (str == "LControl") return sfKeyLControl;
-    if (str == "LShift") return sfKeyLShift;
-    if (str == "LAlt") return sfKeyLAlt;
-    if (str == "LSystem") return sfKeyLSystem;
-    if (str == "RControl") return sfKeyRControl;
-    if (str == "RShift") return sfKeyRShift;
-    if (str == "RAlt") return sfKeyRAlt;
-    if (str == "RSystem") return sfKeyRSystem;
-    if (str == "Menu") return sfKeyMenu;
-    if (str == "LBracket") return sfKeyLBracket;
-    if (str == "RBracket") return sfKeyRBracket;
-    if (str == "Semicolon") return sfKeySemicolon;
-    if (str == "Comma") return sfKeyComma;
-    if (str == "Period") return sfKeyPeriod;
-    if (str == "Quote") return sfKeyQuote;
-    if (str == "Slash") return sfKeySlash;
-    if (str == "Backslash") return sfKeyBackslash;
-    if (str == "Tilde") return sfKeyTilde;
-    if (str == "Equal") return sfKeyEqual;
-    if (str == "Hyphen") return sfKeyHyphen;
-    if (str == "Space") return sfKeySpace;
-    if (str == "Enter") return sfKeyEnter;
-    if (str == "Backspace") return sfKeyBackspace;
-    if (str == "Tab") return sfKeyTab;
-    if (str == "PageUp") return sfKeyPageUp;
-    if (str == "PageDown") return sfKeyPageDown;
-    if (str == "End") return sfKeyEnd;
-    if (str == "Home") return sfKeyHome;
-    if (str == "Insert") return sfKeyInsert;
-    if (str == "Delete") return sfKeyDelete;
-    if (str == "Add") return sfKeyAdd;
-    if (str == "Subtract") return sfKeySubtract;
-    if (str == "Multiply") return sfKeyMultiply;
-    if (str == "Divide") return sfKeyDivide;
-    if (str == "Left") return sfKeyLeft;
-    if (str == "Right") return sfKeyRight;
-    if (str == "Up") return sfKeyUp;
-    if (str == "Down") return sfKeyDown;
-    if (str == "Numpad0") return sfKeyNumpad0;
-    if (str == "Numpad1") return sfKeyNumpad1;
-    if (str == "Numpad2") return sfKeyNumpad2;
-    if (str == "Numpad3") return sfKeyNumpad3;
-    if (str == "Numpad4") return sfKeyNumpad4;
-    if (str == "Numpad5") return sfKeyNumpad5;
-    if (str == "Numpad6") return sfKeyNumpad6;
-    if (str == "Numpad7") return sfKeyNumpad7;
-    if (str == "Numpad8") return sfKeyNumpad8;
-    if (str == "Numpad9") return sfKeyNumpad9;
-    if (str == "F1") return sfKeyF1;
-    if (str == "F2") return sfKeyF2;
-    if (str == "F3") return sfKeyF3;
-    if (str == "F4") return sfKeyF4;
-    if (str == "F5") return sfKeyF5;
-    if (str == "F6") return sfKeyF6;
-    if (str == "F7") return sfKeyF7;
-    if (str == "F8") return sfKeyF8;
-    if (str == "F9") return sfKeyF9;
-    if (str == "F10") return sfKeyF10;
-    if (str == "F11") return sfKeyF11;
-    if (str == "F12") return sfKeyF12;
-    if (str == "F13") return sfKeyF13;
-    if (str == "F14") return sfKeyF14;
-    if (str == "F15") return sfKeyF15;
-    if (str == "Pause") return sfKeyPause;
+    else if (str == "B") return sfKeyB;
+    else if (str == "C") return sfKeyC;
+    else if (str == "D") return sfKeyD;
+    else if (str == "E") return sfKeyE;
+    else if (str == "F") return sfKeyF;
+    else if (str == "G") return sfKeyG;
+    else if (str == "H") return sfKeyH;
+    else if (str == "I") return sfKeyI;
+    else if (str == "J") return sfKeyJ;
+    else if (str == "K") return sfKeyK;
+    else if (str == "L") return sfKeyL;
+    else if (str == "M") return sfKeyM;
+    else if (str == "N") return sfKeyN;
+    else if (str == "O") return sfKeyO;
+    else if (str == "P") return sfKeyP;
+    else if (str == "Q") return sfKeyQ;
+    else if (str == "R") return sfKeyR;
+    else if (str == "S") return sfKeyS;
+    else if (str == "T") return sfKeyT;
+    else if (str == "U") return sfKeyU;
+    else if (str == "V") return sfKeyV;
+    else if (str == "W") return sfKeyW;
+    else if (str == "X") return sfKeyX;
+    else if (str == "Y") return sfKeyY;
+    else if (str == "Z") return sfKeyZ;
+    else if (str == "Num0") return sfKeyNum0;
+    else if (str == "Num1") return sfKeyNum1;
+    else if (str == "Num2") return sfKeyNum2;
+    else if (str == "Num3") return sfKeyNum3;
+    else if (str == "Num4") return sfKeyNum4;
+    else if (str == "Num5") return sfKeyNum5;
+    else if (str == "Num6") return sfKeyNum6;
+    else if (str == "Num7") return sfKeyNum7;
+    else if (str == "Num8") return sfKeyNum8;
+    else if (str == "Num9") return sfKeyNum9;
+    else if (str == "Escape") return sfKeyEscape;
+    else if (str == "LControl") return sfKeyLControl;
+    else if (str == "LShift") return sfKeyLShift;
+    else if (str == "LAlt") return sfKeyLAlt;
+    else if (str == "LSystem") return sfKeyLSystem;
+    else if (str == "RControl") return sfKeyRControl;
+    else if (str == "RShift") return sfKeyRShift;
+    else if (str == "RAlt") return sfKeyRAlt;
+    else if (str == "RSystem") return sfKeyRSystem;
+    else if (str == "Menu") return sfKeyMenu;
+    else if (str == "LBracket") return sfKeyLBracket;
+    else if (str == "RBracket") return sfKeyRBracket;
+    else if (str == "Semicolon") return sfKeySemicolon;
+    else if (str == "Comma") return sfKeyComma;
+    else if (str == "Period") return sfKeyPeriod;
+    else if (str == "Quote") return sfKeyQuote;
+    else if (str == "Slash") return sfKeySlash;
+    else if (str == "Backslash") return sfKeyBackslash;
+    else if (str == "Tilde") return sfKeyTilde;
+    else if (str == "Equal") return sfKeyEqual;
+    else if (str == "Hyphen") return sfKeyHyphen;
+    else if (str == "Space") return sfKeySpace;
+    else if (str == "Enter") return sfKeyEnter;
+    else if (str == "Backspace") return sfKeyBackspace;
+    else if (str == "Tab") return sfKeyTab;
+    else if (str == "PageUp") return sfKeyPageUp;
+    else if (str == "PageDown") return sfKeyPageDown;
+    else if (str == "End") return sfKeyEnd;
+    else if (str == "Home") return sfKeyHome;
+    else if (str == "Insert") return sfKeyInsert;
+    else if (str == "Delete") return sfKeyDelete;
+    else if (str == "Add") return sfKeyAdd;
+    else if (str == "Subtract") return sfKeySubtract;
+    else if (str == "Multiply") return sfKeyMultiply;
+    else if (str == "Divide") return sfKeyDivide;
+    else if (str == "Left") return sfKeyLeft;
+    else if (str == "Right") return sfKeyRight;
+    else if (str == "Up") return sfKeyUp;
+    else if (str == "Down") return sfKeyDown;
+    else if (str == "Numpad0") return sfKeyNumpad0;
+    else if (str == "Numpad1") return sfKeyNumpad1;
+    else if (str == "Numpad2") return sfKeyNumpad2;
+    else if (str == "Numpad3") return sfKeyNumpad3;
+    else if (str == "Numpad4") return sfKeyNumpad4;
+    else if (str == "Numpad5") return sfKeyNumpad5;
+    else if (str == "Numpad6") return sfKeyNumpad6;
+    else if (str == "Numpad7") return sfKeyNumpad7;
+    else if (str == "Numpad8") return sfKeyNumpad8;
+    else if (str == "F1") return sfKeyF1;
+    else if (str == "F2") return sfKeyF2;
+    else if (str == "F3") return sfKeyF3;
+    else if (str == "F4") return sfKeyF4;
+    else if (str == "F5") return sfKeyF5;
+    else if (str == "F6") return sfKeyF6;
+    else if (str == "F7") return sfKeyF7;
+    else if (str == "F8") return sfKeyF8;
+    else if (str == "F9") return sfKeyF9;
+    else if (str == "F10") return sfKeyF10;
+    else if (str == "F11") return sfKeyF11;
+    else if (str == "F12") return sfKeyF12;
+    else if (str == "F13") return sfKeyF13;
+    else if (str == "F14") return sfKeyF14;
+    else if (str == "F15") return sfKeyF15;
     return sfKeyUnknown;
 }
 
-static void writeDefaultBinds(const std::string &path, const Settings::Binds &binds, float sensitivity)
+static void writeDefaultBinds(const std::string &path, const Settings::Binds &binds, float hSens, float vSens)
 {
     std::ofstream output(path, std::ios::trunc);
     if (!output.is_open())
@@ -268,13 +201,15 @@ static void writeDefaultBinds(const std::string &path, const Settings::Binds &bi
     output << "reload=" << keyboardKeyToString(binds.reload) << "\n";
     output << "shoot=" << mouseButtonToString(binds.shoot) << "\n";
     output << "aim=" << mouseButtonToString(binds.aim) << "\n";
-    output << "sensitivity=" << sensitivity << "\n";
+    output << "horizontal_sensitivity=" << hSens << "\n";
+    output << "vertical_sensitivity=" << vSens << "\n";
 }
 
 Settings::Settings()
 {
     std::string path("settings.conf");
-    sensitivity = 0.0025f;
+    horizontal_sensitivity = 0.0025f;
+    vertical_sensitivity = 1.25f;
     bool writeDefaults = false;
 
     std::ifstream input(path);
@@ -282,9 +217,9 @@ Settings::Settings()
         writeDefaults = true;
     } else {
         input.seekg(0, std::ios::end);
-        if (input.tellg() <= 0)
+        if (input.tellg() <= 0) {
             writeDefaults = true;
-        else {
+        } else {
             input.seekg(0);
             std::string line;
             while (std::getline(input, line)) {
@@ -314,103 +249,55 @@ Settings::Settings()
                 } else if (key == "aim") {
                     auto m = mouseButtonFromString(val);
                     if (m != sfMouseButtonCount) binds.aim = m;
-                } else if (key == "sensitivity") {
+                } else if (key == "sensitivity") { // Rétrocompatibilité
                     try {
-                        sensitivity = std::stof(val);
-                    } catch (...) {
-                        sensitivity = 0.0025f;
-                    }
+                        horizontal_sensitivity = std::stof(val);
+                        vertical_sensitivity = std::stof(val);
+                    } catch (...) {}
+                } else if (key == "horizontal_sensitivity") {
+                    try { horizontal_sensitivity = std::stof(val); } catch (...) { horizontal_sensitivity = 0.0025f; }
+                } else if (key == "vertical_sensitivity") {
+                    try { vertical_sensitivity = std::stof(val); } catch (...) { vertical_sensitivity = 0.0025f; }
                 }
             }
-            if (binds.moveForward == sfKeyUnknown ||
-                binds.moveLeft == sfKeyUnknown ||
-                binds.moveBack == sfKeyUnknown ||
-                binds.moveRight == sfKeyUnknown ||
-                binds.crouch == sfKeyUnknown ||
-                binds.reload == sfKeyUnknown ||
-                binds.shoot == sfMouseButtonCount ||
-                binds.aim == sfMouseButtonCount) {
+            if (binds.moveForward == sfKeyUnknown || binds.moveLeft == sfKeyUnknown ||
+                binds.moveBack == sfKeyUnknown || binds.moveRight == sfKeyUnknown ||
+                binds.crouch == sfKeyUnknown || binds.reload == sfKeyUnknown ||
+                binds.shoot == sfMouseButtonCount || binds.aim == sfMouseButtonCount) {
                 writeDefaults = true;
             }
         }
         input.close();
     }
     if (writeDefaults) {
-        writeDefaultBinds(path, binds, sensitivity);
+        writeDefaultBinds(path, binds, horizontal_sensitivity, vertical_sensitivity);
     }
 }
 
-Settings::~Settings()
-{
-}
+Settings::~Settings() {}
 
 void Settings::changeSettings(Window& window, Menu& menu)
 {
     sfFont* font = sfFont_createFromFile("assets/fonts/menu.ttf");
-    if (!font) {
-        return;
-    }
+    if (!font) return;
     sfRenderWindow* renderWindow = window.getWindow();
     sfText* title = sfText_create();
-    sfText_setFont(title, font);
-    sfText_setCharacterSize(title, 30);
-    sfText_setString(title, "Settings");
-    sfText_setPosition(title, (sfVector2f){100, 50});
-    sfText_setColor(title, sfWhite);
-    sfText* moveForwardText = sfText_create();
-    sfText_setFont(moveForwardText, font);
-    sfText_setCharacterSize(moveForwardText, 20);
-    sfText_setPosition(moveForwardText, (sfVector2f){100, 150});
-    sfText_setColor(moveForwardText, sfWhite);
-    sfText* moveLeftText = sfText_create();
-    sfText_setFont(moveLeftText, font);
-    sfText_setCharacterSize(moveLeftText, 20);
-    sfText_setPosition(moveLeftText, (sfVector2f){100, 200});
-    sfText_setColor(moveLeftText, sfWhite);
-    sfText* moveBackText = sfText_create();
-    sfText_setFont(moveBackText, font);
-    sfText_setCharacterSize(moveBackText, 20);
-    sfText_setPosition(moveBackText, (sfVector2f){100, 250});
-    sfText_setColor(moveBackText, sfWhite);
-    sfText* moveRightText = sfText_create();
-    sfText_setFont(moveRightText, font);
-    sfText_setCharacterSize(moveRightText, 20);
-    sfText_setPosition(moveRightText, (sfVector2f){100, 300});
-    sfText_setColor(moveRightText, sfWhite);
-    sfText* crouchText = sfText_create();
-    sfText_setFont(crouchText, font);
-    sfText_setCharacterSize(crouchText, 20);
-    sfText_setPosition(crouchText, (sfVector2f){100, 350});
-    sfText_setColor(crouchText, sfWhite);
-    sfText* shootText = sfText_create();
-    sfText_setFont(shootText, font);
-    sfText_setCharacterSize(shootText, 20);
-    sfText_setPosition(shootText, (sfVector2f){100, 400});
-    sfText_setColor(shootText, sfWhite);
-    sfText* aimText = sfText_create();
-    sfText_setFont(aimText, font);
-    sfText_setCharacterSize(aimText, 20);
-    sfText_setPosition(aimText, (sfVector2f){100, 450});
-    sfText_setColor(aimText, sfWhite);
-    sfText* reloadText = sfText_create();
-    sfText_setFont(reloadText, font);
-    sfText_setCharacterSize(reloadText, 20);
-    sfText_setPosition(reloadText, (sfVector2f){100, 500});
-    sfText_setColor(reloadText, sfWhite);
-    sfText* sensitivityText = sfText_create();
-    sfText_setFont(sensitivityText, font);
-    sfText_setCharacterSize(sensitivityText, 20);
-    sfText_setPosition(sensitivityText, (sfVector2f){100, 550});
-    sfText_setColor(sensitivityText, sfWhite);
+    sfText_setFont(title, font); sfText_setCharacterSize(title, 30);
+    sfText_setString(title, "Settings"); sfText_setPosition(title, (sfVector2f){100, 50}); sfText_setColor(title, sfWhite);
+    sfText* textArray[10];
+    for (int i = 0; i < 10; ++i) {
+        textArray[i] = sfText_create();
+        sfText_setFont(textArray[i], font);
+        sfText_setCharacterSize(textArray[i], 20);
+        sfText_setPosition(textArray[i], (sfVector2f){100, 150.f + (i * 50.f)});
+        sfText_setColor(textArray[i], sfWhite);
+    }
     sfText* waitingText = sfText_create();
-    sfText_setFont(waitingText, font);
-    sfText_setCharacterSize(waitingText, 20);
-    sfText_setPosition(waitingText, (sfVector2f){100, 620});
-    sfText_setColor(waitingText, sfYellow);
-    float minSens = 0.0001f;
-    float maxSens = 0.0100f;
-    float trackX = 400.f;
-    float trackY = 560.f;
+    sfText_setFont(waitingText, font); sfText_setCharacterSize(waitingText, 20);
+    sfText_setPosition(waitingText, (sfVector2f){100, 670}); sfText_setColor(waitingText, sfYellow);
+    float minHSens = 0.0001f, maxHSens = 0.0100f;
+    float minVSens = 0.9f, maxVSens = 2.0f;
+    float trackX = 450.f;
     float trackWidth = 200.f;
     sfRectangleShape* sliderTrack = sfRectangleShape_create();
     sfRectangleShape_setSize(sliderTrack, (sfVector2f){trackWidth, 6});
@@ -424,11 +311,14 @@ void Settings::changeSettings(Window& window, Menu& menu)
     enum State { Normal, WaitingKey, WaitingMouse };
     State state = Normal;
     int waitingFor = -1;
-    bool isDraggingSlider = false;
+    int draggingSlider = 0;
     while (sfRenderWindow_isOpen(renderWindow)) {
         sfEvent event;
-        float ratio = (sensitivity - minSens) / (maxSens - minSens);
-        sfRectangleShape_setPosition(sliderKnob, (sfVector2f){trackX + (ratio * trackWidth), trackY + 3});
+        float hRatio = std::clamp((horizontal_sensitivity - minHSens) / (maxHSens - minHSens), 0.f, 1.f);
+        float vRatio = std::clamp((vertical_sensitivity   - minVSens) / (maxVSens - minVSens), 0.f, 1.f);
+        sfRectangleShape_setPosition(hKnob, (sfVector2f){trackX + (hRatio * trackWidth), 563.f});
+        sfRectangleShape_setPosition(vKnob, (sfVector2f){trackX + (vRatio * trackWidth), 613.f});
+
         while (sfRenderWindow_pollEvent(renderWindow, &event)) {
             if (event.type == sfEvtClosed) {
                 sfRenderWindow_close(renderWindow);
@@ -436,44 +326,22 @@ void Settings::changeSettings(Window& window, Menu& menu)
             }
             if (event.type == sfEvtKeyPressed) {
                 if (state == Normal) {
-                    if (event.key.code == sfKeyNum1) {
+                    if (event.key.code >= sfKeyNum1 && event.key.code <= sfKeyNum5) {
                         state = WaitingKey;
-                        waitingFor = 1;
-                        sfText_setString(waitingText, "Press new key for Move Forward");
-                    } else if (event.key.code == sfKeyNum2) {
-                        state = WaitingKey;
-                        waitingFor = 2;
-                        sfText_setString(waitingText, "Press new key for Move Left");
-                    } else if (event.key.code == sfKeyNum3) {
-                        state = WaitingKey;
-                        waitingFor = 3;
-                        sfText_setString(waitingText, "Press new key for Move Back");
-                    } else if (event.key.code == sfKeyNum4) {
-                        state = WaitingKey;
-                        waitingFor = 4;
-                        sfText_setString(waitingText, "Press new key for Move Right");
-                    } else if (event.key.code == sfKeyNum5) {
-                        state = WaitingKey;
-                        waitingFor = 5;
-                        sfText_setString(waitingText, "Press new key for Crouch");
+                        waitingFor = event.key.code - sfKeyNum1 + 1;
+                        std::string actions[] = {"Move Forward", "Move Left", "Move Back", "Move Right", "Crouch"};
+                        sfText_setString(waitingText, ("Press new key for " + actions[waitingFor - 1]).c_str());
                     } else if (event.key.code == sfKeyNum6) {
-                        state = WaitingMouse;
-                        waitingFor = 6;
-                        sfText_setString(waitingText, "Press new mouse button for Shoot");
+                        state = WaitingMouse; waitingFor = 6; sfText_setString(waitingText, "Press new mouse button for Shoot");
                     } else if (event.key.code == sfKeyNum7) {
-                        state = WaitingMouse;
-                        waitingFor = 7;
-                        sfText_setString(waitingText, "Press new mouse button for Aim");
+                        state = WaitingMouse; waitingFor = 7; sfText_setString(waitingText, "Press new mouse button for Aim");
                     } else if (event.key.code == sfKeyNum8) {
-                        state = WaitingKey;
-                        waitingFor = 8;
-                        sfText_setString(waitingText, "Press new key for Reload");
+                        state = WaitingKey; waitingFor = 8; sfText_setString(waitingText, "Press new key for Reload");
                     } else if (event.key.code == sfKeyEscape) {
-                        sfText_destroy(title); sfText_destroy(moveForwardText); sfText_destroy(moveLeftText);
-                        sfText_destroy(moveBackText); sfText_destroy(moveRightText); sfText_destroy(crouchText);
-                        sfText_destroy(shootText); sfText_destroy(aimText); sfText_destroy(reloadText);
-                        sfText_destroy(sensitivityText); sfText_destroy(waitingText);
-                        sfRectangleShape_destroy(sliderTrack); sfRectangleShape_destroy(sliderKnob);
+                        sfText_destroy(title); sfText_destroy(waitingText);
+                        for (int i = 0; i < 10; ++i) sfText_destroy(textArray[i]);
+                        sfRectangleShape_destroy(hTrack); sfRectangleShape_destroy(hKnob);
+                        sfRectangleShape_destroy(vTrack); sfRectangleShape_destroy(vKnob);
                         sfFont_destroy(font);
                         return;
                     }
@@ -485,112 +353,97 @@ void Settings::changeSettings(Window& window, Menu& menu)
                         else if (waitingFor == 4) binds.moveRight = event.key.code;
                         else if (waitingFor == 5) binds.crouch = event.key.code;
                         else if (waitingFor == 8) binds.reload = event.key.code;
-                        updateTexts(moveForwardText, moveLeftText, moveBackText, moveRightText, crouchText, shootText, aimText, reloadText, sensitivityText);
+                        updateTexts(textArray[0], textArray[1], textArray[2], textArray[3], textArray[4], textArray[5], textArray[6], textArray[7], textArray[8], textArray[9]);
                         saveSettings();
-                        state = Normal;
-                        sfText_setString(waitingText, "");
+                        state = Normal; sfText_setString(waitingText, "");
                     }
                 }
             } else if (event.type == sfEvtMouseButtonPressed) {
                 if (state == Normal && event.mouseButton.button == sfMouseLeft) {
                     int x = event.mouseButton.x;
                     int y = event.mouseButton.y;
-                    if (x >= trackX - 10 && x <= trackX + trackWidth + 10 && y >= trackY - 15 && y <= trackY + 15) {
-                        isDraggingSlider = true;
-                        float newRatio = (x - trackX) / trackWidth;
-                        if (newRatio < 0.f) newRatio = 0.f;
-                        if (newRatio > 1.f) newRatio = 1.f;
-                        sensitivity = minSens + newRatio * (maxSens - minSens);
-                        updateTexts(moveForwardText, moveLeftText, moveBackText, moveRightText, crouchText, shootText, aimText, reloadText, sensitivityText);
+                    if (x >= trackX - 10 && x <= trackX + trackWidth + 10) {
+                        if (y >= 545 && y <= 575) draggingSlider = 1;
+                        else if (y >= 595 && y <= 625) draggingSlider = 2;
+                        if (draggingSlider != 0) {
+                            float newRatio = std::clamp((x - trackX) / trackWidth, 0.f, 1.f);
+                            if (draggingSlider == 1) horizontal_sensitivity = minHSens + newRatio * (maxHSens - minHSens);
+                            else                     vertical_sensitivity   = minVSens + newRatio * (maxVSens - minVSens);
+                            updateTexts(textArray[0], textArray[1], textArray[2], textArray[3], textArray[4], textArray[5], textArray[6], textArray[7], textArray[8], textArray[9]);
+                        }
                     }
-                    else if (y >= 150 && y < 200) {
-                        state = WaitingKey; waitingFor = 1; sfText_setString(waitingText, "Press new key for Move Forward");
-                    } else if (y >= 200 && y < 250) {
-                        state = WaitingKey; waitingFor = 2; sfText_setString(waitingText, "Press new key for Move Left");
-                    } else if (y >= 250 && y < 300) {
-                        state = WaitingKey; waitingFor = 3; sfText_setString(waitingText, "Press new key for Move Back");
-                    } else if (y >= 300 && y < 350) {
-                        state = WaitingKey; waitingFor = 4; sfText_setString(waitingText, "Press new key for Move Right");
-                    } else if (y >= 350 && y < 400) {
-                        state = WaitingKey; waitingFor = 5; sfText_setString(waitingText, "Press new key for Crouch");
-                    } else if (y >= 400 && y < 450) {
-                        state = WaitingMouse; waitingFor = 6; sfText_setString(waitingText, "Press new mouse button for Shoot");
-                    } else if (y >= 450 && y < 500) {
-                        state = WaitingMouse; waitingFor = 7; sfText_setString(waitingText, "Press new mouse button for Aim");
-                    } else if (y >= 500 && y < 550) {
-                        state = WaitingKey; waitingFor = 8; sfText_setString(waitingText, "Press new key for Reload");
+                    if (draggingSlider == 0) {
+                        if      (y >= 150 && y < 200) { state = WaitingKey;   waitingFor = 1; sfText_setString(waitingText, "Press new key for Move Forward"); }
+                        else if (y >= 200 && y < 250) { state = WaitingKey;   waitingFor = 2; sfText_setString(waitingText, "Press new key for Move Left"); }
+                        else if (y >= 250 && y < 300) { state = WaitingKey;   waitingFor = 3; sfText_setString(waitingText, "Press new key for Move Back"); }
+                        else if (y >= 300 && y < 350) { state = WaitingKey;   waitingFor = 4; sfText_setString(waitingText, "Press new key for Move Right"); }
+                        else if (y >= 350 && y < 400) { state = WaitingKey;   waitingFor = 5; sfText_setString(waitingText, "Press new key for Crouch"); }
+                        else if (y >= 400 && y < 450) { state = WaitingMouse; waitingFor = 6; sfText_setString(waitingText, "Press new mouse button for Shoot"); }
+                        else if (y >= 450 && y < 500) { state = WaitingMouse; waitingFor = 7; sfText_setString(waitingText, "Press new mouse button for Aim"); }
+                        else if (y >= 500 && y < 550) { state = WaitingKey;   waitingFor = 8; sfText_setString(waitingText, "Press new key for Reload"); }
                     }
                 } else if (state == WaitingMouse) {
                     if (waitingFor == 6) binds.shoot = event.mouseButton.button;
                     else if (waitingFor == 7) binds.aim = event.mouseButton.button;
-                    updateTexts(moveForwardText, moveLeftText, moveBackText, moveRightText, crouchText, shootText, aimText, reloadText, sensitivityText);
+                    updateTexts(textArray[0], textArray[1], textArray[2], textArray[3], textArray[4], textArray[5], textArray[6], textArray[7], textArray[8], textArray[9]);
                     saveSettings();
-                    state = Normal;
-                    sfText_setString(waitingText, "");
+                    state = Normal; sfText_setString(waitingText, "");
                 }
             } else if (event.type == sfEvtMouseButtonReleased) {
-                if (event.mouseButton.button == sfMouseLeft && isDraggingSlider) {
-                    isDraggingSlider = false;
+                if (event.mouseButton.button == sfMouseLeft && draggingSlider != 0) {
+                    draggingSlider = 0;
                     saveSettings();
                 }
             } else if (event.type == sfEvtMouseMoved) {
-                if (isDraggingSlider) {
-                    float newRatio = (event.mouseMove.x - trackX) / trackWidth;
-                    if (newRatio < 0.f) newRatio = 0.f;
-                    if (newRatio > 1.f) newRatio = 1.f;
-                    sensitivity = minSens + newRatio * (maxSens - minSens);
-                    updateTexts(moveForwardText, moveLeftText, moveBackText, moveRightText, crouchText, shootText, aimText, reloadText, sensitivityText);
+                if (draggingSlider != 0) {
+                    float newRatio = std::clamp((event.mouseMove.x - trackX) / trackWidth, 0.f, 1.f);
+                    if (draggingSlider == 1) horizontal_sensitivity = minHSens + newRatio * (maxHSens - minHSens);
+                    else                     vertical_sensitivity   = minVSens + newRatio * (maxVSens - minVSens);
+                    updateTexts(textArray[0], textArray[1], textArray[2], textArray[3], textArray[4], textArray[5], textArray[6], textArray[7], textArray[8], textArray[9]);
                 }
             }
         }
-        if (!sfRenderWindow_isOpen(renderWindow))
-            break;
+        if (!sfRenderWindow_isOpen(renderWindow)) break;
         sfRenderWindow_clear(renderWindow, sfBlack);
         menu.display(renderWindow, 2);
         sfRenderWindow_drawText(renderWindow, title, NULL);
-        sfRenderWindow_drawText(renderWindow, moveForwardText, NULL);
-        sfRenderWindow_drawText(renderWindow, moveLeftText, NULL);
-        sfRenderWindow_drawText(renderWindow, moveBackText, NULL);
-        sfRenderWindow_drawText(renderWindow, moveRightText, NULL);
-        sfRenderWindow_drawText(renderWindow, crouchText, NULL);
-        sfRenderWindow_drawText(renderWindow, shootText, NULL);
-        sfRenderWindow_drawText(renderWindow, aimText, NULL);
-        sfRenderWindow_drawText(renderWindow, reloadText, NULL);
-        sfRenderWindow_drawText(renderWindow, sensitivityText, NULL);
-        sfRenderWindow_drawRectangleShape(renderWindow, sliderTrack, NULL);
-        sfRenderWindow_drawRectangleShape(renderWindow, sliderKnob, NULL);
-
-        if (state != Normal) {
+        for (int i = 0; i < 10; ++i)
+            sfRenderWindow_drawText(renderWindow, textArray[i], NULL);
+        sfRenderWindow_drawRectangleShape(renderWindow, hTrack, NULL);
+        sfRenderWindow_drawRectangleShape(renderWindow, hKnob, NULL);
+        sfRenderWindow_drawRectangleShape(renderWindow, vTrack, NULL);
+        sfRenderWindow_drawRectangleShape(renderWindow, vKnob, NULL);
+        if (state != Normal)
             sfRenderWindow_drawText(renderWindow, waitingText, NULL);
-        }
         sfRenderWindow_display(renderWindow);
     }
-    sfText_destroy(title); sfText_destroy(moveForwardText); sfText_destroy(moveLeftText);
-    sfText_destroy(moveBackText); sfText_destroy(moveRightText); sfText_destroy(crouchText);
-    sfText_destroy(shootText); sfText_destroy(aimText); sfText_destroy(reloadText);
-    sfText_destroy(sensitivityText); sfText_destroy(waitingText);
-    sfRectangleShape_destroy(sliderTrack); sfRectangleShape_destroy(sliderKnob);
+    sfText_destroy(title); sfText_destroy(waitingText);
+    for (int i = 0; i < 10; ++i) sfText_destroy(textArray[i]);
+    sfRectangleShape_destroy(hTrack); sfRectangleShape_destroy(hKnob);
+    sfRectangleShape_destroy(vTrack); sfRectangleShape_destroy(vKnob);
     sfFont_destroy(font);
 }
 
-void Settings::updateTexts(sfText* mf, sfText* ml, sfText* mb, sfText* mr, sfText* c, sfText* s, sfText* a, sfText* r, sfText* sens)
+void Settings::updateTexts(sfText* mf, sfText* ml, sfText* mb, sfText* mr, sfText* c, sfText* s, sfText* a, sfText* r, sfText* hSens, sfText* vSens)
 {
     sfText_setString(mf, ("1. Move Forward: " + keyboardKeyToString(binds.moveForward)).c_str());
-    sfText_setString(ml, ("2. Move Left: " + keyboardKeyToString(binds.moveLeft)).c_str());
-    sfText_setString(mb, ("3. Move Back: " + keyboardKeyToString(binds.moveBack)).c_str());
-    sfText_setString(mr, ("4. Move Right: " + keyboardKeyToString(binds.moveRight)).c_str());
-    sfText_setString(c,  ("5. Crouch: " + keyboardKeyToString(binds.crouch)).c_str());
-    sfText_setString(s,  ("6. Shoot: " + mouseButtonToString(binds.shoot)).c_str());
-    sfText_setString(a,  ("7. Aim: " + mouseButtonToString(binds.aim)).c_str());
-    sfText_setString(r,  ("8. Reload: " + keyboardKeyToString(binds.reload)).c_str());
-    
-    std::stringstream ss;
-    ss << "9. Sensitivity: " << sensitivity;
-    sfText_setString(sens, ss.str().c_str());
+    sfText_setString(ml, ("2. Move Left: "    + keyboardKeyToString(binds.moveLeft)).c_str());
+    sfText_setString(mb, ("3. Move Back: "    + keyboardKeyToString(binds.moveBack)).c_str());
+    sfText_setString(mr, ("4. Move Right: "   + keyboardKeyToString(binds.moveRight)).c_str());
+    sfText_setString(c,  ("5. Crouch: "       + keyboardKeyToString(binds.crouch)).c_str());
+    sfText_setString(s,  ("6. Shoot: "        + mouseButtonToString(binds.shoot)).c_str());
+    sfText_setString(a,  ("7. Aim: "          + mouseButtonToString(binds.aim)).c_str());
+    sfText_setString(r,  ("8. Reload: "       + keyboardKeyToString(binds.reload)).c_str());
+    float minHSens = 0.0001f, maxHSens = 0.0100f;
+    float minVSens = 0.9f,    maxVSens = 2.0f;
+    int hDisplay = std::clamp((int)(((horizontal_sensitivity - minHSens) / (maxHSens - minHSens)) * 100.f), 0, 100);
+    int vDisplay = std::clamp((int)(((vertical_sensitivity   - minVSens) / (maxVSens - minVSens)) * 100.f), 0, 100);
+    sfText_setString(hSens, ("9. Horizontal Sens: "  + std::to_string(hDisplay)).c_str());
+    sfText_setString(vSens, ("10. Vertical Sens: " + std::to_string(vDisplay)).c_str());
 }
 
 void Settings::saveSettings()
 {
     std::string path("settings.conf");
-    writeDefaultBinds(path, binds, sensitivity);
+    writeDefaultBinds(path, binds, horizontal_sensitivity, vertical_sensitivity);
 }
