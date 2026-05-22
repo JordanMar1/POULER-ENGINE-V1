@@ -44,7 +44,6 @@ Maps::Maps(char ***parsed_file, bool debug)
                     free(lines);
                 }
             }
-            // Check if there is a next map
             bool has_next = false;
             for (int k = i + 1; parsed_file[k] != NULL; k++) {
                 if (strcmp(parsed_file[k][0], "map") == 0) {

@@ -144,7 +144,7 @@ void Game::UpdateWeaponTimer(std::vector<Weapons *> &weapons, int current_weapon
     }
 }
 
-void Game::ManageMouse(sfRenderWindow *window, Player &p)
+void Game::ManageMouse(sfRenderWindow *window, Player &p, Settings *settings)
 {
     if (!sfRenderWindow_hasFocus(window))
         return;
@@ -153,7 +153,7 @@ void Game::ManageMouse(sfRenderWindow *window, Player &p)
     sfVector2i mousePos = sfMouse_getPositionRenderWindow(window);
     int deltaX = mousePos.x - center.x;
     if (deltaX != 0) {
-        float sensitivity = 0.0025f;
+        float sensitivity = settings->sensitivity;
         double angle = deltaX * sensitivity;
         double oldDirX = p.dirX;
         p.dirX = p.dirX * cos(angle) - p.dirY * sin(angle);
@@ -240,7 +240,7 @@ void Game::HandleInputs(Core *core, Player &p, float dt, int map_rows, std::vect
 
 void Game::RenderScene(Core *core, sfUint8 *pixels, Player &p, int map_rows)
 {
-    ManageMouse(core->getWindow()->getWindow(), p);
+    ManageMouse(core->getWindow()->getWindow(), p, core->getSettings());
     sfVector2u winSize = sfRenderWindow_getSize(core->getWindow()->getWindow());
     int w = winSize.x;
     int h = winSize.y;
@@ -341,10 +341,7 @@ int Game::Play(Core *core)
         sfTexture *t = sfTexture_createFromFile(w->sprite_path.c_str(), nullptr);
         weapon_textures.push_back(t);
     }
-
-    // Optionnel : Masque le curseur Windows pour une meilleure immersion FPS
     sfRenderWindow_setMouseCursorVisible(window, sfFalse);
-
     while (sfRenderWindow_isOpen(window)) {
         float dt = sfTime_asSeconds(sfClock_restart(clock));
         sfEvent event;
@@ -361,7 +358,6 @@ int Game::Play(Core *core)
                         w->mag = w->max_mag;
                     }
                 }
-                // Réaffiche la souris avant de retourner au menu
                 sfRenderWindow_setMouseCursorVisible(window, sfTrue);
                 return core->menu_return();
             }

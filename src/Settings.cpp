@@ -12,6 +12,7 @@
 #include <string>
 #include <algorithm>
 #include <cctype>
+#include <sstream>
 
 static std::string trim(const std::string &s)
 {
@@ -254,25 +255,26 @@ static sfKeyCode keyboardKeyFromString(const std::string &str)
     return sfKeyUnknown;
 }
 
-static void writeDefaultBinds(const std::string &path, const Settings::Binds &binds)
+static void writeDefaultBinds(const std::string &path, const Settings::Binds &binds, float sensitivity)
 {
     std::ofstream output(path, std::ios::trunc);
     if (!output.is_open())
         return;
-
     output << "move_forward=" << keyboardKeyToString(binds.moveForward) << "\n";
     output << "move_left=" << keyboardKeyToString(binds.moveLeft) << "\n";
     output << "move_back=" << keyboardKeyToString(binds.moveBack) << "\n";
     output << "move_right=" << keyboardKeyToString(binds.moveRight) << "\n";
     output << "crouch=" << keyboardKeyToString(binds.crouch) << "\n";
-    output << "reload=" << keyboardKeyToString(binds.reload) << "\n"; // Ajouté
+    output << "reload=" << keyboardKeyToString(binds.reload) << "\n";
     output << "shoot=" << mouseButtonToString(binds.shoot) << "\n";
     output << "aim=" << mouseButtonToString(binds.aim) << "\n";
+    output << "sensitivity=" << sensitivity << "\n";
 }
 
 Settings::Settings()
 {
     std::string path("settings.conf");
+    sensitivity = 0.0025f;
     bool writeDefaults = false;
 
     std::ifstream input(path);
@@ -304,7 +306,7 @@ Settings::Settings()
                     binds.moveRight = keyboardKeyFromString(val);
                 else if (key == "crouch")
                     binds.crouch = keyboardKeyFromString(val);
-                else if (key == "reload") // Ajouté
+                else if (key == "reload")
                     binds.reload = keyboardKeyFromString(val);
                 else if (key == "shoot") {
                     auto m = mouseButtonFromString(val);
@@ -312,6 +314,12 @@ Settings::Settings()
                 } else if (key == "aim") {
                     auto m = mouseButtonFromString(val);
                     if (m != sfMouseButtonCount) binds.aim = m;
+                } else if (key == "sensitivity") {
+                    try {
+                        sensitivity = std::stof(val);
+                    } catch (...) {
+                        sensitivity = 0.0025f;
+                    }
                 }
             }
             if (binds.moveForward == sfKeyUnknown ||
@@ -319,7 +327,7 @@ Settings::Settings()
                 binds.moveBack == sfKeyUnknown ||
                 binds.moveRight == sfKeyUnknown ||
                 binds.crouch == sfKeyUnknown ||
-                binds.reload == sfKeyUnknown || // Ajouté
+                binds.reload == sfKeyUnknown ||
                 binds.shoot == sfMouseButtonCount ||
                 binds.aim == sfMouseButtonCount) {
                 writeDefaults = true;
@@ -328,7 +336,7 @@ Settings::Settings()
         input.close();
     }
     if (writeDefaults) {
-        writeDefaultBinds(path, binds);
+        writeDefaultBinds(path, binds, sensitivity);
     }
 }
 
@@ -343,93 +351,88 @@ void Settings::changeSettings(Window& window, Menu& menu)
         return;
     }
     sfRenderWindow* renderWindow = window.getWindow();
-
     sfText* title = sfText_create();
     sfText_setFont(title, font);
     sfText_setCharacterSize(title, 30);
     sfText_setString(title, "Settings");
     sfText_setPosition(title, (sfVector2f){100, 50});
     sfText_setColor(title, sfWhite);
-
     sfText* moveForwardText = sfText_create();
     sfText_setFont(moveForwardText, font);
     sfText_setCharacterSize(moveForwardText, 20);
     sfText_setPosition(moveForwardText, (sfVector2f){100, 150});
     sfText_setColor(moveForwardText, sfWhite);
-
     sfText* moveLeftText = sfText_create();
     sfText_setFont(moveLeftText, font);
     sfText_setCharacterSize(moveLeftText, 20);
     sfText_setPosition(moveLeftText, (sfVector2f){100, 200});
     sfText_setColor(moveLeftText, sfWhite);
-
     sfText* moveBackText = sfText_create();
     sfText_setFont(moveBackText, font);
     sfText_setCharacterSize(moveBackText, 20);
     sfText_setPosition(moveBackText, (sfVector2f){100, 250});
     sfText_setColor(moveBackText, sfWhite);
-
     sfText* moveRightText = sfText_create();
     sfText_setFont(moveRightText, font);
     sfText_setCharacterSize(moveRightText, 20);
     sfText_setPosition(moveRightText, (sfVector2f){100, 300});
     sfText_setColor(moveRightText, sfWhite);
-
     sfText* crouchText = sfText_create();
     sfText_setFont(crouchText, font);
     sfText_setCharacterSize(crouchText, 20);
     sfText_setPosition(crouchText, (sfVector2f){100, 350});
     sfText_setColor(crouchText, sfWhite);
-
     sfText* shootText = sfText_create();
     sfText_setFont(shootText, font);
     sfText_setCharacterSize(shootText, 20);
     sfText_setPosition(shootText, (sfVector2f){100, 400});
     sfText_setColor(shootText, sfWhite);
-
     sfText* aimText = sfText_create();
     sfText_setFont(aimText, font);
     sfText_setCharacterSize(aimText, 20);
     sfText_setPosition(aimText, (sfVector2f){100, 450});
     sfText_setColor(aimText, sfWhite);
-
-    // Ajout graphique du texte Reload à Y = 500
     sfText* reloadText = sfText_create();
     sfText_setFont(reloadText, font);
     sfText_setCharacterSize(reloadText, 20);
     sfText_setPosition(reloadText, (sfVector2f){100, 500});
     sfText_setColor(reloadText, sfWhite);
-
-    // On descend un peu le texte d'attente à Y = 580 pour laisser de la place
+    sfText* sensitivityText = sfText_create();
+    sfText_setFont(sensitivityText, font);
+    sfText_setCharacterSize(sensitivityText, 20);
+    sfText_setPosition(sensitivityText, (sfVector2f){100, 550});
+    sfText_setColor(sensitivityText, sfWhite);
     sfText* waitingText = sfText_create();
     sfText_setFont(waitingText, font);
     sfText_setCharacterSize(waitingText, 20);
-    sfText_setPosition(waitingText, (sfVector2f){100, 580});
+    sfText_setPosition(waitingText, (sfVector2f){100, 620});
     sfText_setColor(waitingText, sfYellow);
-
-    updateTexts(moveForwardText, moveLeftText, moveBackText, moveRightText, crouchText, shootText, aimText, reloadText);
-
+    float minSens = 0.0001f;
+    float maxSens = 0.0100f;
+    float trackX = 400.f;
+    float trackY = 560.f;
+    float trackWidth = 200.f;
+    sfRectangleShape* sliderTrack = sfRectangleShape_create();
+    sfRectangleShape_setSize(sliderTrack, (sfVector2f){trackWidth, 6});
+    sfRectangleShape_setPosition(sliderTrack, (sfVector2f){trackX, trackY});
+    sfRectangleShape_setFillColor(sliderTrack, sfContext_getSettings ? sfColor_fromRGB(100, 100, 100) : sfWhite);
+    sfRectangleShape* sliderKnob = sfRectangleShape_create();
+    sfRectangleShape_setSize(sliderKnob, (sfVector2f){10, 20});
+    sfRectangleShape_setFillColor(sliderKnob, sfRed);
+    sfRectangleShape_setOrigin(sliderKnob, (sfVector2f){5, 10});
+    updateTexts(moveForwardText, moveLeftText, moveBackText, moveRightText, crouchText, shootText, aimText, reloadText, sensitivityText);
     enum State { Normal, WaitingKey, WaitingMouse };
     State state = Normal;
     int waitingFor = -1;
-
+    bool isDraggingSlider = false;
     while (sfRenderWindow_isOpen(renderWindow)) {
         sfEvent event;
+        float ratio = (sensitivity - minSens) / (maxSens - minSens);
+        sfRectangleShape_setPosition(sliderKnob, (sfVector2f){trackX + (ratio * trackWidth), trackY + 3});
         while (sfRenderWindow_pollEvent(renderWindow, &event)) {
             if (event.type == sfEvtClosed) {
                 sfRenderWindow_close(renderWindow);
-                sfText_destroy(title);
-                sfText_destroy(moveForwardText);
-                sfText_destroy(moveLeftText);
-                sfText_destroy(moveBackText);
-                sfText_destroy(moveRightText);
-                sfText_destroy(crouchText);
-                sfText_destroy(shootText);
-                sfText_destroy(aimText);
-                sfText_destroy(reloadText); // Ajouté
-                sfText_destroy(waitingText);
-                sfFont_destroy(font);
-                return;
+                break;
             }
             if (event.type == sfEvtKeyPressed) {
                 if (state == Normal) {
@@ -461,21 +464,16 @@ void Settings::changeSettings(Window& window, Menu& menu)
                         state = WaitingMouse;
                         waitingFor = 7;
                         sfText_setString(waitingText, "Press new mouse button for Aim");
-                    } else if (event.key.code == sfKeyNum8) { // Ajouté
+                    } else if (event.key.code == sfKeyNum8) {
                         state = WaitingKey;
                         waitingFor = 8;
                         sfText_setString(waitingText, "Press new key for Reload");
                     } else if (event.key.code == sfKeyEscape) {
-                        sfText_destroy(title);
-                        sfText_destroy(moveForwardText);
-                        sfText_destroy(moveLeftText);
-                        sfText_destroy(moveBackText);
-                        sfText_destroy(moveRightText);
-                        sfText_destroy(crouchText);
-                        sfText_destroy(shootText);
-                        sfText_destroy(aimText);
-                        sfText_destroy(reloadText); // Ajouté
-                        sfText_destroy(waitingText);
+                        sfText_destroy(title); sfText_destroy(moveForwardText); sfText_destroy(moveLeftText);
+                        sfText_destroy(moveBackText); sfText_destroy(moveRightText); sfText_destroy(crouchText);
+                        sfText_destroy(shootText); sfText_destroy(aimText); sfText_destroy(reloadText);
+                        sfText_destroy(sensitivityText); sfText_destroy(waitingText);
+                        sfRectangleShape_destroy(sliderTrack); sfRectangleShape_destroy(sliderKnob);
                         sfFont_destroy(font);
                         return;
                     }
@@ -486,8 +484,8 @@ void Settings::changeSettings(Window& window, Menu& menu)
                         else if (waitingFor == 3) binds.moveBack = event.key.code;
                         else if (waitingFor == 4) binds.moveRight = event.key.code;
                         else if (waitingFor == 5) binds.crouch = event.key.code;
-                        else if (waitingFor == 8) binds.reload = event.key.code; // Ajouté
-                        updateTexts(moveForwardText, moveLeftText, moveBackText, moveRightText, crouchText, shootText, aimText, reloadText);
+                        else if (waitingFor == 8) binds.reload = event.key.code;
+                        updateTexts(moveForwardText, moveLeftText, moveBackText, moveRightText, crouchText, shootText, aimText, reloadText, sensitivityText);
                         saveSettings();
                         state = Normal;
                         sfText_setString(waitingText, "");
@@ -495,50 +493,58 @@ void Settings::changeSettings(Window& window, Menu& menu)
                 }
             } else if (event.type == sfEvtMouseButtonPressed) {
                 if (state == Normal && event.mouseButton.button == sfMouseLeft) {
+                    int x = event.mouseButton.x;
                     int y = event.mouseButton.y;
-                    if (y >= 150 && y < 200) {
-                        state = WaitingKey;
-                        waitingFor = 1;
-                        sfText_setString(waitingText, "Press new key for Move Forward");
+                    if (x >= trackX - 10 && x <= trackX + trackWidth + 10 && y >= trackY - 15 && y <= trackY + 15) {
+                        isDraggingSlider = true;
+                        float newRatio = (x - trackX) / trackWidth;
+                        if (newRatio < 0.f) newRatio = 0.f;
+                        if (newRatio > 1.f) newRatio = 1.f;
+                        sensitivity = minSens + newRatio * (maxSens - minSens);
+                        updateTexts(moveForwardText, moveLeftText, moveBackText, moveRightText, crouchText, shootText, aimText, reloadText, sensitivityText);
+                    }
+                    else if (y >= 150 && y < 200) {
+                        state = WaitingKey; waitingFor = 1; sfText_setString(waitingText, "Press new key for Move Forward");
                     } else if (y >= 200 && y < 250) {
-                        state = WaitingKey;
-                        waitingFor = 2;
-                        sfText_setString(waitingText, "Press new key for Move Left");
+                        state = WaitingKey; waitingFor = 2; sfText_setString(waitingText, "Press new key for Move Left");
                     } else if (y >= 250 && y < 300) {
-                        state = WaitingKey;
-                        waitingFor = 3;
-                        sfText_setString(waitingText, "Press new key for Move Back");
+                        state = WaitingKey; waitingFor = 3; sfText_setString(waitingText, "Press new key for Move Back");
                     } else if (y >= 300 && y < 350) {
-                        state = WaitingKey;
-                        waitingFor = 4;
-                        sfText_setString(waitingText, "Press new key for Move Right");
+                        state = WaitingKey; waitingFor = 4; sfText_setString(waitingText, "Press new key for Move Right");
                     } else if (y >= 350 && y < 400) {
-                        state = WaitingKey;
-                        waitingFor = 5;
-                        sfText_setString(waitingText, "Press new key for Crouch");
+                        state = WaitingKey; waitingFor = 5; sfText_setString(waitingText, "Press new key for Crouch");
                     } else if (y >= 400 && y < 450) {
-                        state = WaitingMouse;
-                        waitingFor = 6;
-                        sfText_setString(waitingText, "Press new mouse button for Shoot");
+                        state = WaitingMouse; waitingFor = 6; sfText_setString(waitingText, "Press new mouse button for Shoot");
                     } else if (y >= 450 && y < 500) {
-                        state = WaitingMouse;
-                        waitingFor = 7;
-                        sfText_setString(waitingText, "Press new mouse button for Aim");
-                    } else if (y >= 500 && y < 550) { // Ajouté (Zone cliquable du Reload)
-                        state = WaitingKey;
-                        waitingFor = 8;
-                        sfText_setString(waitingText, "Press new key for Reload");
+                        state = WaitingMouse; waitingFor = 7; sfText_setString(waitingText, "Press new mouse button for Aim");
+                    } else if (y >= 500 && y < 550) {
+                        state = WaitingKey; waitingFor = 8; sfText_setString(waitingText, "Press new key for Reload");
                     }
                 } else if (state == WaitingMouse) {
                     if (waitingFor == 6) binds.shoot = event.mouseButton.button;
                     else if (waitingFor == 7) binds.aim = event.mouseButton.button;
-                    updateTexts(moveForwardText, moveLeftText, moveBackText, moveRightText, crouchText, shootText, aimText, reloadText);
+                    updateTexts(moveForwardText, moveLeftText, moveBackText, moveRightText, crouchText, shootText, aimText, reloadText, sensitivityText);
                     saveSettings();
                     state = Normal;
                     sfText_setString(waitingText, "");
                 }
+            } else if (event.type == sfEvtMouseButtonReleased) {
+                if (event.mouseButton.button == sfMouseLeft && isDraggingSlider) {
+                    isDraggingSlider = false;
+                    saveSettings();
+                }
+            } else if (event.type == sfEvtMouseMoved) {
+                if (isDraggingSlider) {
+                    float newRatio = (event.mouseMove.x - trackX) / trackWidth;
+                    if (newRatio < 0.f) newRatio = 0.f;
+                    if (newRatio > 1.f) newRatio = 1.f;
+                    sensitivity = minSens + newRatio * (maxSens - minSens);
+                    updateTexts(moveForwardText, moveLeftText, moveBackText, moveRightText, crouchText, shootText, aimText, reloadText, sensitivityText);
+                }
             }
         }
+        if (!sfRenderWindow_isOpen(renderWindow))
+            break;
         sfRenderWindow_clear(renderWindow, sfBlack);
         menu.display(renderWindow, 2);
         sfRenderWindow_drawText(renderWindow, title, NULL);
@@ -549,26 +555,25 @@ void Settings::changeSettings(Window& window, Menu& menu)
         sfRenderWindow_drawText(renderWindow, crouchText, NULL);
         sfRenderWindow_drawText(renderWindow, shootText, NULL);
         sfRenderWindow_drawText(renderWindow, aimText, NULL);
-        sfRenderWindow_drawText(renderWindow, reloadText, NULL); // Ajouté
+        sfRenderWindow_drawText(renderWindow, reloadText, NULL);
+        sfRenderWindow_drawText(renderWindow, sensitivityText, NULL);
+        sfRenderWindow_drawRectangleShape(renderWindow, sliderTrack, NULL);
+        sfRenderWindow_drawRectangleShape(renderWindow, sliderKnob, NULL);
+
         if (state != Normal) {
             sfRenderWindow_drawText(renderWindow, waitingText, NULL);
         }
         sfRenderWindow_display(renderWindow);
     }
-    sfText_destroy(title);
-    sfText_destroy(moveForwardText);
-    sfText_destroy(moveLeftText);
-    sfText_destroy(moveBackText);
-    sfText_destroy(moveRightText);
-    sfText_destroy(crouchText);
-    sfText_destroy(shootText);
-    sfText_destroy(aimText);
-    sfText_destroy(reloadText); // Ajouté
-    sfText_destroy(waitingText);
+    sfText_destroy(title); sfText_destroy(moveForwardText); sfText_destroy(moveLeftText);
+    sfText_destroy(moveBackText); sfText_destroy(moveRightText); sfText_destroy(crouchText);
+    sfText_destroy(shootText); sfText_destroy(aimText); sfText_destroy(reloadText);
+    sfText_destroy(sensitivityText); sfText_destroy(waitingText);
+    sfRectangleShape_destroy(sliderTrack); sfRectangleShape_destroy(sliderKnob);
     sfFont_destroy(font);
 }
 
-void Settings::updateTexts(sfText* mf, sfText* ml, sfText* mb, sfText* mr, sfText* c, sfText* s, sfText* a, sfText* r)
+void Settings::updateTexts(sfText* mf, sfText* ml, sfText* mb, sfText* mr, sfText* c, sfText* s, sfText* a, sfText* r, sfText* sens)
 {
     sfText_setString(mf, ("1. Move Forward: " + keyboardKeyToString(binds.moveForward)).c_str());
     sfText_setString(ml, ("2. Move Left: " + keyboardKeyToString(binds.moveLeft)).c_str());
@@ -577,11 +582,15 @@ void Settings::updateTexts(sfText* mf, sfText* ml, sfText* mb, sfText* mr, sfTex
     sfText_setString(c,  ("5. Crouch: " + keyboardKeyToString(binds.crouch)).c_str());
     sfText_setString(s,  ("6. Shoot: " + mouseButtonToString(binds.shoot)).c_str());
     sfText_setString(a,  ("7. Aim: " + mouseButtonToString(binds.aim)).c_str());
-    sfText_setString(r,  ("8. Reload: " + keyboardKeyToString(binds.reload)).c_str()); // Ajouté
+    sfText_setString(r,  ("8. Reload: " + keyboardKeyToString(binds.reload)).c_str());
+    
+    std::stringstream ss;
+    ss << "9. Sensitivity: " << sensitivity;
+    sfText_setString(sens, ss.str().c_str());
 }
 
 void Settings::saveSettings()
 {
     std::string path("settings.conf");
-    writeDefaultBinds(path, binds);
+    writeDefaultBinds(path, binds, sensitivity);
 }
