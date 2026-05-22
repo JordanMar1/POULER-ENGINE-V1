@@ -415,7 +415,7 @@ void Settings::changeSettings(Window& window, Menu& menu)
     sfRectangleShape* sliderTrack = sfRectangleShape_create();
     sfRectangleShape_setSize(sliderTrack, (sfVector2f){trackWidth, 6});
     sfRectangleShape_setPosition(sliderTrack, (sfVector2f){trackX, trackY});
-    sfRectangleShape_setFillColor(sliderTrack, sfContext_getSettings ? sfColor_fromRGB(100, 100, 100) : sfWhite);
+    sfRectangleShape_setFillColor(sliderTrack, sfColor_fromRGB(100, 100, 100));
     sfRectangleShape* sliderKnob = sfRectangleShape_create();
     sfRectangleShape_setSize(sliderKnob, (sfVector2f){10, 20});
     sfRectangleShape_setFillColor(sliderKnob, sfRed);
