@@ -1,8 +1,8 @@
 /*
 ** EPITECH PROJECT, 2026
-** POULER OR NOT
+** MY_GZDOOM
 ** File description:
-** Setting
+** Settings
 */
 
 #pragma once
@@ -25,12 +25,13 @@ class Settings {
             sfMouseButton shoot = sfMouseLeft;
             sfMouseButton aim = sfMouseRight;
         } binds;
+        float sensitivity;
         Settings();
         ~Settings();
         void changeSettings(Window& window, Menu& menu);
 
     protected:
     private:
-        void updateTexts(sfText* mf, sfText* ml, sfText* mb, sfText* mr, sfText* s, sfText* a, sfText* c, sfText* r);
+        void updateTexts(sfText* mf, sfText* ml, sfText* mb, sfText* mr, sfText* c, sfText* s, sfText* a, sfText* r, sfText* sens);
         void saveSettings();
 };
