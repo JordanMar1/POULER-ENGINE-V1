@@ -1,0 +1,17 @@
+#temp files
+*.o
+
+#libs
+*.a
+
+#exe
+
+pouler_or_not
+
+#vgcores ?
+
+vgcore.*
+
+# user settings
+
+settings.conf
