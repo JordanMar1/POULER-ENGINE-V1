@@ -179,7 +179,6 @@ void Game::ManageMouse(sfRenderWindow *window, Player &p, Settings *settings)
 void Game::HandleInputs(Core *core, Player &p, float dt, int map_rows, std::vector<Weapons *> &weapons, int current_weapon_idx, int &weapon_state, float &weapon_timer)
 {
     float mv = 4.0f * dt;
-    float rot = 2.0f * dt;
     auto tryMove = [&](double nx, double ny) {
         int nh = getH(core, (int)nx, (int)ny, map_rows);
         int ch = getH(core, (int)p.x, (int)p.y, map_rows);
@@ -190,15 +189,10 @@ void Game::HandleInputs(Core *core, Player &p, float dt, int map_rows, std::vect
     };
     if (sfKeyboard_isKeyPressed(core->getSettings()->binds.moveForward)) tryMove(p.x + p.dirX * mv, p.y + p.dirY * mv);
     if (sfKeyboard_isKeyPressed(core->getSettings()->binds.moveBack))    tryMove(p.x - p.dirX * mv, p.y - p.dirY * mv);
-    if (sfKeyboard_isKeyPressed(core->getSettings()->binds.moveLeft) || sfKeyboard_isKeyPressed(core->getSettings()->binds.moveRight)) {
-        double angle = sfKeyboard_isKeyPressed(core->getSettings()->binds.moveLeft) ? -rot : rot;
-        double oldDirX = p.dirX;
-        p.dirX = p.dirX * cos(angle) - p.dirY * sin(angle);
-        p.dirY = oldDirX * sin(angle) + p.dirY * cos(angle);
-        double oldPlaneX = p.planeX;
-        p.planeX = p.planeX * cos(angle) - p.planeY * sin(angle);
-        p.planeY = oldPlaneX * sin(angle) + p.planeY * cos(angle);
-    }
+    if (sfKeyboard_isKeyPressed(core->getSettings()->binds.moveLeft))
+        tryMove(p.x + p.dirY * mv, p.y - p.dirX * mv);
+    if (sfKeyboard_isKeyPressed(core->getSettings()->binds.moveRight))
+        tryMove(p.x - p.dirY * mv, p.y + p.dirX * mv);
     double mapH = (double)getH(core, (int)p.x, (int)p.y, map_rows);
     if (mapH >= 99) mapH = p.height;
     double targetH = mapH + (p.crouching ? -0.25 : 0.0);
