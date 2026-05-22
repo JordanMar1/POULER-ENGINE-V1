@@ -144,6 +144,27 @@ void Game::UpdateWeaponTimer(std::vector<Weapons *> &weapons, int current_weapon
     }
 }
 
+void Game::ManageMouse(sfRenderWindow *window, Player &p)
+{
+    if (!sfRenderWindow_hasFocus(window))
+        return;
+    sfVector2u winSize = sfRenderWindow_getSize(window);
+    sfVector2i center = {(int)(winSize.x / 2), (int)(winSize.y / 2)};
+    sfVector2i mousePos = sfMouse_getPositionRenderWindow(window);
+    int deltaX = mousePos.x - center.x;
+    if (deltaX != 0) {
+        float sensitivity = 0.0025f;
+        double angle = deltaX * sensitivity;
+        double oldDirX = p.dirX;
+        p.dirX = p.dirX * cos(angle) - p.dirY * sin(angle);
+        p.dirY = oldDirX * sin(angle) + p.dirY * cos(angle);
+        double oldPlaneX = p.planeX;
+        p.planeX = p.planeX * cos(angle) - p.planeY * sin(angle);
+        p.planeY = oldPlaneX * sin(angle) + p.planeY * cos(angle);
+        sfMouse_setPositionRenderWindow(center, window);
+    }
+}
+
 void Game::HandleInputs(Core *core, Player &p, float dt, int map_rows, std::vector<Weapons *> &weapons, int current_weapon_idx, int &weapon_state, float &weapon_timer)
 {
     float mv = 4.0f * dt;
@@ -217,8 +238,9 @@ void Game::HandleInputs(Core *core, Player &p, float dt, int map_rows, std::vect
     }
 }
 
-void Game::RenderScene(Core *core, sfUint8 *pixels, const Player &p, int map_rows)
+void Game::RenderScene(Core *core, sfUint8 *pixels, Player &p, int map_rows)
 {
+    ManageMouse(core->getWindow()->getWindow(), p);
     sfVector2u winSize = sfRenderWindow_getSize(core->getWindow()->getWindow());
     int w = winSize.x;
     int h = winSize.y;
@@ -320,6 +342,9 @@ int Game::Play(Core *core)
         weapon_textures.push_back(t);
     }
 
+    // Optionnel : Masque le curseur Windows pour une meilleure immersion FPS
+    sfRenderWindow_setMouseCursorVisible(window, sfFalse);
+
     while (sfRenderWindow_isOpen(window)) {
         float dt = sfTime_asSeconds(sfClock_restart(clock));
         sfEvent event;
@@ -336,6 +361,8 @@ int Game::Play(Core *core)
                         w->mag = w->max_mag;
                     }
                 }
+                // Réaffiche la souris avant de retourner au menu
+                sfRenderWindow_setMouseCursorVisible(window, sfTrue);
                 return core->menu_return();
             }
             if (event.type == sfEvtKeyPressed && event.key.code == core->getSettings()->binds.crouch)
