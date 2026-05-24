@@ -24,6 +24,7 @@ int main(int argc, char *argv[])
     Menu menu(gameData.game_array, errorHandler.isDebug());
     std::vector<Weapons *> weapons = create_weapons(gameData.game_array, errorHandler.isDebug());
     Settings settings = Settings();
+    menu.setMusicVolume(settings.musicVolume);
     Core core(&window, &menu, &gameData, &settings, weapons);
     sfRenderWindow_setFramerateLimit(window.getWindow(), settings.fps);
     
@@ -48,6 +49,7 @@ int main(int argc, char *argv[])
                     if (errorHandler.isDebug())
                         std::cout << "Opening options..." << std::endl;
                     settings.changeSettings(window, menu);
+                    menu.setMusicVolume(settings.musicVolume);
                     sfMusic_play(menu.getMusic());
                     buttonId = 0;
                 } else if (buttonId == 3) {

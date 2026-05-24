@@ -9,6 +9,7 @@
 
 #include <SFML/Window.h>
 #include <SFML/Graphics.h>
+#include <string>
 
 class Window;
 class Menu;
@@ -29,13 +30,17 @@ class Settings {
         } binds;
         float horizontal_sensitivity;
         float vertical_sensitivity;
-        Settings();
-        ~Settings();
-        void changeSettings(Window& window, Menu& menu);
         int fps = 60;
         unsigned int windowWidth  = 1920;
         unsigned int windowHeight = 1080;
         bool fullscreen = false;
+        int soundVolume = 100;
+        int musicVolume = 100;
+
+        Settings();
+        ~Settings();
+        void changeSettings(Window& window, Menu& menu);
+        
     private:
         enum State { Normal, WaitingKey, WaitingMouse };
         void handleFpsClick(sfRenderWindow *&rw);
@@ -45,14 +50,18 @@ class Settings {
                             sfText *waitingText, int &draggingSlider,
                             float trackX, float trackWidth,
                             float hSliderY, float vSliderY,
+                            float sSliderY, float mSliderY,
                             float minHSens, float maxHSens,
                             float minVSens, float maxVSens,
                             State &state, int &waitingFor, sfText **textArray);
         void handleKeyPress(sfKeyCode code, State &state, int &waitingFor,
                             sfText *waitingText, sfText **textArray,
-                            sfText *title, sfRectangleShape *hTrack,
-                            sfRectangleShape *hKnob, sfRectangleShape *vTrack,
-                            sfRectangleShape *vKnob, sfFont *font, bool &shouldReturn);
+                            sfText *title, 
+                            sfRectangleShape *hTrack, sfRectangleShape *hKnob, 
+                            sfRectangleShape *vTrack, sfRectangleShape *vKnob, 
+                            sfRectangleShape *sTrack, sfRectangleShape *sKnob, 
+                            sfRectangleShape *mTrack, sfRectangleShape *mKnob, 
+                            sfFont *font, bool &shouldReturn);
         void updateTexts(sfText** textArray);
         void saveSettings();
 };
