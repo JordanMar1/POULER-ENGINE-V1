@@ -384,6 +384,7 @@ int Game::Play(Core *core)
         weapon_textures.push_back(t);
     }
     sfRenderWindow_setMouseCursorVisible(window, sfFalse);
+    sfRenderWindow_setFramerateLimit(window, core->getSettings()->fps);
     while (sfRenderWindow_isOpen(window)) {
         float dt = sfTime_asSeconds(sfClock_restart(clock));
         sfEvent event;

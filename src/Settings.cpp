@@ -188,7 +188,7 @@ static sfKeyCode keyboardKeyFromString(const std::string &str)
     return sfKeyUnknown;
 }
 
-static void writeDefaultBinds(const std::string &path, const Settings::Binds &binds, float hSens, float vSens)
+static void writeDefaultBinds(const std::string &path, const Settings::Binds &binds, float hSens, float vSens, int fps, int windowWidth, int windowHeight)
 {
     std::ofstream output(path, std::ios::trunc);
     if (!output.is_open())
@@ -205,6 +205,9 @@ static void writeDefaultBinds(const std::string &path, const Settings::Binds &bi
     output << "aim=" << mouseButtonToString(binds.aim) << "\n";
     output << "horizontal_sensitivity=" << hSens << "\n";
     output << "vertical_sensitivity=" << vSens << "\n";
+    output << "fps=" << fps << "\n";
+    output << "window_width="  << windowWidth  << "\n";
+    output << "window_height=" << windowHeight << "\n";
 }
 
 Settings::Settings()
@@ -264,6 +267,12 @@ Settings::Settings()
                     try { horizontal_sensitivity = std::stof(val); } catch (...) { horizontal_sensitivity = 0.0025f; }
                 } else if (key == "vertical_sensitivity") {
                     try { vertical_sensitivity = std::stof(val); } catch (...) { vertical_sensitivity = 1.25f; }
+                } else if (key == "fps") {
+                    try { fps = std::stoi(val); } catch (...) { fps = 60; }
+                } else if (key == "window_width") {                                          // ← ajouter
+                    try { windowWidth  = std::stoul(val); } catch (...) { windowWidth  = 1920; }
+                } else if (key == "window_height") {                                         // ← ajouter
+                    try { windowHeight = std::stoul(val); } catch (...) { windowHeight = 1080; }
                 }
             }
             if (binds.moveForward == sfKeyUnknown || binds.moveLeft == sfKeyUnknown ||
@@ -277,7 +286,7 @@ Settings::Settings()
         input.close();
     }
     if (writeDefaults) {
-        writeDefaultBinds(path, binds, horizontal_sensitivity, vertical_sensitivity);
+        writeDefaultBinds(path, binds, horizontal_sensitivity, vertical_sensitivity, fps, windowWidth, windowHeight);
     }
 }
 
@@ -291,8 +300,8 @@ void Settings::changeSettings(Window& window, Menu& menu)
     sfText* title = sfText_create();
     sfText_setFont(title, font); sfText_setCharacterSize(title, 30);
     sfText_setString(title, "Settings"); sfText_setPosition(title, (sfVector2f){100, 50}); sfText_setColor(title, sfWhite);
-    sfText* textArray[12];
-    for (int i = 0; i < 12; ++i) {
+    sfText* textArray[14];
+    for (int i = 0; i < 14; ++i) {
         textArray[i] = sfText_create();
         sfText_setFont(textArray[i], font);
         sfText_setCharacterSize(textArray[i], 20);
@@ -307,27 +316,22 @@ void Settings::changeSettings(Window& window, Menu& menu)
     float trackWidth = 200.f;
     float hSliderY = 120.f + (10 * 45.f) + 13.f;
     float vSliderY = 120.f + (11 * 45.f) + 13.f;
-
     sfRectangleShape* hTrack = sfRectangleShape_create();
     sfRectangleShape_setSize(hTrack, (sfVector2f){trackWidth, 6});
     sfRectangleShape_setPosition(hTrack, (sfVector2f){trackX, hSliderY});
     sfRectangleShape_setFillColor(hTrack, sfColor_fromRGB(100, 100, 100));
-
     sfRectangleShape* vTrack = sfRectangleShape_create();
     sfRectangleShape_setSize(vTrack, (sfVector2f){trackWidth, 6});
     sfRectangleShape_setPosition(vTrack, (sfVector2f){trackX, vSliderY});
     sfRectangleShape_setFillColor(vTrack, sfColor_fromRGB(100, 100, 100));
-
     sfRectangleShape* hKnob = sfRectangleShape_create();
     sfRectangleShape_setSize(hKnob, (sfVector2f){10, 20});
     sfRectangleShape_setFillColor(hKnob, sfRed);
     sfRectangleShape_setOrigin(hKnob, (sfVector2f){5, 10});
-
     sfRectangleShape* vKnob = sfRectangleShape_create();
     sfRectangleShape_setSize(vKnob, (sfVector2f){10, 20});
     sfRectangleShape_setFillColor(vKnob, sfRed);
     sfRectangleShape_setOrigin(vKnob, (sfVector2f){5, 10});
-
     updateTexts(textArray);
     enum State { Normal, WaitingKey, WaitingMouse };
     State state = Normal;
@@ -339,7 +343,6 @@ void Settings::changeSettings(Window& window, Menu& menu)
         float vRatio = std::clamp((vertical_sensitivity   - minVSens) / (maxVSens - minVSens), 0.f, 1.f);
         sfRectangleShape_setPosition(hKnob, (sfVector2f){trackX + (hRatio * trackWidth), hSliderY});
         sfRectangleShape_setPosition(vKnob, (sfVector2f){trackX + (vRatio * trackWidth), vSliderY});
-
         while (sfRenderWindow_pollEvent(renderWindow, &event)) {
             if (event.type == sfEvtClosed) {
                 sfRenderWindow_close(renderWindow);
@@ -362,7 +365,7 @@ void Settings::changeSettings(Window& window, Menu& menu)
                         state = WaitingMouse; waitingFor = 9; sfText_setString(waitingText, "Press new mouse button for Aim");
                     } else if (event.key.code == sfKeyEscape) {
                         sfText_destroy(title); sfText_destroy(waitingText);
-                        for (int i = 0; i < 12; ++i) sfText_destroy(textArray[i]);
+                        for (int i = 0; i < 14; ++i) sfText_destroy(textArray[i]);
                         sfRectangleShape_destroy(hTrack); sfRectangleShape_destroy(hKnob);
                         sfRectangleShape_destroy(vTrack); sfRectangleShape_destroy(vKnob);
                         sfFont_destroy(font);
@@ -408,6 +411,42 @@ void Settings::changeSettings(Window& window, Menu& menu)
                         else if (y >= 435 && y < 480) { state = WaitingMouse; waitingFor = 8; sfText_setString(waitingText, "Press new mouse button for Shoot"); }
                         else if (y >= 480 && y < 525) { state = WaitingMouse; waitingFor = 9; sfText_setString(waitingText, "Press new mouse button for Aim"); }
                         else if (y >= 525 && y < 570) { state = WaitingKey;   waitingFor = 10; sfText_setString(waitingText, "Press new key for Reload"); }
+                        else if (y >= 660 && y < 705) {
+                            int fpsOptions[] = {30, 60, 120, 144, 240, 0};
+                            bool found = false;
+                            for (int i = 0; i < 6; i++) {
+                                if (fps == fpsOptions[i]) {
+                                    fps = fpsOptions[(i + 1) % 6];
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (!found) fps = 60;
+                            sfRenderWindow_setFramerateLimit(renderWindow, fps);
+                            updateTexts(textArray);
+                            saveSettings();
+                        } else if (y>=705 && y < 750) {
+                            struct Res { unsigned int w, h; };
+                            Res resOptions[] = {{1280,720},{1600,900},{1920,1080},{2560,1440},{3840,2160}};
+                            int count = 5;
+                            bool found = false;
+                            for (int i = 0; i < count; i++) {
+                                if (windowWidth == resOptions[i].w && windowHeight == resOptions[i].h) {
+                                    windowWidth  = resOptions[(i + 1) % count].w;
+                                    windowHeight = resOptions[(i + 1) % count].h;
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (!found) { windowWidth = 1920; windowHeight = 1080; }
+                            sfVideoMode vm = { windowWidth, windowHeight, 32};
+                            sfRenderWindow_destroy(renderWindow);
+                            renderWindow = sfRenderWindow_create(vm, "pouler_or_not", sfDefaultStyle, NULL);
+                            window.setWindow(renderWindow);
+                            updateTexts(textArray);
+                            saveSettings();
+                        }
+                        }
                     }
                 } else if (state == WaitingMouse) {
                     if (waitingFor == 8) binds.shoot = event.mouseButton.button;
@@ -415,37 +454,36 @@ void Settings::changeSettings(Window& window, Menu& menu)
                     updateTexts(textArray);
                     saveSettings();
                     state = Normal; sfText_setString(waitingText, "");
+                } else if (event.type == sfEvtMouseButtonReleased) {
+                    if (event.mouseButton.button == sfMouseLeft && draggingSlider != 0) {
+                        draggingSlider = 0;
+                        saveSettings();
+                    }
+                } else if (event.type == sfEvtMouseMoved) {
+                    if (draggingSlider != 0) {
+                        float newRatio = std::clamp((event.mouseMove.x - trackX) / trackWidth, 0.f, 1.f);
+                        if (draggingSlider == 1) horizontal_sensitivity = minHSens + newRatio * (maxHSens - minHSens);
+                        else                     vertical_sensitivity   = minVSens + newRatio * (maxVSens - minVSens);
+                        updateTexts(textArray);
+                    }
                 }
-            } else if (event.type == sfEvtMouseButtonReleased) {
-                if (event.mouseButton.button == sfMouseLeft && draggingSlider != 0) {
-                    draggingSlider = 0;
-                    saveSettings();
-                }
-            } else if (event.type == sfEvtMouseMoved) {
-                if (draggingSlider != 0) {
-                    float newRatio = std::clamp((event.mouseMove.x - trackX) / trackWidth, 0.f, 1.f);
-                    if (draggingSlider == 1) horizontal_sensitivity = minHSens + newRatio * (maxHSens - minHSens);
-                    else                     vertical_sensitivity   = minVSens + newRatio * (maxVSens - minVSens);
-                    updateTexts(textArray);
-                }
-            }
+            if (!sfRenderWindow_isOpen(renderWindow)) break;
+            sfRenderWindow_clear(renderWindow, sfBlack);
+            menu.display(renderWindow, 2);
+            sfRenderWindow_drawText(renderWindow, title, NULL);
+            for (int i = 0; i < 14; ++i)
+                sfRenderWindow_drawText(renderWindow, textArray[i], NULL);
+            sfRenderWindow_drawRectangleShape(renderWindow, hTrack, NULL);
+            sfRenderWindow_drawRectangleShape(renderWindow, hKnob, NULL);
+            sfRenderWindow_drawRectangleShape(renderWindow, vTrack, NULL);
+            sfRenderWindow_drawRectangleShape(renderWindow, vKnob, NULL);
+            if (state != Normal)
+                sfRenderWindow_drawText(renderWindow, waitingText, NULL);
+            sfRenderWindow_display(renderWindow);
         }
-        if (!sfRenderWindow_isOpen(renderWindow)) break;
-        sfRenderWindow_clear(renderWindow, sfBlack);
-        menu.display(renderWindow, 2);
-        sfRenderWindow_drawText(renderWindow, title, NULL);
-        for (int i = 0; i < 12; ++i)
-            sfRenderWindow_drawText(renderWindow, textArray[i], NULL);
-        sfRenderWindow_drawRectangleShape(renderWindow, hTrack, NULL);
-        sfRenderWindow_drawRectangleShape(renderWindow, hKnob, NULL);
-        sfRenderWindow_drawRectangleShape(renderWindow, vTrack, NULL);
-        sfRenderWindow_drawRectangleShape(renderWindow, vKnob, NULL);
-        if (state != Normal)
-            sfRenderWindow_drawText(renderWindow, waitingText, NULL);
-        sfRenderWindow_display(renderWindow);
     }
     sfText_destroy(title); sfText_destroy(waitingText);
-    for (int i = 0; i < 12; ++i) sfText_destroy(textArray[i]);
+    for (int i = 0; i < 14; ++i) sfText_destroy(textArray[i]);
     sfRectangleShape_destroy(hTrack); sfRectangleShape_destroy(hKnob);
     sfRectangleShape_destroy(vTrack); sfRectangleShape_destroy(vKnob);
     sfFont_destroy(font);
@@ -471,10 +509,13 @@ void Settings::updateTexts(sfText** textArray)
     
     sfText_setString(textArray[10], ("11. Horizontal Sens: " + std::to_string(hDisplay)).c_str());
     sfText_setString(textArray[11], ("12. Vertical Sens: "   + std::to_string(vDisplay)).c_str());
+    std::string fpsStr = (fps == 0) ? "Unlimited" : std::to_string(fps);
+    sfText_setString(textArray[12], ("13. FPS Limit: " + fpsStr + "  [click to change]").c_str());
+    sfText_setString(textArray[13], ("14. Resolution: " + std::to_string(windowWidth) + "x" + std::to_string(windowHeight) + "  [click to change]").c_str());
 }
 
 void Settings::saveSettings()
 {
     std::string path("settings.conf");
-    writeDefaultBinds(path, binds, horizontal_sensitivity, vertical_sensitivity);
+    writeDefaultBinds(path, binds, horizontal_sensitivity, vertical_sensitivity, fps, windowWidth, windowHeight);
 }

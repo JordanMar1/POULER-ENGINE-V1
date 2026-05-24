@@ -136,6 +136,7 @@ int Core::menu_return(void)
         if (sfKeyboard_isKeyPressed(sfKeyQ))
             sfRenderWindow_close(window->getWindow());
         sfRenderWindow_display(window->getWindow());
+        sfRenderWindow_setFramerateLimit(window->getWindow(), this->getSettings()->fps);
     }
     return 0;
 }

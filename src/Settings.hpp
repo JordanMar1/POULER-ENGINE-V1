@@ -32,6 +32,9 @@ class Settings {
         Settings();
         ~Settings();
         void changeSettings(Window& window, Menu& menu);
+        int fps = 60;
+        unsigned int windowWidth  = 1920;
+        unsigned int windowHeight = 1080;
     private:
         void updateTexts(sfText** textArray);
         void saveSettings();

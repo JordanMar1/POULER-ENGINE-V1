@@ -16,6 +16,7 @@ class Window {
         Window(char *windowtitle, bool debug);
         ~Window();
 
+        void setWindow(sfRenderWindow *window) {_window = window; }
         sfRenderWindow* getWindow() const { return _window; }
         sfVideoMode getVm() const { return _vm; }
         sfTexture* getText() const { return _text; }
