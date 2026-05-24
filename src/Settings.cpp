@@ -291,15 +291,12 @@ void Settings::changeSettings(Window& window, Menu& menu)
     sfText* title = sfText_create();
     sfText_setFont(title, font); sfText_setCharacterSize(title, 30);
     sfText_setString(title, "Settings"); sfText_setPosition(title, (sfVector2f){100, 50}); sfText_setColor(title, sfWhite);
-    
-    // Passé à 12 éléments de texte pour accueillir leanLeft et leanRight
     sfText* textArray[12];
     for (int i = 0; i < 12; ++i) {
         textArray[i] = sfText_create();
         sfText_setFont(textArray[i], font);
         sfText_setCharacterSize(textArray[i], 20);
-        sfText_setPosition(textArray[i], (sfVector2f){100, 120.f + (i * 45.f)}); // Espacement légèrement réduit pour que tout rentre
-        sfText_setColor(textArray[i], sfWhite);
+        sfText_setPosition(textArray[i], (sfVector2f){100, 120.f + (i * 45.f)});
     }
     sfText* waitingText = sfText_create();
     sfText_setFont(waitingText, font); sfText_setCharacterSize(waitingText, 20);
@@ -308,8 +305,6 @@ void Settings::changeSettings(Window& window, Menu& menu)
     float minVSens = 0.9f, maxVSens = 2.0f;
     float trackX = 450.f;
     float trackWidth = 200.f;
-
-    // Ajustement de la position Y des sliders (lignes 11 et 12)
     float hSliderY = 120.f + (10 * 45.f) + 13.f;
     float vSliderY = 120.f + (11 * 45.f) + 13.f;
 
