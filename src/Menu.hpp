@@ -93,6 +93,7 @@ class button_list {
 
 class Menu {
     public:
+        void setMusicVolume(int volume) {sfMusic_setVolume(music, (float)volume);}
         Menu(char ***parsed_file, bool debug);
         ~Menu();
         void display(sfRenderWindow *window, int buttonId);
