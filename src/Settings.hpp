@@ -33,6 +33,6 @@ class Settings {
         ~Settings();
         void changeSettings(Window& window, Menu& menu);
     private:
-        void updateTexts(sfText* mf, sfText* ml, sfText* mb, sfText* mr, sfText* c, sfText* s, sfText* a, sfText* r, sfText* hSens, sfText* vSens);
+        void updateTexts(sfText** textArray);
         void saveSettings();
 };
