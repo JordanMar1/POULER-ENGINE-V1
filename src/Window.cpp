@@ -16,9 +16,10 @@ Window::Window(char *windowtitle, bool debug)
     if (_debug)
         std::cout << "Window created with title '" << windowtitle << "'" << std::endl;
     _vm = {(unsigned int)settings.windowWidth, (unsigned int)settings.windowHeight, 32};
+    sfUint32 style = settings.fullscreen ? sfFullscreen : sfDefaultStyle;
     if (_debug)
         std::cout << "Video mode set to " << _vm.width << "x" << _vm.height << std::endl;
-    _window = sfRenderWindow_create(_vm, windowtitle, sfDefaultStyle, NULL);
+    _window = sfRenderWindow_create(_vm, windowtitle, style, NULL);
     if (!_window) {
         std::cerr << "Error: Could not create window" << std::endl;
         exit(84);
