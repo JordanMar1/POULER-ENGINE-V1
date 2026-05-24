@@ -25,7 +25,7 @@ class Core {
         GameData *getGameData() const { return gameData; }
         Settings *getSettings() const { return settings; }
         std::vector<Weapons *> getWeapons() const {return weapons;};
-        void displayLevels();
+        void displayLevels(Maps *selected);
     private:
         Window *window;
         Menu *menu;

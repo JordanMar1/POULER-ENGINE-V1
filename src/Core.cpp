@@ -13,22 +13,55 @@
 #include "Maps.hpp"
 #include "Game.hpp"
 
-void Core::displayLevels()
+void Core::displayLevels(Maps* selected)
 {
-    Maps *clone = maps;
+    sfVector2u winSize = sfRenderWindow_getSize(window->getWindow());
+    int totalItems = 0;
+    int selectedIndex = 0;
+    Maps *temp = maps;
+    while (temp != nullptr) {
+        if (temp == selected) {
+            selectedIndex = totalItems;
+        }
+        totalItems++;
+        temp = temp->next;
+    }
+    float spacing = 60.0f;
+    float startY = (float)winSize.y / 4.0f;
+    float centerY = (float)winSize.y / 2.0f;
+    float scrollOffset = 0.0f;
+    float idealSelectedY = startY + (selectedIndex * spacing);
+    if (idealSelectedY > centerY) {
+        scrollOffset = idealSelectedY - centerY;
+    }
+    float maxScroll = (totalItems * spacing) + startY - (winSize.y * 0.8f);
+    if (maxScroll < 0.0f) maxScroll = 0.0f; 
 
+    if (scrollOffset > maxScroll) {
+        scrollOffset = maxScroll;
+    }
+    Maps *clone = maps;
+    int i = 0;
     while (clone != nullptr) {
         sfText *text = sfText_create();
         sfText_setFont(text, menu->getFont());
         sfText_setString(text, clone->getName());
         sfText_setCharacterSize(text, 24);
+        if (clone == selected) {
+            sfText_setFillColor(text, sfRed); 
+        } else {
+            sfText_setFillColor(text, sfWhite);
+        }
+
         sfFloatRect textRect = sfText_getLocalBounds(text);
-        sfText_setOrigin(text, {textRect.width / 2, textRect.height / 2});
-        sfVector2u winSize = sfRenderWindow_getSize(window->getWindow());
-        sfText_setPosition(text, {(float)winSize.x / 2, (float)winSize.y / 4 + (float)(winSize.y / 4) * (maps->getMapArray() ? 0 : 1)});
+        sfText_setOrigin(text, {textRect.width / 2.0f, textRect.height / 2.0f});
+        float posX = (float)winSize.x / 2.0f;
+        float posY = startY + (i * spacing) - scrollOffset;
+        sfText_setPosition(text, {posX, posY});
         sfRenderWindow_drawText(window->getWindow(), text, nullptr);
         sfText_destroy(text);
         clone = clone->next;
+        i++;
     }
 }
 
@@ -59,7 +92,7 @@ int Core::chooseLevel(void)
                 }
             }
         }
-        displayLevels();
+        displayLevels(selected); 
         sfRenderWindow_display(window->getWindow());
     }
     return 0;

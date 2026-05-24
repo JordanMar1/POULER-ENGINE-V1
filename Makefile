@@ -6,7 +6,7 @@
 ##
 
 CXX		=	g++
-CXXFLAGS	=	-Wall -Wextra -g -Iinclude
+CXXFLAGS	=	-Wall -Wextra -Iinclude
 
 LDFLAGS		=	-Linclude
 
