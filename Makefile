@@ -6,7 +6,7 @@
 ##
 
 CXX		=	g++
-CXXFLAGS	=	-Wall -Wextra -Iinclude
+CXXFLAGS	=	-Wall -Wextra -Iinclude -g
 
 LDFLAGS		=	-Linclude
 
@@ -48,4 +48,6 @@ fclean: clean
 	@rm -f $(NAME)
 	@rm -f settings.conf
 
-re: fclean all
+re:
+	@$(MAKE) fclean
+	@$(MAKE) all
