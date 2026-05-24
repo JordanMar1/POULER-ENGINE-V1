@@ -29,6 +29,15 @@ class button_list {
         void set_text_r(int r);
         void set_text_g(int g);
         void set_text_b(int b);
+        void set_scale(float s);
+        void set_id(int id);
+        void set_text_s(int ts);
+        float get_text_s() const {
+            return text_s;
+        }
+        float get_scale() const {
+            return scale;
+        }
         const char *get_text() const {
             return text != nullptr ? text : "";
         };
@@ -69,9 +78,9 @@ class button_list {
         int get_id() const {
             return id;
         };
-        void set_id(int id) {
-            this->id = id;
-        };
+        sfRectangleShape *get_shape() const {
+            return Buttons;
+        }
     private:
         sfRectangleShape *Buttons;
         button_list *next = nullptr;
@@ -87,6 +96,8 @@ class button_list {
         int text_r;
         int text_g;
         int text_b;
+        int text_s;
+        float scale;
         int id;
 };
 
@@ -100,6 +111,7 @@ class Menu {
         int handleClick(int mouseX, int mouseY);
         sfFont *getFont() { return font; }
         sfMusic *getMusic() { return music; }
+        void handleHover(int x, int y);
     private:
         sfSprite *sprite;
         sfTexture *texture;

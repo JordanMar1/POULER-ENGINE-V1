@@ -14,7 +14,9 @@
 :text_r:0:
 :text_g:0:
 :text_b:0:
+:text_s:75:
 :id:1:
+:scale:1.1:
 #menu_button:
 :x:750:
 :y:900:
@@ -27,7 +29,9 @@
 :text_r:0:
 :text_g:0:
 :text_b:0:
+:text_s:50:
 :id:2:
+:scale:1.1:
 #menu_button:
 :x:1250:
 :y:900:
@@ -40,8 +44,9 @@
 :text_r:0:
 :text_g:0:
 :text_b:0:
+:text_s:75:
 :id:3:
-
+:scale:1.1:
 #weapon:
 :name:m4:
 :sprite:assets/weapons/m4.png:
