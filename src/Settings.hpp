@@ -32,7 +32,27 @@ class Settings {
         Settings();
         ~Settings();
         void changeSettings(Window& window, Menu& menu);
+        int fps = 60;
+        unsigned int windowWidth  = 1920;
+        unsigned int windowHeight = 1080;
+        bool fullscreen = false;
     private:
+        enum State { Normal, WaitingKey, WaitingMouse };
+        void handleFpsClick(sfRenderWindow *&rw);
+        void handleResolutionClick(sfRenderWindow *&rw, Window &win);
+        void handleFullscreenClick(sfRenderWindow *&rw, Window &win);
+        void handleMouseClick(int x, int y, sfRenderWindow *&rw, Window &win,
+                            sfText *waitingText, int &draggingSlider,
+                            float trackX, float trackWidth,
+                            float hSliderY, float vSliderY,
+                            float minHSens, float maxHSens,
+                            float minVSens, float maxVSens,
+                            State &state, int &waitingFor, sfText **textArray);
+        void handleKeyPress(sfKeyCode code, State &state, int &waitingFor,
+                            sfText *waitingText, sfText **textArray,
+                            sfText *title, sfRectangleShape *hTrack,
+                            sfRectangleShape *hKnob, sfRectangleShape *vTrack,
+                            sfRectangleShape *vKnob, sfFont *font, bool &shouldReturn);
         void updateTexts(sfText** textArray);
         void saveSettings();
 };

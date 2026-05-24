@@ -188,7 +188,7 @@ static sfKeyCode keyboardKeyFromString(const std::string &str)
     return sfKeyUnknown;
 }
 
-static void writeDefaultBinds(const std::string &path, const Settings::Binds &binds, float hSens, float vSens)
+static void writeDefaultBinds(const std::string &path, const Settings::Binds &binds, float hSens, float vSens, int fps, int windowWidth, int windowHeight, bool fullscreen)
 {
     std::ofstream output(path, std::ios::trunc);
     if (!output.is_open())
@@ -205,6 +205,10 @@ static void writeDefaultBinds(const std::string &path, const Settings::Binds &bi
     output << "aim=" << mouseButtonToString(binds.aim) << "\n";
     output << "horizontal_sensitivity=" << hSens << "\n";
     output << "vertical_sensitivity=" << vSens << "\n";
+    output << "fps=" << fps << "\n";
+    output << "window_width="  << windowWidth  << "\n";
+    output << "window_height=" << windowHeight << "\n";
+    output << "fullscreen=" << (fullscreen ? "1" : "0") << "\n";
 }
 
 Settings::Settings()
@@ -264,6 +268,14 @@ Settings::Settings()
                     try { horizontal_sensitivity = std::stof(val); } catch (...) { horizontal_sensitivity = 0.0025f; }
                 } else if (key == "vertical_sensitivity") {
                     try { vertical_sensitivity = std::stof(val); } catch (...) { vertical_sensitivity = 1.25f; }
+                } else if (key == "fps") {
+                    try { fps = std::stoi(val); } catch (...) { fps = 60; }
+                } else if (key == "window_width") {
+                    try { windowWidth  = std::stoul(val); } catch (...) { windowWidth  = 1920; }
+                } else if (key == "window_height") {
+                    try { windowHeight = std::stoul(val); } catch (...) { windowHeight = 1080; }
+                } else if (key == "fullscreen") {
+                    fullscreen = (val == "1" || val == "true");
                 }
             }
             if (binds.moveForward == sfKeyUnknown || binds.moveLeft == sfKeyUnknown ||
@@ -277,22 +289,154 @@ Settings::Settings()
         input.close();
     }
     if (writeDefaults) {
-        writeDefaultBinds(path, binds, horizontal_sensitivity, vertical_sensitivity);
+        writeDefaultBinds(path, binds, horizontal_sensitivity, vertical_sensitivity, fps, windowWidth, windowHeight, fullscreen);
     }
 }
 
 Settings::~Settings() {}
 
+static void recreateWindow(sfRenderWindow *&rw, Window &win,
+                           unsigned int w, unsigned int h, bool fs)
+{
+    sfVideoMode vm = {w, h, 32};
+    sfRenderWindow_destroy(rw);
+    rw = sfRenderWindow_create(vm, "pouler_or_not",
+                               fs ? sfFullscreen : sfDefaultStyle, NULL);
+    win.setWindow(rw);
+}
+
+void Settings::handleFpsClick(sfRenderWindow *&rw)
+{
+    int fpsOptions[] = {30, 60, 120, 144, 240, 0};
+    bool found = false;
+    for (int i = 0; i < 6; i++) {
+        if (fps == fpsOptions[i]) {
+            fps = fpsOptions[(i + 1) % 6];
+            found = true;
+            break;
+        }
+    }
+    if (!found) fps = 60;
+    sfRenderWindow_setFramerateLimit(rw, fps);
+    saveSettings();
+}
+
+void Settings::handleResolutionClick(sfRenderWindow *&rw, Window &win)
+{
+    struct Res { unsigned int w, h; };
+    Res resOptions[] = {{1280,720},{1600,900},{1920,1080},{2560,1440},{3840,2160}};
+    int count = 5;
+    bool found = false;
+    for (int i = 0; i < count; i++) {
+        if ((unsigned int)windowWidth  == resOptions[i].w &&
+            (unsigned int)windowHeight == resOptions[i].h) {
+            windowWidth  = resOptions[(i + 1) % count].w;
+            windowHeight = resOptions[(i + 1) % count].h;
+            found = true;
+            break;
+        }
+    }
+    if (!found) { windowWidth = 1920; windowHeight = 1080; }
+    recreateWindow(rw, win, windowWidth, windowHeight, fullscreen);
+    saveSettings();
+}
+
+void Settings::handleFullscreenClick(sfRenderWindow *&rw, Window &win)
+{
+    fullscreen = !fullscreen;
+    recreateWindow(rw, win, windowWidth, windowHeight, fullscreen);
+    saveSettings();
+}
+
+void Settings::handleMouseClick(int x, int y, sfRenderWindow *&rw, Window &win,
+                                sfText *waitingText, int &draggingSlider,
+                                float trackX, float trackWidth,
+                                float hSliderY, float vSliderY,
+                                float minHSens, float maxHSens,
+                                float minVSens, float maxVSens,
+                                State &state, int &waitingFor,
+                                sfText **textArray)
+{
+    if (x >= trackX - 10 && x <= trackX + trackWidth + 10) {
+        if (y >= hSliderY - 15 && y <= hSliderY + 15)      draggingSlider = 1;
+        else if (y >= vSliderY - 15 && y <= vSliderY + 15) draggingSlider = 2;
+        if (draggingSlider != 0) {
+            float newRatio = std::clamp((x - trackX) / trackWidth, 0.f, 1.f);
+            if (draggingSlider == 1) horizontal_sensitivity = minHSens + newRatio * (maxHSens - minHSens);
+            else                     vertical_sensitivity   = minVSens + newRatio * (maxVSens - minVSens);
+            updateTexts(textArray);
+            return;
+        }
+    }
+    auto setWaitKey   = [&](int id, const char *msg){ state = WaitingKey;   waitingFor = id; sfText_setString(waitingText, msg); };
+    auto setWaitMouse = [&](int id, const char *msg){ state = WaitingMouse; waitingFor = id; sfText_setString(waitingText, msg); };
+    if      (y >= 120 && y < 165) setWaitKey  (1,  "Press new key for Move Forward");
+    else if (y >= 165 && y < 210) setWaitKey  (2,  "Press new key for Move Left");
+    else if (y >= 210 && y < 255) setWaitKey  (3,  "Press new key for Move Back");
+    else if (y >= 255 && y < 300) setWaitKey  (4,  "Press new key for Move Right");
+    else if (y >= 300 && y < 345) setWaitKey  (5,  "Press new key for Crouch");
+    else if (y >= 345 && y < 390) setWaitKey  (6,  "Press new key for Lean Left");
+    else if (y >= 390 && y < 435) setWaitKey  (7,  "Press new key for Lean Right");
+    else if (y >= 435 && y < 480) setWaitMouse(8,  "Press new mouse button for Shoot");
+    else if (y >= 480 && y < 525) setWaitMouse(9,  "Press new mouse button for Aim");
+    else if (y >= 525 && y < 570) setWaitKey  (10, "Press new key for Reload");
+    else if (y >= 660 && y < 705) { handleFpsClick(rw);              updateTexts(textArray); }
+    else if (y >= 705 && y < 750) { handleResolutionClick(rw, win);  updateTexts(textArray); }
+    else if (y >= 750 && y < 795) { handleFullscreenClick(rw, win);  updateTexts(textArray); }
+}
+
+void Settings::handleKeyPress(sfKeyCode code, State &state, int &waitingFor,
+                              sfText *waitingText, sfText **textArray,
+                              sfText *title, sfRectangleShape *hTrack,
+                              sfRectangleShape *hKnob, sfRectangleShape *vTrack,
+                              sfRectangleShape *vKnob, sfFont *font, bool &shouldReturn)
+{
+    if (state == Normal) {
+        if (code >= sfKeyNum1 && code <= sfKeyNum5) {
+            state = WaitingKey;
+            waitingFor = code - sfKeyNum1 + 1;
+            std::string actions[] = {"Move Forward","Move Left","Move Back","Move Right","Crouch"};
+            sfText_setString(waitingText, ("Press new key for " + actions[waitingFor - 1]).c_str());
+        } else if (code == sfKeyNum6) { state = WaitingKey;   waitingFor = 6;  sfText_setString(waitingText, "Press new key for Lean Left"); }
+        else if (code == sfKeyNum7)   { state = WaitingKey;   waitingFor = 7;  sfText_setString(waitingText, "Press new key for Lean Right"); }
+        else if (code == sfKeyNum8)   { state = WaitingMouse; waitingFor = 8;  sfText_setString(waitingText, "Press new mouse button for Shoot"); }
+        else if (code == sfKeyNum9)   { state = WaitingMouse; waitingFor = 9;  sfText_setString(waitingText, "Press new mouse button for Aim"); }
+        else if (code == sfKeyEscape) {
+            sfText_destroy(title); sfText_destroy(waitingText);
+            for (int i = 0; i < 15; ++i) sfText_destroy(textArray[i]);
+            sfRectangleShape_destroy(hTrack); sfRectangleShape_destroy(hKnob);
+            sfRectangleShape_destroy(vTrack); sfRectangleShape_destroy(vKnob);
+            sfFont_destroy(font);
+            shouldReturn = true;
+        }
+    } else if (state == WaitingKey && code != sfKeyUnknown) {
+        if      (waitingFor == 1)  binds.moveForward = code;
+        else if (waitingFor == 2)  binds.moveLeft    = code;
+        else if (waitingFor == 3)  binds.moveBack    = code;
+        else if (waitingFor == 4)  binds.moveRight   = code;
+        else if (waitingFor == 5)  binds.crouch      = code;
+        else if (waitingFor == 6)  binds.leanLeft    = code;
+        else if (waitingFor == 7)  binds.leanRight   = code;
+        else if (waitingFor == 10) binds.reload      = code;
+        updateTexts(textArray);
+        saveSettings();
+        state = Normal; sfText_setString(waitingText, "");
+    }
+}
+
 void Settings::changeSettings(Window& window, Menu& menu)
 {
     sfFont* font = sfFont_createFromFile("assets/fonts/menu.ttf");
     if (!font) return;
-    sfRenderWindow* renderWindow = window.getWindow();
+    sfRenderWindow* rw = window.getWindow();
+
     sfText* title = sfText_create();
     sfText_setFont(title, font); sfText_setCharacterSize(title, 30);
-    sfText_setString(title, "Settings"); sfText_setPosition(title, (sfVector2f){100, 50}); sfText_setColor(title, sfWhite);
-    sfText* textArray[12];
-    for (int i = 0; i < 12; ++i) {
+    sfText_setString(title, "Settings");
+    sfText_setPosition(title, (sfVector2f){100, 50});
+    sfText_setColor(title, sfWhite);
+    sfText* textArray[15];
+    for (int i = 0; i < 15; ++i) {
         textArray[i] = sfText_create();
         sfText_setFont(textArray[i], font);
         sfText_setCharacterSize(textArray[i], 20);
@@ -300,115 +444,57 @@ void Settings::changeSettings(Window& window, Menu& menu)
     }
     sfText* waitingText = sfText_create();
     sfText_setFont(waitingText, font); sfText_setCharacterSize(waitingText, 20);
-    sfText_setPosition(waitingText, (sfVector2f){100, 680}); sfText_setColor(waitingText, sfYellow);
+    sfText_setPosition(waitingText, (sfVector2f){100, 780});
+    sfText_setColor(waitingText, sfYellow);
     float minHSens = 0.0001f, maxHSens = 0.0100f;
-    float minVSens = 0.9f, maxVSens = 2.0f;
-    float trackX = 450.f;
-    float trackWidth = 200.f;
+    float minVSens = 0.9f,    maxVSens = 2.0f;
+    float trackX = 450.f, trackWidth = 200.f;
     float hSliderY = 120.f + (10 * 45.f) + 13.f;
     float vSliderY = 120.f + (11 * 45.f) + 13.f;
-
     sfRectangleShape* hTrack = sfRectangleShape_create();
     sfRectangleShape_setSize(hTrack, (sfVector2f){trackWidth, 6});
     sfRectangleShape_setPosition(hTrack, (sfVector2f){trackX, hSliderY});
     sfRectangleShape_setFillColor(hTrack, sfColor_fromRGB(100, 100, 100));
-
     sfRectangleShape* vTrack = sfRectangleShape_create();
     sfRectangleShape_setSize(vTrack, (sfVector2f){trackWidth, 6});
     sfRectangleShape_setPosition(vTrack, (sfVector2f){trackX, vSliderY});
     sfRectangleShape_setFillColor(vTrack, sfColor_fromRGB(100, 100, 100));
-
     sfRectangleShape* hKnob = sfRectangleShape_create();
     sfRectangleShape_setSize(hKnob, (sfVector2f){10, 20});
     sfRectangleShape_setFillColor(hKnob, sfRed);
     sfRectangleShape_setOrigin(hKnob, (sfVector2f){5, 10});
-
     sfRectangleShape* vKnob = sfRectangleShape_create();
     sfRectangleShape_setSize(vKnob, (sfVector2f){10, 20});
     sfRectangleShape_setFillColor(vKnob, sfRed);
     sfRectangleShape_setOrigin(vKnob, (sfVector2f){5, 10});
-
     updateTexts(textArray);
-    enum State { Normal, WaitingKey, WaitingMouse };
     State state = Normal;
     int waitingFor = -1;
     int draggingSlider = 0;
-    while (sfRenderWindow_isOpen(renderWindow)) {
-        sfEvent event;
+    while (sfRenderWindow_isOpen(rw)) {
         float hRatio = std::clamp((horizontal_sensitivity - minHSens) / (maxHSens - minHSens), 0.f, 1.f);
         float vRatio = std::clamp((vertical_sensitivity   - minVSens) / (maxVSens - minVSens), 0.f, 1.f);
-        sfRectangleShape_setPosition(hKnob, (sfVector2f){trackX + (hRatio * trackWidth), hSliderY});
-        sfRectangleShape_setPosition(vKnob, (sfVector2f){trackX + (vRatio * trackWidth), vSliderY});
+        sfRectangleShape_setPosition(hKnob, (sfVector2f){trackX + hRatio * trackWidth, hSliderY});
+        sfRectangleShape_setPosition(vKnob, (sfVector2f){trackX + vRatio * trackWidth, vSliderY});
+        sfEvent event;
+        while (sfRenderWindow_pollEvent(rw, &event)) {
+            if (event.type == sfEvtClosed) { sfRenderWindow_close(rw); break; }
 
-        while (sfRenderWindow_pollEvent(renderWindow, &event)) {
-            if (event.type == sfEvtClosed) {
-                sfRenderWindow_close(renderWindow);
-                break;
-            }
             if (event.type == sfEvtKeyPressed) {
+                bool shouldReturn = false;
+                handleKeyPress(event.key.code, state, waitingFor, waitingText,
+                               textArray, title, hTrack, hKnob, vTrack, vKnob,
+                               font, shouldReturn);
+                if (shouldReturn) return;
+            }
+            else if (event.type == sfEvtMouseButtonPressed
+                     && event.mouseButton.button == sfMouseLeft) {
                 if (state == Normal) {
-                    if (event.key.code >= sfKeyNum1 && event.key.code <= sfKeyNum5) {
-                        state = WaitingKey;
-                        waitingFor = event.key.code - sfKeyNum1 + 1;
-                        std::string actions[] = {"Move Forward", "Move Left", "Move Back", "Move Right", "Crouch"};
-                        sfText_setString(waitingText, ("Press new key for " + actions[waitingFor - 1]).c_str());
-                    } else if (event.key.code == sfKeyNum6) {
-                        state = WaitingKey; waitingFor = 6; sfText_setString(waitingText, "Press new key for Lean Left");
-                    } else if (event.key.code == sfKeyNum7) {
-                        state = WaitingKey; waitingFor = 7; sfText_setString(waitingText, "Press new key for Lean Right");
-                    } else if (event.key.code == sfKeyNum8) {
-                        state = WaitingMouse; waitingFor = 8; sfText_setString(waitingText, "Press new mouse button for Shoot");
-                    } else if (event.key.code == sfKeyNum9) {
-                        state = WaitingMouse; waitingFor = 9; sfText_setString(waitingText, "Press new mouse button for Aim");
-                    } else if (event.key.code == sfKeyEscape) {
-                        sfText_destroy(title); sfText_destroy(waitingText);
-                        for (int i = 0; i < 12; ++i) sfText_destroy(textArray[i]);
-                        sfRectangleShape_destroy(hTrack); sfRectangleShape_destroy(hKnob);
-                        sfRectangleShape_destroy(vTrack); sfRectangleShape_destroy(vKnob);
-                        sfFont_destroy(font);
-                        return;
-                    }
-                } else if (state == WaitingKey) {
-                    if (event.key.code != sfKeyUnknown) {
-                        if (waitingFor == 1) binds.moveForward = event.key.code;
-                        else if (waitingFor == 2) binds.moveLeft = event.key.code;
-                        else if (waitingFor == 3) binds.moveBack = event.key.code;
-                        else if (waitingFor == 4) binds.moveRight = event.key.code;
-                        else if (waitingFor == 5) binds.crouch = event.key.code;
-                        else if (waitingFor == 6) binds.leanLeft = event.key.code;
-                        else if (waitingFor == 7) binds.leanRight = event.key.code;
-                        else if (waitingFor == 10) binds.reload = event.key.code;
-                        updateTexts(textArray);
-                        saveSettings();
-                        state = Normal; sfText_setString(waitingText, "");
-                    }
-                }
-            } else if (event.type == sfEvtMouseButtonPressed) {
-                if (state == Normal && event.mouseButton.button == sfMouseLeft) {
-                    int x = event.mouseButton.x;
-                    int y = event.mouseButton.y;
-                    if (x >= trackX - 10 && x <= trackX + trackWidth + 10) {
-                        if (y >= hSliderY - 15 && y <= hSliderY + 15) draggingSlider = 1;
-                        else if (y >= vSliderY - 15 && y <= vSliderY + 15) draggingSlider = 2;
-                        if (draggingSlider != 0) {
-                            float newRatio = std::clamp((x - trackX) / trackWidth, 0.f, 1.f);
-                            if (draggingSlider == 1) horizontal_sensitivity = minHSens + newRatio * (maxHSens - minHSens);
-                            else                     vertical_sensitivity   = minVSens + newRatio * (maxVSens - minVSens);
-                            updateTexts(textArray);
-                        }
-                    }
-                    if (draggingSlider == 0) {
-                        if      (y >= 120 && y < 165) { state = WaitingKey;   waitingFor = 1; sfText_setString(waitingText, "Press new key for Move Forward"); }
-                        else if (y >= 165 && y < 210) { state = WaitingKey;   waitingFor = 2; sfText_setString(waitingText, "Press new key for Move Left"); }
-                        else if (y >= 210 && y < 255) { state = WaitingKey;   waitingFor = 3; sfText_setString(waitingText, "Press new key for Move Back"); }
-                        else if (y >= 255 && y < 300) { state = WaitingKey;   waitingFor = 4; sfText_setString(waitingText, "Press new key for Move Right"); }
-                        else if (y >= 300 && y < 345) { state = WaitingKey;   waitingFor = 5; sfText_setString(waitingText, "Press new key for Crouch"); }
-                        else if (y >= 345 && y < 390) { state = WaitingKey;   waitingFor = 6; sfText_setString(waitingText, "Press new key for Lean Left"); }
-                        else if (y >= 390 && y < 435) { state = WaitingKey;   waitingFor = 7; sfText_setString(waitingText, "Press new key for Lean Right"); }
-                        else if (y >= 435 && y < 480) { state = WaitingMouse; waitingFor = 8; sfText_setString(waitingText, "Press new mouse button for Shoot"); }
-                        else if (y >= 480 && y < 525) { state = WaitingMouse; waitingFor = 9; sfText_setString(waitingText, "Press new mouse button for Aim"); }
-                        else if (y >= 525 && y < 570) { state = WaitingKey;   waitingFor = 10; sfText_setString(waitingText, "Press new key for Reload"); }
-                    }
+                    handleMouseClick(event.mouseButton.x, event.mouseButton.y,
+                                     rw, window, waitingText, draggingSlider,
+                                     trackX, trackWidth, hSliderY, vSliderY,
+                                     minHSens, maxHSens, minVSens, maxVSens,
+                                     state, waitingFor, textArray);
                 } else if (state == WaitingMouse) {
                     if (waitingFor == 8) binds.shoot = event.mouseButton.button;
                     else if (waitingFor == 9) binds.aim = event.mouseButton.button;
@@ -416,36 +502,36 @@ void Settings::changeSettings(Window& window, Menu& menu)
                     saveSettings();
                     state = Normal; sfText_setString(waitingText, "");
                 }
-            } else if (event.type == sfEvtMouseButtonReleased) {
-                if (event.mouseButton.button == sfMouseLeft && draggingSlider != 0) {
-                    draggingSlider = 0;
-                    saveSettings();
-                }
-            } else if (event.type == sfEvtMouseMoved) {
-                if (draggingSlider != 0) {
-                    float newRatio = std::clamp((event.mouseMove.x - trackX) / trackWidth, 0.f, 1.f);
-                    if (draggingSlider == 1) horizontal_sensitivity = minHSens + newRatio * (maxHSens - minHSens);
-                    else                     vertical_sensitivity   = minVSens + newRatio * (maxVSens - minVSens);
-                    updateTexts(textArray);
-                }
+            }
+            else if (event.type == sfEvtMouseButtonReleased
+                     && event.mouseButton.button == sfMouseLeft
+                     && draggingSlider != 0) {
+                draggingSlider = 0;
+                saveSettings();
+            }
+            else if (event.type == sfEvtMouseMoved && draggingSlider != 0) {
+                float newRatio = std::clamp((event.mouseMove.x - trackX) / trackWidth, 0.f, 1.f);
+                if (draggingSlider == 1) horizontal_sensitivity = minHSens + newRatio * (maxHSens - minHSens);
+                else                     vertical_sensitivity   = minVSens + newRatio * (maxVSens - minVSens);
+                updateTexts(textArray);
             }
         }
-        if (!sfRenderWindow_isOpen(renderWindow)) break;
-        sfRenderWindow_clear(renderWindow, sfBlack);
-        menu.display(renderWindow, 2);
-        sfRenderWindow_drawText(renderWindow, title, NULL);
-        for (int i = 0; i < 12; ++i)
-            sfRenderWindow_drawText(renderWindow, textArray[i], NULL);
-        sfRenderWindow_drawRectangleShape(renderWindow, hTrack, NULL);
-        sfRenderWindow_drawRectangleShape(renderWindow, hKnob, NULL);
-        sfRenderWindow_drawRectangleShape(renderWindow, vTrack, NULL);
-        sfRenderWindow_drawRectangleShape(renderWindow, vKnob, NULL);
+        if (!sfRenderWindow_isOpen(rw)) break;
+        sfRenderWindow_clear(rw, sfBlack);
+        menu.display(rw, 2);
+        sfRenderWindow_drawText(rw, title, NULL);
+        for (int i = 0; i < 15; ++i)
+            sfRenderWindow_drawText(rw, textArray[i], NULL);
+        sfRenderWindow_drawRectangleShape(rw, hTrack, NULL);
+        sfRenderWindow_drawRectangleShape(rw, hKnob,  NULL);
+        sfRenderWindow_drawRectangleShape(rw, vTrack, NULL);
+        sfRenderWindow_drawRectangleShape(rw, vKnob,  NULL);
         if (state != Normal)
-            sfRenderWindow_drawText(renderWindow, waitingText, NULL);
-        sfRenderWindow_display(renderWindow);
+            sfRenderWindow_drawText(rw, waitingText, NULL);
+        sfRenderWindow_display(rw);
     }
     sfText_destroy(title); sfText_destroy(waitingText);
-    for (int i = 0; i < 12; ++i) sfText_destroy(textArray[i]);
+    for (int i = 0; i < 15; ++i) sfText_destroy(textArray[i]);
     sfRectangleShape_destroy(hTrack); sfRectangleShape_destroy(hKnob);
     sfRectangleShape_destroy(vTrack); sfRectangleShape_destroy(vKnob);
     sfFont_destroy(font);
@@ -471,10 +557,14 @@ void Settings::updateTexts(sfText** textArray)
     
     sfText_setString(textArray[10], ("11. Horizontal Sens: " + std::to_string(hDisplay)).c_str());
     sfText_setString(textArray[11], ("12. Vertical Sens: "   + std::to_string(vDisplay)).c_str());
+    std::string fpsStr = (fps == 0) ? "Unlimited" : std::to_string(fps);
+    sfText_setString(textArray[12], ("13. FPS Limit: " + fpsStr + "  [click to change]").c_str());
+    sfText_setString(textArray[13], ("14. Resolution: " + std::to_string(windowWidth) + "x" + std::to_string(windowHeight) + "  [click to change]").c_str());
+    sfText_setString(textArray[14], ("15. Fullscreen: " + std::string(fullscreen ? "On" : "Off") + "  [click to toggle]").c_str());
 }
 
 void Settings::saveSettings()
 {
     std::string path("settings.conf");
-    writeDefaultBinds(path, binds, horizontal_sensitivity, vertical_sensitivity);
+    writeDefaultBinds(path, binds, horizontal_sensitivity, vertical_sensitivity, fps, windowWidth, windowHeight, fullscreen);
 }
