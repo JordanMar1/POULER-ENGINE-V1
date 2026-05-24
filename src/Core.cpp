@@ -115,6 +115,7 @@ int Core::menu_return(void)
             if (event.type == sfEvtMouseButtonPressed) {
                 sfVector2i mousePos = sfMouse_getPositionRenderWindow(window->getWindow());
                 buttonId = menu->handleClick(mousePos.x, mousePos.y);
+                menu->handleHover(mousePos.x, mousePos.y);
                 if (buttonId == 1) {
                     sfMusic_stop(menu->getMusic());
                     if (window->isDebug())
