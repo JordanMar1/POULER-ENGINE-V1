@@ -190,7 +190,7 @@ void Game::HandleInputs(Core *core, Player &p, float dt, int map_rows, std::vect
     float leanTarget = 0.0f;
     if (sfKeyboard_isKeyPressed(core->getSettings()->binds.leanLeft))  leanTarget = -1.0f;
     if (sfKeyboard_isKeyPressed(core->getSettings()->binds.leanRight)) leanTarget =  1.0f;
-    p.lean += (leanTarget - p.lean) * 10.0f * dt; // interpolation smooth
+    p.lean += (leanTarget - p.lean) * 10.0f * dt;
     if (sfKeyboard_isKeyPressed(core->getSettings()->binds.moveForward)) tryMove(p.x + p.dirX * mv, p.y + p.dirY * mv);
     if (sfKeyboard_isKeyPressed(core->getSettings()->binds.moveBack))    tryMove(p.x - p.dirX * mv, p.y - p.dirY * mv);
     if (sfKeyboard_isKeyPressed(core->getSettings()->binds.moveLeft))
@@ -256,19 +256,19 @@ void Game::RenderScene(Core *core, sfUint8 *pixels, Player &p, int map_rows)
     double leanSideY = p.dirX * p.lean * 0.3;
     double eyeX = p.x + leanSideX;
     double eyeY = p.y + leanSideY;
-    int leanPitch = 0;
-    int horizon   = (int)(h * 0.5 + p.pitch + leanPitch);
+    double horizonF = h * 0.5 + p.pitch;
+    int horizon = (int)horizonF;
+
     for (int i = 0; i < w * h * 4; i += 4) {
         int pixelY = (i / 4) / w;
-        bool sky = pixelY < horizon;
-        pixels[i] = pixels[i+1] = pixels[i+2] = sky ? 30 : 50;
+        pixels[i] = pixels[i+1] = pixels[i+2] = (pixelY < horizon) ? 30 : 50;
         pixels[i+3] = 255;
     }
     for (int x = 0; x < w; x++) {
         double cameraX = 2.0 * x / (double)w - 1.0;
         double rayX = p.dirX + p.planeX * cameraX;
         double rayY = p.dirY + p.planeY * cameraX;
-        int mX = (int)eyeX, mY = (int)eyeY; 
+        int mX = (int)eyeX, mY = (int)eyeY;
         double dX = fabs(1.0 / rayX);
         double dY = fabs(1.0 / rayY);
         int stX = (rayX < 0) ? -1 : 1;
@@ -286,9 +286,7 @@ void Game::RenderScene(Core *core, sfUint8 *pixels, Player &p, int map_rows)
             if (dist < 0.01) dist = 0.01;
             int curH = getH(core, mX, mY, map_rows);
             double lineH = (double)h / dist;
-            double horizonF = h * 0.5 + p.pitch + leanPitch; // calculé une fois avant la boucle for x
             int floor_px = (int)(horizonF - (lastH - p.eyeHeight) * lineH);
-
             if (floor_px < screen_floor_limit) {
                 float dShade = std::min(1.0f, 14.0f / (float)(dist + 1.0f));
                 sfUint8 shade = (sfUint8)std::max(0, (int)((38 + lastH * 9) * dShade));
@@ -322,8 +320,35 @@ void Game::RenderScene(Core *core, sfUint8 *pixels, Player &p, int map_rows)
             lastH = curH;
         }
     }
-}
+    if (fabs(p.lean) > 0.001f) {
+        float angle = p.lean * -0.08f;
+        float cosA = cos(angle);
+        float sinA = sin(angle);
+        float cx = w * 0.5f;
+        float cy = h * 0.5f;
+        float maxZoom = 1.125f / cos(fabs(angle));
+        float zoom = 1.0f + (maxZoom - 1.0f) * fabs(p.lean);
 
+        std::vector<sfUint8> tmp(w * h * 4);
+        memcpy(tmp.data(), pixels, w * h * 4);
+        memset(pixels, 0, w * h * 4);
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                float dx = (x - cx) / zoom;
+                float dy = (y - cy) / zoom;
+                int srcX = (int)(cosA * dx + sinA * dy + cx);
+                int srcY = (int)(-sinA * dx + cosA * dy + cy);
+                if (srcX < 0 || srcX >= w || srcY < 0 || srcY >= h) continue;
+                int dst = (y * w + x) * 4;
+                int src = (srcY * w + srcX) * 4;
+                pixels[dst]   = tmp[src];
+                pixels[dst+1] = tmp[src+1];
+                pixels[dst+2] = tmp[src+2];
+                pixels[dst+3] = tmp[src+3];
+            }
+        }
+    }
+}
 
 int Game::Play(Core *core)
 {
