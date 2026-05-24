@@ -6,7 +6,7 @@
 ##
 
 CXX		=	g++
-CXXFLAGS	=	-Wall -Wextra -Iinclude -g
+CXXFLAGS	=	-Wall -Wextra -Iinclude
 
 LDFLAGS		=	-Linclude
 
@@ -28,12 +28,12 @@ NAME		=	pouler_or_not
 
 .PHONY: all libarray clean fclean re
 
-all: libarray $(NAME)
+all: $(NAME)
 
 libarray:
 	@$(MAKE) -C include
 
-$(NAME): $(OBJS)
+$(NAME): libarray $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) $(LDFLAGS) $(LDLIBS)
 
 %.o: %.cpp
