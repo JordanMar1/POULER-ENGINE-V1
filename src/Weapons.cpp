@@ -149,3 +149,10 @@ std::vector<Weapons *> create_weapons(char ***game_array, bool isDebug)
     }
     return weapons;
 }
+
+void setWeaponsVolume(std::vector<Weapons *> weapons, int volume)
+{
+    for (const auto &wp : weapons) {
+        wp->setWeaponVolume(volume);
+    }
+} 

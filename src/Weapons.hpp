@@ -39,7 +39,8 @@ public:
     sfSoundBuffer *sh_buff;
     sfSound *reload_sound;
     sfSound *shoot_sound;
-    float reload_time; 
+    float reload_time;
+    void setWeaponVolume(int volume) { sfSound_setVolume(reload_sound, (float)volume); sfSound_setVolume(shoot_sound, (float)volume); }
     Weapons()
         : id(0), dmg(0), ammo(0), mag(0),
           firerate(0.f), fire_distance(0.f),
@@ -47,3 +48,4 @@ public:
 };
 
 std::vector<Weapons *> create_weapons(char ***game_array, bool isDebug);
+void setWeaponsVolume(std::vector<Weapons *> weapons, int volume);

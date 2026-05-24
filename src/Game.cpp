@@ -353,6 +353,7 @@ void Game::RenderScene(Core *core, sfUint8 *pixels, Player &p, int map_rows)
 int Game::Play(Core *core, Maps *map)
 {
     char **mapArray = map->getMapArray();
+    sfMusic_setVolume(map->getMusic(), core->getSettings()->musicVolume);
     sfMusic_setLoop(map->getMusic(), true);
     sfMusic_play(map->getMusic());
     int map_rows = 0;
@@ -376,6 +377,7 @@ int Game::Play(Core *core, Maps *map)
     sfSprite_setTexture(spr, tex, sfTrue);
     sfClock *clock = sfClock_create();
     std::vector<Weapons *> weapons = core->getWeapons();
+    setWeaponsVolume(weapons, core->getSettings()->soundVolume);
     std::vector<sfTexture *> weapon_textures;
     sfSprite *weapon_sprite = sfSprite_create();
     int current_weapon_idx = 0;
