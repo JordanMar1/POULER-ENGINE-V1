@@ -88,7 +88,8 @@ int Core::chooseLevel(void)
                 } else if (event.key.code == sfKeyEnter || event.key.code == sfKeyReturn) {
                     if (window->isDebug())
                         std::cout << "Selected level: " << selected->getName() << std::endl;
-                    return game.Play(this);
+                    setMaps(selected);
+                    return game.Play(this, selected);
                 }
             }
         }
