@@ -40,6 +40,7 @@ Menu::Menu(char ***parsed_file, bool debug)
                     music = sfMusic_createFromFile(parsed_file[i][j + 1]);
                     if (debug)
                         printf("Playing music: %s\n", parsed_file[i][j + 1]);
+                    sfMusic_setLoop(music, true);
                     sfMusic_play(music);
                 }
                 if (strcmp(parsed_file[i][j], "font") == 0 && parsed_file[i][j + 1] != NULL) {

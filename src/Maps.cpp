@@ -22,6 +22,11 @@ Maps::Maps(char ***parsed_file, bool debug)
                 if (strcmp(parsed_file[i][j], "name") == 0 && parsed_file[i][j + 1] != NULL) {
                     current->name = strdup(parsed_file[i][j + 1]);
                 }
+                if (strcmp(parsed_file[i][j], "music") == 0 && parsed_file[i][j + 1] != NULL) {
+                    current->music = sfMusic_createFromFile(parsed_file[i][j + 1]);
+                    if (debug && !current->music)
+                        std::cout << "Warning: error on music";
+                }
                 if (strcmp(parsed_file[i][j], "content") == 0 && parsed_file[i][j + 1] != NULL) {
                     current->map_array = my_str_to_word_array(parsed_file[i][j + 1], (char *)"\n");
                 }

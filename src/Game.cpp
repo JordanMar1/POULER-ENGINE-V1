@@ -353,6 +353,8 @@ void Game::RenderScene(Core *core, sfUint8 *pixels, Player &p, int map_rows)
 int Game::Play(Core *core)
 {
     char **mapArray = core->getMaps()->getMapArray();
+    sfMusic_setLoop(core->getMaps()->getMusic(), true);
+    sfMusic_play(core->getMaps()->getMusic());
     int map_rows = 0;
     while (mapArray[map_rows]) map_rows++;
     sfRenderWindow *window = core->getWindow()->getWindow();
@@ -401,6 +403,7 @@ int Game::Play(Core *core)
                         w->mag = w->max_mag;
                     }
                 }
+                sfMusic_stop(core->getMaps()->getMusic());
                 sfRenderWindow_setMouseCursorVisible(window, sfTrue);
                 return core->menu_return();
             }
@@ -427,6 +430,7 @@ int Game::Play(Core *core)
         if (t) sfTexture_destroy(t);
     }
     sfSprite_destroy(weapon_sprite);
+    sfMusic_stop(core->getMaps()->getMusic());
     delete[] pixels;
     sfTexture_destroy(tex);
     sfSprite_destroy(spr);

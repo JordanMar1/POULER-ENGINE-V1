@@ -7,11 +7,14 @@
 
 #pragma once
 
+#include <SFML/Audio.h>
+
 class Maps {
 public:
     Maps() {};
     Maps(char ***parsed_file, bool debug);
     ~Maps();
+    sfMusic *getMusic() const { return music; }
     char **getMapArray() const { return map_array; }
     int **getHeatmap() const { return heatmap; }
     int getHeatmapRows() const { return heatmap_rows; }
@@ -26,4 +29,5 @@ private:
     int **heatmap   = nullptr;
     int  heatmap_rows = 0;
     int  heatmap_cols = 0;
+    sfMusic *music;
 };
