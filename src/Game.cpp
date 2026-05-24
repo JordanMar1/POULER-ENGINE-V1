@@ -350,11 +350,11 @@ void Game::RenderScene(Core *core, sfUint8 *pixels, Player &p, int map_rows)
     }
 }
 
-int Game::Play(Core *core)
+int Game::Play(Core *core, Maps *map)
 {
-    char **mapArray = core->getMaps()->getMapArray();
-    sfMusic_setLoop(core->getMaps()->getMusic(), true);
-    sfMusic_play(core->getMaps()->getMusic());
+    char **mapArray = map->getMapArray();
+    sfMusic_setLoop(map->getMusic(), true);
+    sfMusic_play(map->getMusic());
     int map_rows = 0;
     while (mapArray[map_rows]) map_rows++;
     sfRenderWindow *window = core->getWindow()->getWindow();
@@ -364,7 +364,7 @@ int Game::Play(Core *core)
         for (int j = 0; mapArray[i][j]; j++) {
             if (mapArray[i][j] == 'S') {
                 p.x = j + 0.5; p.y = i + 0.5;
-                p.height = (double)std::max(0, core->getMaps()->getHeatmap()[i][j]);
+                p.height = (double)std::max(0, map->getHeatmap()[i][j]);
                 p.eyeHeight = p.height + 0.5;
             }
         }
