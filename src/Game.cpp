@@ -187,6 +187,10 @@ void Game::HandleInputs(Core *core, Player &p, float dt, int map_rows, std::vect
             p.y = ny;
         }
     };
+    float leanTarget = 0.0f;
+    if (sfKeyboard_isKeyPressed(core->getSettings()->binds.leanLeft))  leanTarget = -1.0f;
+    if (sfKeyboard_isKeyPressed(core->getSettings()->binds.leanRight)) leanTarget =  1.0f;
+    p.lean += (leanTarget - p.lean) * 10.0f * dt; // interpolation smooth
     if (sfKeyboard_isKeyPressed(core->getSettings()->binds.moveForward)) tryMove(p.x + p.dirX * mv, p.y + p.dirY * mv);
     if (sfKeyboard_isKeyPressed(core->getSettings()->binds.moveBack))    tryMove(p.x - p.dirX * mv, p.y - p.dirY * mv);
     if (sfKeyboard_isKeyPressed(core->getSettings()->binds.moveLeft))
@@ -248,7 +252,12 @@ void Game::RenderScene(Core *core, sfUint8 *pixels, Player &p, int map_rows)
     sfVector2u winSize = sfRenderWindow_getSize(core->getWindow()->getWindow());
     int w = winSize.x;
     int h = winSize.y;
-    int horizon = (int)(h * 0.5 + p.pitch);
+    double leanSideX = -p.dirY * p.lean * 0.3;
+    double leanSideY = p.dirX * p.lean * 0.3;
+    double eyeX = p.x + leanSideX;
+    double eyeY = p.y + leanSideY;
+    int leanPitch = 0;
+    int horizon   = (int)(h * 0.5 + p.pitch + leanPitch);
     for (int i = 0; i < w * h * 4; i += 4) {
         int pixelY = (i / 4) / w;
         bool sky = pixelY < horizon;
@@ -259,13 +268,13 @@ void Game::RenderScene(Core *core, sfUint8 *pixels, Player &p, int map_rows)
         double cameraX = 2.0 * x / (double)w - 1.0;
         double rayX = p.dirX + p.planeX * cameraX;
         double rayY = p.dirY + p.planeY * cameraX;
-        int mX = (int)p.x, mY = (int)p.y;
+        int mX = (int)eyeX, mY = (int)eyeY; 
         double dX = fabs(1.0 / rayX);
         double dY = fabs(1.0 / rayY);
         int stX = (rayX < 0) ? -1 : 1;
         int stY = (rayY < 0) ? -1 : 1;
-        double sX = (rayX < 0) ? (p.x - mX) * dX : (mX + 1.0 - p.x) * dX;
-        double sY = (rayY < 0) ? (p.y - mY) * dY : (mY + 1.0 - p.y) * dY;
+        double sX = (rayX < 0) ? (eyeX - mX) * dX : (mX + 1.0 - eyeX) * dX;
+        double sY = (rayY < 0) ? (eyeY - mY) * dY : (mY + 1.0 - eyeY) * dY;
         int screen_floor_limit = h;
         int lastH = getH(core, mX, mY, map_rows);
         int steps = 0;
@@ -277,7 +286,9 @@ void Game::RenderScene(Core *core, sfUint8 *pixels, Player &p, int map_rows)
             if (dist < 0.01) dist = 0.01;
             int curH = getH(core, mX, mY, map_rows);
             double lineH = (double)h / dist;
-            int floor_px = (int)((h * 0.5 + p.pitch) - (lastH - p.eyeHeight) * lineH);
+            double horizonF = h * 0.5 + p.pitch + leanPitch; // calculé une fois avant la boucle for x
+            int floor_px = (int)(horizonF - (lastH - p.eyeHeight) * lineH);
+
             if (floor_px < screen_floor_limit) {
                 float dShade = std::min(1.0f, 14.0f / (float)(dist + 1.0f));
                 sfUint8 shade = (sfUint8)std::max(0, (int)((38 + lastH * 9) * dShade));
@@ -290,8 +301,8 @@ void Game::RenderScene(Core *core, sfUint8 *pixels, Player &p, int map_rows)
             if (curH != lastH) {
                 double wallTopH = (curH == 99) ? (double)lastH + 3.0 : (double)std::max(curH, lastH);
                 double wallBotH = (double)std::min(curH, lastH);
-                int pxTop = (int)((h * 0.5 + p.pitch) - (wallTopH - p.eyeHeight) * lineH);
-                int pxBot = (int)((h * 0.5 + p.pitch) - (wallBotH - p.eyeHeight) * lineH);
+                int pxTop = (int)(horizonF - (wallTopH - p.eyeHeight) * lineH);
+                int pxBot = (int)(horizonF - (wallBotH - p.eyeHeight) * lineH);
                 int drawTop = std::max(pxTop, 0);
                 int drawBot = std::min(pxBot, screen_floor_limit);
                 if (drawTop < drawBot) {
@@ -321,7 +332,7 @@ int Game::Play(Core *core)
     while (mapArray[map_rows]) map_rows++;
     sfRenderWindow *window = core->getWindow()->getWindow();
 
-    Player p = {2.5, 2.5, 1.0, 0.0, 0.0, 0.66, 0.0, 0.0, 0.5, false};
+    Player p = {2.5, 2.5, 1.0, 0.0, 0.0, 0.66, 0.0, 0.0, 0.5, false, 0.0f, 0.0f};
     for (int i = 0; i < map_rows; i++) {
         for (int j = 0; mapArray[i][j]; j++) {
             if (mapArray[i][j] == 'S') {

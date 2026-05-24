@@ -15,6 +15,7 @@ struct Player {
     double defaultHeight = height;
     double eyeHeight;
     bool crouching = false;
+    float lean = 0.0f;
     float pitch = 0.0f;
 };
 

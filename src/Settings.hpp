@@ -22,6 +22,8 @@ class Settings {
             sfKeyCode moveRight = sfKeyD;
             sfKeyCode crouch = sfKeyLControl;
             sfKeyCode reload = sfKeyR;
+            sfKeyCode leanLeft = sfKeyA;
+            sfKeyCode leanRight = sfKeyE;
             sfMouseButton shoot = sfMouseLeft;
             sfMouseButton aim = sfMouseRight;
         } binds;
