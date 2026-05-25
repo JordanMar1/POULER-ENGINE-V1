@@ -13,9 +13,11 @@
 #include "Settings.hpp"
 #include "Maps.hpp"
 #include "Weapons.hpp"
+#include "Player.hpp"
+
 class Core {
     public:
-        Core(Window *window, Menu *menu, GameData *gameData, Settings *settings, std::vector<Weapons *> weapons) : window(window), menu(menu), gameData(gameData), settings(settings), weapons(weapons) {};
+        Core(Window *window, Menu *menu, GameData *gameData, Settings *settings, std::vector<Weapons *> weapons, Player *player) : window(window), menu(menu), gameData(gameData), settings(settings), weapons(weapons), player(player) {};
         int chooseLevel(void);
         int menu_return(void);
         void setMaps(Maps *maps) { this->maps = maps; }
@@ -25,6 +27,7 @@ class Core {
         GameData *getGameData() const { return gameData; }
         Settings *getSettings() const { return settings; }
         std::vector<Weapons *> getWeapons() const {return weapons;};
+        Player *getPlayer() const { return player; }
         void displayLevels(Maps *selected);
     private:
         Window *window;
@@ -34,4 +37,5 @@ class Core {
         Settings *settings;
         Maps *maps;
         std::vector<Weapons *> weapons;
+        Player *player;
 };

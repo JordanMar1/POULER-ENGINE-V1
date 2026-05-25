@@ -229,7 +229,6 @@ void Game::HandleInputs(Core *core, Player &p, float dt, int map_rows, std::vect
             weapon_state = 2;
             weapon_timer = 0.0f;
             w->mag -= 1;
-            w->ammo = w->max_ammo;
             sfSound_play(w->reload_sound);
         }
     }
@@ -258,16 +257,21 @@ int Game::Play(Core *core, Maps *map)
     int map_rows = 0;
     while (mapArray[map_rows]) map_rows++;
     sfRenderWindow *window = core->getWindow()->getWindow();
-
-    Player p = {2.5, 2.5, 1.0, 0.0, 0.0, 0.66, 0.0, 0.0, 0.5, false, 0.0f, 0.0f};
+    Player &p = *core->getPlayer();
+    bool spawn_found = false;
     for (int i = 0; i < map_rows; i++) {
         for (int j = 0; mapArray[i][j]; j++) {
             if (mapArray[i][j] == 'S') {
                 p.x = j + 0.5; p.y = i + 0.5;
                 p.height = (double)std::max(0, map->getHeatmap()[i][j]);
                 p.eyeHeight = p.height + 0.5;
+                spawn_found = true;
             }
         }
+    }
+    if (!spawn_found) {
+        std::cerr << "[ERROR] Aucun point de spawn 'S' trouvé dans la map !" << std::endl;
+        p.x = 1.5; p.y = 1.5; 
     }
     sfVector2u currentSize = sfRenderWindow_getSize(window);
     Renderer renderer(currentSize);

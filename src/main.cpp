@@ -11,6 +11,7 @@
 #include "Menu.hpp"
 #include "Core.hpp"
 #include "Weapons.hpp"
+#include "Player.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -23,9 +24,10 @@ int main(int argc, char *argv[])
     Window window((char *)"POULER OR NOT", errorHandler.isDebug());
     Menu menu(gameData.game_array, errorHandler.isDebug());
     std::vector<Weapons *> weapons = create_weapons(gameData.game_array, errorHandler.isDebug());
+    Player player(gameData.game_array, errorHandler.isDebug());
     Settings settings = Settings();
     menu.setMusicVolume(settings.musicVolume);
-    Core core(&window, &menu, &gameData, &settings, weapons);
+    Core core(&window, &menu, &gameData, &settings, weapons, &player);
     sfRenderWindow_setFramerateLimit(window.getWindow(), settings.fps);
     
     while (sfRenderWindow_isOpen(window.getWindow()))

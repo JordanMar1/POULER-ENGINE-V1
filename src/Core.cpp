@@ -71,7 +71,6 @@ int Core::chooseLevel(void)
     Maps *maps = new Maps(gameData->game_array, window->isDebug());
     setMaps(maps);
     Maps *selected = maps;
-
     while (sfRenderWindow_isOpen(window->getWindow())) {
         sfEvent event;
         sfRenderWindow_clear(window->getWindow(), sfBlack);
@@ -108,7 +107,6 @@ int Core::menu_return(void)
     {
         sfEvent event;
         int buttonId = 0;
-
         while (sfRenderWindow_pollEvent(window->getWindow(), &event)) {
             if (event.type == sfEvtClosed)
                 sfRenderWindow_close(window->getWindow());
@@ -124,6 +122,8 @@ int Core::menu_return(void)
                     if (window->isDebug())
                         std::cout << "Opening options..." << std::endl;
                     settings->changeSettings(*window, *menu);
+                    menu->setMusicVolume(settings->musicVolume);
+                    sfMusic_play(menu->getMusic());
                 } else if (buttonId == 3) {
                     sfMusic_stop(menu->getMusic());
                     if (window->isDebug())
