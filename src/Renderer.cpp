@@ -56,7 +56,7 @@ void Renderer::clearScreen(int horizon)
     int totalPixels = m_size.x * m_size.y * 4;
     for (int i = 0; i < totalPixels; i += 4) {
         int pixelY = (i / 4) / m_size.x;
-        m_pixels[i]   = (pixelY < horizon) ? 30 : 50; // Ciel : Sol
+        m_pixels[i]   = (pixelY < horizon) ? 30 : 50;
         m_pixels[i+1] = (pixelY < horizon) ? 30 : 50;
         m_pixels[i+2] = (pixelY < horizon) ? 30 : 50;
         m_pixels[i+3] = 255;
