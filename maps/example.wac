@@ -149,6 +149,9 @@ WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW:
 :maxhp:150:
 :height:1.5:
 :crouch_height:0.75:
+:stamina:100:
+:speed::
+:sprint_speed::
 #interface_item:
 :info:hp:
 :image:assets/images/heart.png:
@@ -183,3 +186,12 @@ WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW:
 :r:255:
 :g:255:
 :b:0:
+#head:
+:image:assets/images/doom.png:
+:x:1720:
+:y:880:
+:100:585,0,734,175:
+:80:585,175,734,361:
+:60:585,361,734,561:
+:40:585,561,734,750:
+:20:585,750,734,943:

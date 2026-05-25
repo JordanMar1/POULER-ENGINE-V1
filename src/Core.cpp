@@ -13,7 +13,7 @@
 #include "Maps.hpp"
 #include "Game.hpp"
 #include "math.h"
-
+#include "Head.hpp"
 Core::~Core()
 {
 }

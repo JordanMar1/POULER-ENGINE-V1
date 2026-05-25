@@ -53,6 +53,15 @@ Player::Player(char ***parsed_file, bool debug)
                     if (debug)
                         std::cout << "Player crouch height set to: " << crouchHeight << std::endl;
                 }
+                if (strcmp(parsed_file[i][j], "stamina") == 0 && parsed_file[i][j + 1] != NULL) {
+                    stamina = std::stoi(parsed_file[i][j + 1]);
+                    if (stamina < 0) {
+                        stamina = 100;
+                    }
+                    maxStamina = stamina;
+                    if (debug)
+                        std::cout << "Player stamina set to: " << stamina << std::endl;
+                }
             }
              if (debug)
                 std::cout << "Player HP: " << hp << "/" << maxHp << std::endl;

@@ -158,7 +158,6 @@ void InterfaceItems::_renderAmmoText(sfRenderWindow *window,
     sfColor col = sfColor_fromRGB((sfUint8)s->def.r, (sfUint8)s->def.g, (sfUint8)s->def.b);
     char buf[64];
     snprintf(buf, sizeof(buf), "%d | %d/%d", w->ammo, w->mag, w->max_mag);
-    std::cout << "Ammo: " << w->ammo << " / " << w->mag << " (max mag: " << w->max_mag << ")\n";
     _drawText(window, font, buf, 20, col, s->def.x, s->def.y);
 }
 

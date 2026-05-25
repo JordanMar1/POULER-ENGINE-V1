@@ -14,6 +14,7 @@
 #include "Player.hpp"
 #include "math.h"
 #include "InterfaceItems.hpp"
+#include "Head.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -27,10 +28,11 @@ int main(int argc, char *argv[])
     Menu menu(gameData.game_array, errorHandler.isDebug());
     std::vector<Weapons *> weapons = create_weapons(gameData.game_array, errorHandler.isDebug());
     Player player(gameData.game_array, errorHandler.isDebug());
+    Head head = *parse_heads(gameData.game_array, errorHandler.isDebug());
     Settings settings = Settings();
     menu.setMusicVolume(settings.musicVolume);
     settings.Pfov = (int)(atan(player.planeY) * 2.0 * 180.0 / M_PI);
-    Core core(&window, &menu, &gameData, &settings, weapons, &player);
+    Core core(&window, &menu, &gameData, &settings, weapons, &player, &head);
     core.interfaceItems = buildInterfaceItems(gameData.game_array, errorHandler.isDebug());
     sfRenderWindow_setFramerateLimit(window.getWindow(), settings.fps);
     
