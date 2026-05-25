@@ -13,6 +13,11 @@
 #include "Maps.hpp"
 #include "Game.hpp"
 #include "math.h"
+#include "Head.hpp"
+Core::~Core()
+{
+}
+
 void Core::displayLevels(Maps* selected)
 {
     sfVector2u winSize = sfRenderWindow_getSize(window->getWindow());

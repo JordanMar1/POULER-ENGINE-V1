@@ -83,6 +83,9 @@ static Weapons *create_weapon_from_block(char **block)
         w->sprite_x      = parse_int_list(get_field(block, "SP_x"));
         w->sprite_y      = parse_int_list(get_field(block, "SP_y"));
         w->shoot_anim    = parse_anim_frames(get_field(block, "SH_AM"));
+        w->check_anim    = parse_anim_frames(get_field(block, "CH_AM"));
+        std::string check_time_str = get_field(block, "CH_TIME");
+        w->check_time    = check_time_str.empty() ? 0.f : std::stof(check_time_str);
         w->sh_buff = sfSoundBuffer_createFromFile(get_field(block, "SH_SD").c_str());
         w->shoot_sound = sfSound_create();
         if (w->sh_buff)

@@ -15,6 +15,8 @@ Player::Player(char ***parsed_file, bool debug)
     dirY  =  0.0;
     planeX = 0.0;
     planeY = 0.66;
+    hp = 100;
+    maxHp = 100;
     for (int i = 0; parsed_file[i] != NULL; i++) {
         if (strcmp(parsed_file[i][0], "player") == 0) {
             for (int j = 1; parsed_file[i][j] != NULL; j++) {
@@ -26,7 +28,7 @@ Player::Player(char ***parsed_file, bool debug)
                     if (debug)
                         std::cout << "Player HP set to: " << hp << std::endl;
                 }
-                if (strcmp(parsed_file[i][j], "max_hp") == 0 && parsed_file[i][j + 1] != NULL) {
+                if (strcmp(parsed_file[i][j], "maxhp") == 0 && parsed_file[i][j + 1] != NULL) {
                     maxHp = std::stoi(parsed_file[i][j + 1]);
                     if (maxHp <= 0) {
                         maxHp = 100;
@@ -50,6 +52,15 @@ Player::Player(char ***parsed_file, bool debug)
                     }
                     if (debug)
                         std::cout << "Player crouch height set to: " << crouchHeight << std::endl;
+                }
+                if (strcmp(parsed_file[i][j], "stamina") == 0 && parsed_file[i][j + 1] != NULL) {
+                    stamina = std::stoi(parsed_file[i][j + 1]);
+                    if (stamina < 0) {
+                        stamina = 100;
+                    }
+                    maxStamina = stamina;
+                    if (debug)
+                        std::cout << "Player stamina set to: " << stamina << std::endl;
                 }
             }
              if (debug)
