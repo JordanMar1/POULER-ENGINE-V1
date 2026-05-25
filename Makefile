@@ -21,7 +21,8 @@ SRCS		=	src/ErrorHandler.cpp \
 				src/Core.cpp \
 				src/Maps.cpp \
 				src/Game.cpp \
-				src/Weapons.cpp
+				src/Weapons.cpp \
+				src/Renderer.cpp
 
 OBJS		=	$(SRCS:.cpp=.o)
 NAME		=	pouler_or_not
