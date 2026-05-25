@@ -7,18 +7,6 @@
 #pragma once
 #include "Core.hpp"
 
-struct Player {
-    double x, y;
-    double dirX, dirY;
-    double planeX, planeY;
-    double height;
-    double defaultHeight = height;
-    double eyeHeight;
-    bool crouching = false;
-    float lean = 0.0f;
-    float pitch = 0.0f;
-};
-
 class Game {
 public:
     int Play(Core *core, Maps *map);
