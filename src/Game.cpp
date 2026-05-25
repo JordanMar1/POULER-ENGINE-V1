@@ -3,6 +3,7 @@
 #include <cstring>
 #include <algorithm>
 #include <iostream>
+#include "Renderer.hpp"
 
 static bool findTeleport(Core *core, int map_rows, int srcX, int srcY, double &dstX, double &dstY)
 {
@@ -247,11 +248,8 @@ void Game::HandleInputs(Core *core, Player &p, float dt, int map_rows, std::vect
     }
 }
 
-void Game::RenderScene(Core *core, sfUint8 *pixels, Player &p, int map_rows)
+void Game::RenderScene(Core *core, sfUint8 *pixels, Player &p, int map_rows, int w, int h)
 {
-    sfVector2u winSize = sfRenderWindow_getSize(core->getWindow()->getWindow());
-    int w = winSize.x;
-    int h = winSize.y;
     double leanSideX = -p.dirY * p.lean * 0.3;
     double leanSideY = p.dirX * p.lean * 0.3;
     double eyeX = p.x + leanSideX;
@@ -370,11 +368,8 @@ int Game::Play(Core *core, Maps *map)
             }
         }
     }
-    sfVector2u size = sfRenderWindow_getSize(window);
-    sfUint8 *pixels = new sfUint8[size.x * size.y * 4];
-    sfTexture *tex = sfTexture_create(size.x, size.y);
-    sfSprite *spr = sfSprite_create();
-    sfSprite_setTexture(spr, tex, sfTrue);
+    sfVector2u currentSize = sfRenderWindow_getSize(window);
+    Renderer renderer(currentSize);
     sfClock *clock = sfClock_create();
     std::vector<Weapons *> weapons = core->getWeapons();
     setWeaponsVolume(weapons, core->getSettings()->soundVolume);
@@ -395,10 +390,18 @@ int Game::Play(Core *core, Maps *map)
         while (sfRenderWindow_pollEvent(window, &event)) {
             if (event.type == sfEvtClosed)
                 sfRenderWindow_close(window);
+            if (event.type == sfEvtResized) {
+                currentSize.x = event.size.width;
+                currentSize.y = event.size.height;
+                renderer.resize(currentSize);
+                sfFloatRect visibleArea = {0.f, 0.f, (float)currentSize.x, (float)currentSize.y};
+                sfView* view = sfView_createFromRect(visibleArea);
+                sfRenderWindow_setView(window, view);
+                sfView_destroy(view);
+            }
             if (event.type == sfEvtKeyPressed && event.key.code == sfKeyEscape) {
                 for (auto *t : weapon_textures) if (t) sfTexture_destroy(t);
                 sfSprite_destroy(weapon_sprite);
-                delete[] pixels; sfTexture_destroy(tex); sfSprite_destroy(spr); sfClock_destroy(clock);
                 for (auto *w: weapons) {
                     if (w) {
                         w->ammo = w->max_ammo;
@@ -407,10 +410,11 @@ int Game::Play(Core *core, Maps *map)
                 }
                 sfMusic_stop(core->getMaps()->getMusic());
                 sfRenderWindow_setMouseCursorVisible(window, sfTrue);
+                sfClock_destroy(clock);
                 return core->menu_return();
             }
             if (event.type == sfEvtKeyPressed && event.key.code == core->getSettings()->binds.crouch)
-                p.crouching = !p.crouching;
+                p.crouching = !p.crouching;   
             if (event.type == sfEvtKeyPressed && event.key.code >= sfKeyNum1 && event.key.code <= sfKeyNum9) {
                 int selected = event.key.code - sfKeyNum1;
                 if (selected < (int)weapons.size() && weapon_state == 0) {
@@ -420,10 +424,9 @@ int Game::Play(Core *core, Maps *map)
         }
         ManageMouse(window, p, core->getSettings());
         HandleInputs(core, p, dt, map_rows, weapons, current_weapon_idx, weapon_state, weapon_timer);
-        RenderScene(core, pixels, p, map_rows);
-        sfTexture_updateFromPixels(tex, pixels, size.x, size.y, 0, 0);
+        renderer.initFrameRender(core, p, map_rows);
         sfRenderWindow_clear(window, sfBlack);
-        sfRenderWindow_drawSprite(window, spr, nullptr);
+        renderer.drawScene(window, p.lean);
         RenderWeapon(core, window, weapons, weapon_textures, weapon_sprite, current_weapon_idx, weapon_state, weapon_timer);
         UpdateWeaponTimer(weapons, current_weapon_idx, weapon_state, weapon_timer, dt);
         sfRenderWindow_display(window);
@@ -433,9 +436,6 @@ int Game::Play(Core *core, Maps *map)
     }
     sfSprite_destroy(weapon_sprite);
     sfMusic_stop(core->getMaps()->getMusic());
-    delete[] pixels;
-    sfTexture_destroy(tex);
-    sfSprite_destroy(spr);
     sfClock_destroy(clock);
     return 0;
 }
