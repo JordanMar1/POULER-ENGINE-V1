@@ -23,6 +23,8 @@ class Player {
         float pitch = 0.0f;
         int hp;
         int maxHp;
-        int stamina = 100;
-        int maxStamina = stamina;
+        float stamina = 100.0f;
+        float maxStamina = 100.0f;
+        float speed = 5.0f;
+        float sprint_speed = 8.0f;
 };

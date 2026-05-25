@@ -26,6 +26,7 @@ class Settings {
             sfKeyCode leanLeft = sfKeyA;
             sfKeyCode leanRight = sfKeyE;
             sfKeyCode checkAmmo = sfKeyF;
+            sfKeyCode sprint = sfKeyLShift;
             sfMouseButton shoot = sfMouseLeft;
             sfMouseButton aim = sfMouseRight;
         } binds;

@@ -194,7 +194,6 @@ void Game::ManageMouse(sfRenderWindow *window, Player &p, Settings *settings){
 }
 
 void Game::HandleInputs(Core *core, Player &p, float dt, int map_rows, std::vector<Weapons *> &weapons, int current_weapon_idx, int &weapon_state, float &weapon_timer){
-    float mv = 4.0f * dt;
     auto tryMove = [&](double nx, double ny) {
         int nh = getH(core, (int)nx, (int)ny, map_rows);
         int ch = getH(core, (int)p.x, (int)p.y, map_rows);
@@ -203,7 +202,21 @@ void Game::HandleInputs(Core *core, Player &p, float dt, int map_rows, std::vect
             p.y = ny;
         }
     };
+    bool isMoving = sfKeyboard_isKeyPressed(core->getSettings()->binds.moveForward) ||
+                    sfKeyboard_isKeyPressed(core->getSettings()->binds.moveBack) ||
+                    sfKeyboard_isKeyPressed(core->getSettings()->binds.moveLeft) ||
+                    sfKeyboard_isKeyPressed(core->getSettings()->binds.moveRight);
     float leanTarget = 0.0f;
+    float mv = p.speed * dt;
+    bool isTryingToSprint = sfKeyboard_isKeyPressed(core->getSettings()->binds.sprint) && isMoving;
+    if (isTryingToSprint && p.stamina > 0.0f) {
+        mv = p.sprint_speed * dt;
+        p.stamina -= 30.0f * dt;
+        if (p.stamina < 0.0f) p.stamina = 0.0f;
+    } else {
+        p.stamina += 15.0f * dt;
+        if (p.stamina > p.maxStamina) p.stamina = p.maxStamina;
+    }
     if (sfKeyboard_isKeyPressed(core->getSettings()->binds.leanLeft))  leanTarget = -1.0f;
     if (sfKeyboard_isKeyPressed(core->getSettings()->binds.leanRight)) leanTarget =  1.0f;
     p.lean += (leanTarget - p.lean) * 10.0f * dt;
