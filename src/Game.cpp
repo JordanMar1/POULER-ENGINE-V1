@@ -200,7 +200,7 @@ void Game::HandleInputs(Core *core, Player &p, float dt, int map_rows, std::vect
         tryMove(p.x - p.dirY * mv, p.y + p.dirX * mv);
     double mapH = (double)getH(core, (int)p.x, (int)p.y, map_rows);
     if (mapH >= 99) mapH = p.height;
-    double targetH = mapH + (p.crouching ? -0.25 : 0.0);
+    double targetH = mapH + (p.crouching ? p.crouchHeight : p.defaultHeight);
     double diff = targetH - p.height;
     if (diff < 0.0) p.height = targetH;
     else p.height += diff * 14.0 * dt;

@@ -23,12 +23,16 @@ Player::Player(char ***parsed_file, bool debug)
                     if (hp < 0) {
                         hp = 100;
                     }
+                    if (debug)
+                        std::cout << "Player HP set to: " << hp << std::endl;
                 }
                 if (strcmp(parsed_file[i][j], "max_hp") == 0 && parsed_file[i][j + 1] != NULL) {
                     maxHp = std::stoi(parsed_file[i][j + 1]);
                     if (maxHp <= 0) {
                         maxHp = 100;
                     }
+                    if (debug)
+                        std::cout << "Player max HP set to: " << maxHp << std::endl;
                 }
                 if (strcmp(parsed_file[i][j], "height") == 0 && parsed_file[i][j + 1] != NULL) {
                     height = atof(parsed_file[i][j + 1]);
@@ -36,12 +40,16 @@ Player::Player(char ***parsed_file, bool debug)
                         height = 1.0;
                     }
                     defaultHeight = height;
+                    if (debug)
+                        std::cout << "Player height set to: " << height << std::endl;
                 }
                 if (strcmp(parsed_file[i][j], "crouch_height") == 0 && parsed_file[i][j + 1] != NULL) {
                     crouchHeight = atof(parsed_file[i][j + 1]);
                     if (crouchHeight <= 0.0) {
                         crouchHeight = height * 0.5;
                     }
+                    if (debug)
+                        std::cout << "Player crouch height set to: " << crouchHeight << std::endl;
                 }
             }
              if (debug)
