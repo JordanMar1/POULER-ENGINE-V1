@@ -34,17 +34,19 @@ public:
     std::vector<int> sprite_y;
     std::vector<std::pair<int,int>> shoot_anim;
     std::vector<std::pair<int,int>> reload_anim;
+    std::vector<std::pair<int,int>> check_anim;
     float shoot_time;
     sfSoundBuffer *rd_buff;
     sfSoundBuffer *sh_buff;
     sfSound *reload_sound;
     sfSound *shoot_sound;
     float reload_time;
+    float check_time;
     void setWeaponVolume(int volume) { sfSound_setVolume(reload_sound, (float)volume); sfSound_setVolume(shoot_sound, (float)volume); }
     Weapons()
         : id(0), dmg(0), ammo(0), mag(0),
           firerate(0.f), fire_distance(0.f),
-          shoot_time(0.f), reload_time(0.f) {}
+          shoot_time(0.f), reload_time(0.f), check_time(0.f) {}
 };
 
 std::vector<Weapons *> create_weapons(char ***game_array, bool isDebug);

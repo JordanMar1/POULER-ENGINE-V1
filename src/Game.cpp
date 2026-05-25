@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <iostream>
 #include "Renderer.hpp"
+#include "InterfaceItems.hpp"
 
 static bool findTeleport(Core *core, int map_rows, int srcX, int srcY, double &dstX, double &dstY)
 {
@@ -47,10 +48,8 @@ void Game::RenderWeapon(Core *core, sfRenderWindow *window, const std::vector<We
     int gridY = 0;
     if (weapon_state == 1 && w->ammo > 0) {
         if (w->shoot_anim.empty()) {
-            if (core->getWindow()->isDebug())
-                std::cout << "[DEBUG ANIM] Attention: shoot_anim est VIDE pour cette arme !\n";
             float progress = (w->shoot_time > 0.0f) ? (weapon_timer / w->shoot_time) : 0.0f;
-            gridX = (int)(progress * 4); 
+            gridX = (int)(progress * 4);
             if (gridX > 3) gridX = 3;
             gridY = 0;
         } else {
@@ -58,16 +57,11 @@ void Game::RenderWeapon(Core *core, sfRenderWindow *window, const std::vector<We
             float progress = (w->shoot_time > 0.0f) ? (weapon_timer / w->shoot_time) : 0.0f;
             int current_frame = (int)(progress * total_frames);
             if (current_frame >= total_frames) current_frame = total_frames - 1;
-            
             gridX = w->shoot_anim[current_frame].first;
             gridY = w->shoot_anim[current_frame].second;
         }
-    }
-    else if (weapon_state == 2 && w->mag > 0) {
+    } else if (weapon_state == 2 && w->mag > 0) {
         if (w->reload_anim.empty()) {
-            if (core->getWindow()->isDebug())
-                std::cout << "[DEBUG ANIM] Attention: reload_anim est VIDE pour cette arme !\n";
-            
             float progress = (w->reload_time > 0.0f) ? (weapon_timer / w->reload_time) : 0.0f;
             gridX = (int)(progress * 4);
             if (gridX > 3) gridX = 3;
@@ -77,12 +71,19 @@ void Game::RenderWeapon(Core *core, sfRenderWindow *window, const std::vector<We
             float progress = (w->reload_time > 0.0f) ? (weapon_timer / w->reload_time) : 0.0f;
             int current_frame = (int)(progress * total_frames);
             if (current_frame >= total_frames) current_frame = total_frames - 1;
-            
             gridX = w->reload_anim[current_frame].first;
             gridY = w->reload_anim[current_frame].second;
         }
-    }
-    else {
+    } else if (weapon_state == 3) {
+        if (!w->check_anim.empty()) {
+            int total_frames = w->check_anim.size();
+            float progress = (w->check_time > 0.0f) ? (weapon_timer / w->check_time) : 0.0f;
+            int current_frame = (int)(progress * total_frames);
+            if (current_frame >= total_frames) current_frame = total_frames - 1;
+            gridX = w->check_anim[current_frame].first;
+            gridY = w->check_anim[current_frame].second;
+        }
+    } else {
         gridX = 0;
         gridY = 0;
     }
@@ -93,22 +94,20 @@ void Game::RenderWeapon(Core *core, sfRenderWindow *window, const std::vector<We
     int default_frame_size = 64;
     if (!w->sprite_x.empty() && gridX < (int)w->sprite_x.size()) {
         pixel_X_start = w->sprite_x[gridX];
-        if (gridX + 1 < (int)w->sprite_x.size()) {
+        if (gridX + 1 < (int)w->sprite_x.size())
             pixel_X_end = w->sprite_x[gridX + 1];
-        } else {
+        else
             pixel_X_end = pixel_X_start + default_frame_size;
-        }
     } else {
         pixel_X_start = gridX * default_frame_size;
         pixel_X_end   = pixel_X_start + default_frame_size;
     }
     if (!w->sprite_y.empty() && gridY < (int)w->sprite_y.size()) {
         pixel_Y_start = w->sprite_y[gridY];
-        if (gridY + 1 < (int)w->sprite_y.size()) {
+        if (gridY + 1 < (int)w->sprite_y.size())
             pixel_Y_end = w->sprite_y[gridY + 1];
-        } else {
+        else
             pixel_Y_end = pixel_Y_start + default_frame_size;
-        }
     } else {
         pixel_Y_start = gridY * default_frame_size;
         pixel_Y_end   = pixel_Y_start + default_frame_size;
@@ -139,6 +138,12 @@ void Game::UpdateWeaponTimer(std::vector<Weapons *> &weapons, int current_weapon
         weapon_timer += dt;
         if (weapon_timer >= w->reload_time) {
             w->ammo = w->max_ammo;
+            weapon_state = 0;
+            weapon_timer = 0.0f;
+        }
+    } else if (weapon_state == 3) {
+        weapon_timer += dt;
+        if (weapon_timer >= w->check_time) {
             weapon_state = 0;
             weapon_timer = 0.0f;
         }
@@ -257,6 +262,7 @@ int Game::Play(Core *core, Maps *map)
     int map_rows = 0;
     while (mapArray[map_rows]) map_rows++;
     sfRenderWindow *window = core->getWindow()->getWindow();
+    
     Player &p = *core->getPlayer();
     bool spawn_found = false;
     for (int i = 0; i < map_rows; i++) {
@@ -278,6 +284,8 @@ int Game::Play(Core *core, Maps *map)
     sfClock *clock = sfClock_create();
     std::vector<Weapons *> weapons = core->getWeapons();
     setWeaponsVolume(weapons, core->getSettings()->soundVolume);
+    InterfaceItems ui(nullptr);
+    ui.loadItems(core->interfaceItems);
     std::vector<sfTexture *> weapon_textures;
     sfSprite *weapon_sprite = sfSprite_create();
     int current_weapon_idx = 0;
@@ -303,6 +311,13 @@ int Game::Play(Core *core, Maps *map)
                 sfView* view = sfView_createFromRect(visibleArea);
                 sfRenderWindow_setView(window, view);
                 sfView_destroy(view);
+            }
+            if (event.type == sfEvtKeyPressed && event.key.code == core->getSettings()->binds.checkAmmo) {
+                if (weapon_state == 0 && !weapons.empty()) {
+                    weapon_state = 3;
+                    weapon_timer = 0.0f;
+                    ui.notifyCheckPressed(weapons[current_weapon_idx]->check_time);
+                }
             }
             if (event.type == sfEvtKeyPressed && event.key.code == sfKeyEscape) {
                 for (auto *t : weapon_textures) if (t) sfTexture_destroy(t);
@@ -333,6 +348,7 @@ int Game::Play(Core *core, Maps *map)
         sfRenderWindow_clear(window, sfBlack);
         renderer.drawScene(window, p.lean);
         RenderWeapon(core, window, weapons, weapon_textures, weapon_sprite, current_weapon_idx, weapon_state, weapon_timer);
+        ui.render(window, core->getPlayer(), weapons, current_weapon_idx, dt);
         UpdateWeaponTimer(weapons, current_weapon_idx, weapon_state, weapon_timer, dt);
         sfRenderWindow_display(window);
     }

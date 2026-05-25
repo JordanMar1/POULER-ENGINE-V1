@@ -25,8 +25,8 @@ static std::string trim(const std::string &s)
 
 static sfMouseButton mouseButtonFromString(const std::string &button)
 {
-    if (button == "mouse_left") return sfMouseLeft;
-    if (button == "mouse_right") return sfMouseRight;
+    if (button == "mouse_left")   return sfMouseLeft;
+    if (button == "mouse_right")  return sfMouseRight;
     if (button == "mouse_middle") return sfMouseMiddle;
     return sfMouseButtonCount;
 }
@@ -34,10 +34,10 @@ static sfMouseButton mouseButtonFromString(const std::string &button)
 static std::string mouseButtonToString(sfMouseButton button)
 {
     switch (button) {
-        case sfMouseLeft: return "mouse_left";
-        case sfMouseRight: return "mouse_right";
+        case sfMouseLeft:   return "mouse_left";
+        case sfMouseRight:  return "mouse_right";
         case sfMouseMiddle: return "mouse_middle";
-        default: return "unknown";
+        default:            return "unknown";
     }
 }
 
@@ -132,37 +132,41 @@ static sfKeyCode keyboardKeyFromString(const std::string &str)
     return sfKeyUnknown;
 }
 
-static void writeDefaultBinds(const std::string &path, const Settings::Binds &binds, float hSens, float vSens, int fps, int windowWidth, int windowHeight, bool fullscreen, int sVol, int mVol, int Pfov)
+static void writeDefaultBinds(const std::string &path, const Settings::Binds &binds,
+                               float hSens, float vSens, int fps,
+                               int windowWidth, int windowHeight, bool fullscreen,
+                               int sVol, int mVol, int Pfov)
 {
     std::ofstream output(path, std::ios::trunc);
     if (!output.is_open())
         return;
-    output << "move_forward=" << keyboardKeyToString(binds.moveForward) << "\n";
-    output << "move_left=" << keyboardKeyToString(binds.moveLeft) << "\n";
-    output << "move_back=" << keyboardKeyToString(binds.moveBack) << "\n";
-    output << "move_right=" << keyboardKeyToString(binds.moveRight) << "\n";
-    output << "crouch=" << keyboardKeyToString(binds.crouch) << "\n";
-    output << "lean_left=" << keyboardKeyToString(binds.leanLeft) << "\n";
-    output << "lean_right=" << keyboardKeyToString(binds.leanRight) << "\n";
-    output << "reload=" << keyboardKeyToString(binds.reload) << "\n";
-    output << "shoot=" << mouseButtonToString(binds.shoot) << "\n";
-    output << "aim=" << mouseButtonToString(binds.aim) << "\n";
-    output << "horizontal_sensitivity=" << hSens << "\n";
-    output << "vertical_sensitivity=" << vSens << "\n";
-    output << "fps=" << fps << "\n";
-    output << "window_width="  << windowWidth  << "\n";
-    output << "window_height=" << windowHeight << "\n";
-    output << "fullscreen=" << (fullscreen ? "1" : "0") << "\n";
-    output << "sound_volume=" << sVol << "\n";
-    output << "music_volume=" << mVol << "\n";
-    output << "fov=" << Pfov << "\n";
+    output << "move_forward="           << keyboardKeyToString(binds.moveForward) << "\n";
+    output << "move_left="              << keyboardKeyToString(binds.moveLeft)    << "\n";
+    output << "move_back="              << keyboardKeyToString(binds.moveBack)    << "\n";
+    output << "move_right="             << keyboardKeyToString(binds.moveRight)   << "\n";
+    output << "crouch="                 << keyboardKeyToString(binds.crouch)      << "\n";
+    output << "lean_left="              << keyboardKeyToString(binds.leanLeft)    << "\n";
+    output << "lean_right="             << keyboardKeyToString(binds.leanRight)   << "\n";
+    output << "reload="                 << keyboardKeyToString(binds.reload)      << "\n";
+    output << "check_ammo="             << keyboardKeyToString(binds.checkAmmo)   << "\n";
+    output << "shoot="                  << mouseButtonToString(binds.shoot)       << "\n";
+    output << "aim="                    << mouseButtonToString(binds.aim)         << "\n";
+    output << "horizontal_sensitivity=" << hSens        << "\n";
+    output << "vertical_sensitivity="   << vSens        << "\n";
+    output << "fps="                    << fps          << "\n";
+    output << "window_width="           << windowWidth  << "\n";
+    output << "window_height="          << windowHeight << "\n";
+    output << "fullscreen="             << (fullscreen ? "1" : "0") << "\n";
+    output << "sound_volume="           << sVol         << "\n";
+    output << "music_volume="           << mVol         << "\n";
+    output << "fov="                    << Pfov         << "\n";
 }
 
 Settings::Settings()
 {
     std::string path("settings.conf");
     horizontal_sensitivity = 0.0025f;
-    vertical_sensitivity = 1.25f;
+    vertical_sensitivity   = 1.25f;
     bool writeDefaults = false;
 
     std::ifstream input(path);
@@ -184,22 +188,16 @@ Settings::Settings()
                     continue;
                 std::string key = trim(line.substr(0, eq));
                 std::string val = trim(line.substr(eq + 1));
-                if (key == "move_forward")
-                    binds.moveForward = keyboardKeyFromString(val);
-                else if (key == "move_left")
-                    binds.moveLeft = keyboardKeyFromString(val);
-                else if (key == "move_back")
-                    binds.moveBack = keyboardKeyFromString(val);
-                else if (key == "move_right")
-                    binds.moveRight = keyboardKeyFromString(val);
-                else if (key == "crouch")
-                    binds.crouch = keyboardKeyFromString(val);
-                else if (key == "lean_left")
-                    binds.leanLeft = keyboardKeyFromString(val);
-                else if (key == "lean_right")
-                    binds.leanRight = keyboardKeyFromString(val);
-                else if (key == "reload")
-                    binds.reload = keyboardKeyFromString(val);
+
+                if      (key == "move_forward")  binds.moveForward = keyboardKeyFromString(val);
+                else if (key == "move_left")     binds.moveLeft    = keyboardKeyFromString(val);
+                else if (key == "move_back")     binds.moveBack    = keyboardKeyFromString(val);
+                else if (key == "move_right")    binds.moveRight   = keyboardKeyFromString(val);
+                else if (key == "crouch")        binds.crouch      = keyboardKeyFromString(val);
+                else if (key == "lean_left")     binds.leanLeft    = keyboardKeyFromString(val);
+                else if (key == "lean_right")    binds.leanRight   = keyboardKeyFromString(val);
+                else if (key == "reload")        binds.reload      = keyboardKeyFromString(val);
+                else if (key == "check_ammo")    binds.checkAmmo   = keyboardKeyFromString(val);
                 else if (key == "shoot") {
                     auto m = mouseButtonFromString(val);
                     if (m != sfMouseButtonCount) binds.shoot = m;
@@ -209,7 +207,7 @@ Settings::Settings()
                 } else if (key == "sensitivity") {
                     try {
                         horizontal_sensitivity = std::stof(val);
-                        vertical_sensitivity = std::stof(val);
+                        vertical_sensitivity   = std::stof(val);
                     } catch (...) {}
                 } else if (key == "horizontal_sensitivity") {
                     try { horizontal_sensitivity = std::stof(val); } catch (...) { horizontal_sensitivity = 0.0025f; }
@@ -231,10 +229,11 @@ Settings::Settings()
                     try { Pfov = std::stoi(val); } catch (...) { Pfov = 90; }
                 }
             }
-            if (binds.moveForward == sfKeyUnknown || binds.moveLeft == sfKeyUnknown ||
-                binds.moveBack == sfKeyUnknown || binds.moveRight == sfKeyUnknown ||
-                binds.crouch == sfKeyUnknown || binds.leanLeft == sfKeyUnknown || 
-                binds.leanRight == sfKeyUnknown || binds.reload == sfKeyUnknown ||
+            if (binds.moveForward == sfKeyUnknown || binds.moveLeft    == sfKeyUnknown ||
+                binds.moveBack    == sfKeyUnknown || binds.moveRight   == sfKeyUnknown ||
+                binds.crouch      == sfKeyUnknown || binds.leanLeft    == sfKeyUnknown ||
+                binds.leanRight   == sfKeyUnknown || binds.reload      == sfKeyUnknown ||
+                binds.checkAmmo   == sfKeyUnknown ||
                 binds.shoot == sfMouseButtonCount || binds.aim == sfMouseButtonCount) {
                 writeDefaults = true;
             }
@@ -243,7 +242,8 @@ Settings::Settings()
     }
     if (writeDefaults) {
         writeDefaultBinds(path, binds, horizontal_sensitivity, vertical_sensitivity,
-                  fps, windowWidth, windowHeight, fullscreen, soundVolume, musicVolume, Pfov);
+                          fps, windowWidth, windowHeight, fullscreen,
+                          soundVolume, musicVolume, Pfov);
     }
 }
 
@@ -307,26 +307,25 @@ void Settings::handleMouseClick(int x, int y, sfRenderWindow *&rw, Window &win,
                                 float trackX, float trackWidth,
                                 float hSliderY, float vSliderY,
                                 float sSliderY, float mSliderY, float fSliderY,
+                                float minFSens, float maxFSens,
                                 float minHSens, float maxHSens,
                                 float minVSens, float maxVSens,
-                                float minFSens, float maxFSens,
                                 State &state, int &waitingFor,
                                 sfText **textArray)
 {
     if (x >= trackX - 10 && x <= trackX + trackWidth + 10) {
-        if (y >= hSliderY - 15 && y <= hSliderY + 15)      draggingSlider = 1;
+        if      (y >= hSliderY - 15 && y <= hSliderY + 15) draggingSlider = 1;
         else if (y >= vSliderY - 15 && y <= vSliderY + 15) draggingSlider = 2;
         else if (y >= sSliderY - 15 && y <= sSliderY + 15) draggingSlider = 3;
         else if (y >= mSliderY - 15 && y <= mSliderY + 15) draggingSlider = 4;
         else if (y >= fSliderY - 15 && y <= fSliderY + 15) draggingSlider = 5;
-        
         if (draggingSlider != 0) {
             float newRatio = std::clamp((x - trackX) / trackWidth, 0.f, 1.f);
-            if (draggingSlider == 1) horizontal_sensitivity = minHSens + newRatio * (maxHSens - minHSens);
+            if      (draggingSlider == 1) horizontal_sensitivity = minHSens + newRatio * (maxHSens - minHSens);
             else if (draggingSlider == 2) vertical_sensitivity   = minVSens + newRatio * (maxVSens - minVSens);
             else if (draggingSlider == 3) soundVolume = (int)(newRatio * 100.f);
             else if (draggingSlider == 4) musicVolume = (int)(newRatio * 100.f);
-            else if (draggingSlider == 5) Pfov = 60 + (int)(newRatio * 60.f);
+            else if (draggingSlider == 5) Pfov = (int)(minFSens + newRatio * (maxFSens - minFSens));
             updateTexts(textArray);
             return;
         }
@@ -343,18 +342,19 @@ void Settings::handleMouseClick(int x, int y, sfRenderWindow *&rw, Window &win,
     else if (y >= 435 && y < 480) setWaitMouse(8,  "Press new mouse button for Shoot");
     else if (y >= 480 && y < 525) setWaitMouse(9,  "Press new mouse button for Aim");
     else if (y >= 525 && y < 570) setWaitKey  (10, "Press new key for Reload");
-    else if (y >= 660 && y < 705) { handleFpsClick(rw);              updateTexts(textArray); }
-    else if (y >= 705 && y < 750) { handleResolutionClick(rw, win);  updateTexts(textArray); }
-    else if (y >= 750 && y < 795) { handleFullscreenClick(rw, win);  updateTexts(textArray); }
+    else if (y >= 570 && y < 615) setWaitKey  (11, "Press new key for Check Ammo");
+    else if (y >= 705 && y < 750) { handleFpsClick(rw);             updateTexts(textArray); }
+    else if (y >= 750 && y < 795) { handleResolutionClick(rw, win); updateTexts(textArray); }
+    else if (y >= 795 && y < 840) { handleFullscreenClick(rw, win); updateTexts(textArray); }
 }
 
 void Settings::handleKeyPress(sfKeyCode code, State &state, int &waitingFor,
                               sfText *waitingText, sfText **textArray,
-                              sfText *title, 
-                              sfRectangleShape *hTrack, sfRectangleShape *hKnob, 
-                              sfRectangleShape *vTrack, sfRectangleShape *vKnob, 
-                              sfRectangleShape *sTrack, sfRectangleShape *sKnob, 
-                              sfRectangleShape *mTrack, sfRectangleShape *mKnob, 
+                              sfText *title,
+                              sfRectangleShape *hTrack, sfRectangleShape *hKnob,
+                              sfRectangleShape *vTrack, sfRectangleShape *vKnob,
+                              sfRectangleShape *sTrack, sfRectangleShape *sKnob,
+                              sfRectangleShape *mTrack, sfRectangleShape *mKnob,
                               sfFont *font, bool &shouldReturn)
 {
     if (state == Normal) {
@@ -369,7 +369,7 @@ void Settings::handleKeyPress(sfKeyCode code, State &state, int &waitingFor,
         else if (code == sfKeyNum9)   { state = WaitingMouse; waitingFor = 9;  sfText_setString(waitingText, "Press new mouse button for Aim"); }
         else if (code == sfKeyEscape) {
             sfText_destroy(title); sfText_destroy(waitingText);
-            for (int i = 0; i < 17; ++i) sfText_destroy(textArray[i]);
+            for (int i = 0; i < 19; ++i) sfText_destroy(textArray[i]);
             sfRectangleShape_destroy(hTrack); sfRectangleShape_destroy(hKnob);
             sfRectangleShape_destroy(vTrack); sfRectangleShape_destroy(vKnob);
             sfRectangleShape_destroy(sTrack); sfRectangleShape_destroy(sKnob);
@@ -386,6 +386,7 @@ void Settings::handleKeyPress(sfKeyCode code, State &state, int &waitingFor,
         else if (waitingFor == 6)  binds.leanLeft    = code;
         else if (waitingFor == 7)  binds.leanRight   = code;
         else if (waitingFor == 10) binds.reload      = code;
+        else if (waitingFor == 11) binds.checkAmmo   = code;
         updateTexts(textArray);
         saveSettings();
         state = Normal; sfText_setString(waitingText, "");
@@ -402,8 +403,8 @@ void Settings::changeSettings(Window& window, Menu& menu)
     sfText_setString(title, "Settings");
     sfText_setPosition(title, (sfVector2f){100, 50});
     sfText_setColor(title, sfWhite);
-    sfText* textArray[18];
-    for (int i = 0; i < 18; ++i) {
+    sfText* textArray[19];
+    for (int i = 0; i < 19; ++i) {
         textArray[i] = sfText_create();
         sfText_setFont(textArray[i], font);
         sfText_setCharacterSize(textArray[i], 20);
@@ -415,14 +416,13 @@ void Settings::changeSettings(Window& window, Menu& menu)
     sfText_setColor(waitingText, sfYellow);
     float minHSens = 0.0001f, maxHSens = 0.0100f;
     float minVSens = 0.9f,    maxVSens = 2.0f;
+    float minFov   = 60.f,    maxFov   = 120.f;
     float trackX = 450.f, trackWidth = 200.f;
-    float hSliderY = 120.f + (10 * 45.f) + 13.f;
-    float vSliderY = 120.f + (11 * 45.f) + 13.f;
-    float sSliderY = 120.f + (15 * 45.f) + 13.f;
-    float mSliderY = 120.f + (16 * 45.f) + 13.f;
-    float minFov = 60.f, maxFov = 120.f;
-    float fSliderY = 120.f + (17 * 45.f) + 13.f;
-    
+    float hSliderY = 120.f + (11 * 45.f) + 13.f;
+    float vSliderY = 120.f + (12 * 45.f) + 13.f;
+    float sSliderY = 120.f + (16 * 45.f) + 13.f;
+    float mSliderY = 120.f + (17 * 45.f) + 13.f;
+    float fSliderY = 120.f + (18 * 45.f) + 13.f;
     auto createTrack = [&](float y) {
         sfRectangleShape* t = sfRectangleShape_create();
         sfRectangleShape_setSize(t, (sfVector2f){trackWidth, 6});
@@ -441,15 +441,15 @@ void Settings::changeSettings(Window& window, Menu& menu)
     sfRectangleShape* vTrack = createTrack(vSliderY);
     sfRectangleShape* sTrack = createTrack(sSliderY);
     sfRectangleShape* mTrack = createTrack(mSliderY);
-    sfRectangleShape* hKnob = createKnob();
-    sfRectangleShape* vKnob = createKnob();
-    sfRectangleShape* sKnob = createKnob();
-    sfRectangleShape* mKnob = createKnob();
     sfRectangleShape* fTrack = createTrack(fSliderY);
+    sfRectangleShape* hKnob  = createKnob();
+    sfRectangleShape* vKnob  = createKnob();
+    sfRectangleShape* sKnob  = createKnob();
+    sfRectangleShape* mKnob  = createKnob();
     sfRectangleShape* fKnob  = createKnob();
     updateTexts(textArray);
     State state = Normal;
-    int waitingFor = -1;
+    int waitingFor    = -1;
     int draggingSlider = 0;
     while (sfRenderWindow_isOpen(rw)) {
         float hRatio = std::clamp((horizontal_sensitivity - minHSens) / (maxHSens - minHSens), 0.f, 1.f);
@@ -457,19 +457,18 @@ void Settings::changeSettings(Window& window, Menu& menu)
         float sRatio = std::clamp(soundVolume / 100.f, 0.f, 1.f);
         float mRatio = std::clamp(musicVolume / 100.f, 0.f, 1.f);
         float fRatio = std::clamp((Pfov - minFov) / (maxFov - minFov), 0.f, 1.f);
-        sfRectangleShape_setPosition(fKnob, (sfVector2f){trackX + fRatio * trackWidth, fSliderY});
         sfRectangleShape_setPosition(hKnob, (sfVector2f){trackX + hRatio * trackWidth, hSliderY});
         sfRectangleShape_setPosition(vKnob, (sfVector2f){trackX + vRatio * trackWidth, vSliderY});
         sfRectangleShape_setPosition(sKnob, (sfVector2f){trackX + sRatio * trackWidth, sSliderY});
         sfRectangleShape_setPosition(mKnob, (sfVector2f){trackX + mRatio * trackWidth, mSliderY});
-        
+        sfRectangleShape_setPosition(fKnob, (sfVector2f){trackX + fRatio * trackWidth, fSliderY});
         sfEvent event;
         while (sfRenderWindow_pollEvent(rw, &event)) {
             if (event.type == sfEvtClosed) { sfRenderWindow_close(rw); break; }
 
             if (event.type == sfEvtKeyPressed) {
                 bool shouldReturn = false;
-                handleKeyPress(event.key.code, state, waitingFor, waitingText, textArray, title, 
+                handleKeyPress(event.key.code, state, waitingFor, waitingText, textArray, title,
                                hTrack, hKnob, vTrack, vKnob, sTrack, sKnob, mTrack, mKnob, font, shouldReturn);
                 if (shouldReturn) return;
             }
@@ -478,8 +477,10 @@ void Settings::changeSettings(Window& window, Menu& menu)
                 if (state == Normal) {
                     handleMouseClick(event.mouseButton.x, event.mouseButton.y,
                                      rw, window, waitingText, draggingSlider,
-                                     trackX, trackWidth, hSliderY, vSliderY, sSliderY, mSliderY, fSliderY,
-                                     minHSens, maxHSens, minVSens, maxVSens, 60, 120,
+                                     trackX, trackWidth,
+                                     hSliderY, vSliderY, sSliderY, mSliderY, fSliderY,
+                                     minFov, maxFov,
+                                     minHSens, maxHSens, minVSens, maxVSens,
                                      state, waitingFor, textArray);
                 } else if (state == WaitingMouse) {
                     if (waitingFor == 8) binds.shoot = event.mouseButton.button;
@@ -497,11 +498,11 @@ void Settings::changeSettings(Window& window, Menu& menu)
             }
             else if (event.type == sfEvtMouseMoved && draggingSlider != 0) {
                 float newRatio = std::clamp((event.mouseMove.x - trackX) / trackWidth, 0.f, 1.f);
-                if (draggingSlider == 1) horizontal_sensitivity = minHSens + newRatio * (maxHSens - minHSens);
+                if      (draggingSlider == 1) horizontal_sensitivity = minHSens + newRatio * (maxHSens - minHSens);
                 else if (draggingSlider == 2) vertical_sensitivity   = minVSens + newRatio * (maxVSens - minVSens);
                 else if (draggingSlider == 3) soundVolume = (int)(newRatio * 100.f);
                 else if (draggingSlider == 4) musicVolume = (int)(newRatio * 100.f);
-                else if (draggingSlider == 5) Pfov = 60 + (int)(newRatio * (120 - 60));
+                else if (draggingSlider == 5) Pfov = (int)(minFov + newRatio * (maxFov - minFov));
                 updateTexts(textArray);
             }
         }
@@ -509,59 +510,58 @@ void Settings::changeSettings(Window& window, Menu& menu)
         sfRenderWindow_clear(rw, sfBlack);
         menu.display(rw, 2);
         sfRenderWindow_drawText(rw, title, NULL);
-        for (int i = 0; i < 18; ++i)
-            sfRenderWindow_drawText(rw, textArray[i], NULL);    
-        sfRenderWindow_drawRectangleShape(rw, hTrack, NULL); sfRenderWindow_drawRectangleShape(rw, hKnob,  NULL);
-        sfRenderWindow_drawRectangleShape(rw, vTrack, NULL); sfRenderWindow_drawRectangleShape(rw, vKnob,  NULL);
-        sfRenderWindow_drawRectangleShape(rw, sTrack, NULL); sfRenderWindow_drawRectangleShape(rw, sKnob,  NULL);
-        sfRenderWindow_drawRectangleShape(rw, mTrack, NULL); sfRenderWindow_drawRectangleShape(rw, mKnob,  NULL);
-        sfRenderWindow_drawRectangleShape(rw, fTrack, NULL);
-        sfRenderWindow_drawRectangleShape(rw, fKnob,  NULL);
+        for (int i = 0; i < 19; ++i)
+            sfRenderWindow_drawText(rw, textArray[i], NULL);
+        sfRenderWindow_drawRectangleShape(rw, hTrack, NULL); sfRenderWindow_drawRectangleShape(rw, hKnob, NULL);
+        sfRenderWindow_drawRectangleShape(rw, vTrack, NULL); sfRenderWindow_drawRectangleShape(rw, vKnob, NULL);
+        sfRenderWindow_drawRectangleShape(rw, sTrack, NULL); sfRenderWindow_drawRectangleShape(rw, sKnob, NULL);
+        sfRenderWindow_drawRectangleShape(rw, mTrack, NULL); sfRenderWindow_drawRectangleShape(rw, mKnob, NULL);
+        sfRenderWindow_drawRectangleShape(rw, fTrack, NULL); sfRenderWindow_drawRectangleShape(rw, fKnob, NULL);
         if (state != Normal)
             sfRenderWindow_drawText(rw, waitingText, NULL);
         sfRenderWindow_display(rw);
     }
     sfText_destroy(title); sfText_destroy(waitingText);
-    for (int i = 0; i < 18; ++i) sfText_destroy(textArray[i]);
+    for (int i = 0; i < 19; ++i) sfText_destroy(textArray[i]);
     sfRectangleShape_destroy(hTrack); sfRectangleShape_destroy(hKnob);
     sfRectangleShape_destroy(vTrack); sfRectangleShape_destroy(vKnob);
     sfRectangleShape_destroy(sTrack); sfRectangleShape_destroy(sKnob);
     sfRectangleShape_destroy(mTrack); sfRectangleShape_destroy(mKnob);
-    sfRectangleShape_destroy(fTrack);
-    sfRectangleShape_destroy(fKnob);
+    sfRectangleShape_destroy(fTrack); sfRectangleShape_destroy(fKnob);
     sfFont_destroy(font);
 }
 
 void Settings::updateTexts(sfText** textArray)
 {
-    sfText_setString(textArray[0],  ("1. Move Forward: " + keyboardKeyToString(binds.moveForward)).c_str());
-    sfText_setString(textArray[1],  ("2. Move Left: "    + keyboardKeyToString(binds.moveLeft)).c_str());
-    sfText_setString(textArray[2],  ("3. Move Back: "    + keyboardKeyToString(binds.moveBack)).c_str());
-    sfText_setString(textArray[3],  ("4. Move Right: "   + keyboardKeyToString(binds.moveRight)).c_str());
-    sfText_setString(textArray[4],  ("5. Crouch: "       + keyboardKeyToString(binds.crouch)).c_str());
-    sfText_setString(textArray[5],  ("6. Lean Left: "    + keyboardKeyToString(binds.leanLeft)).c_str());
-    sfText_setString(textArray[6],  ("7. Lean Right: "   + keyboardKeyToString(binds.leanRight)).c_str());
-    sfText_setString(textArray[7],  ("8. Shoot: "        + mouseButtonToString(binds.shoot)).c_str());
-    sfText_setString(textArray[8],  ("9. Aim: "          + mouseButtonToString(binds.aim)).c_str());
-    sfText_setString(textArray[9],  ("10. Reload: "      + keyboardKeyToString(binds.reload)).c_str());
+    sfText_setString(textArray[0],  ("1. Move Forward: "  + keyboardKeyToString(binds.moveForward)).c_str());
+    sfText_setString(textArray[1],  ("2. Move Left: "     + keyboardKeyToString(binds.moveLeft)).c_str());
+    sfText_setString(textArray[2],  ("3. Move Back: "     + keyboardKeyToString(binds.moveBack)).c_str());
+    sfText_setString(textArray[3],  ("4. Move Right: "    + keyboardKeyToString(binds.moveRight)).c_str());
+    sfText_setString(textArray[4],  ("5. Crouch: "        + keyboardKeyToString(binds.crouch)).c_str());
+    sfText_setString(textArray[5],  ("6. Lean Left: "     + keyboardKeyToString(binds.leanLeft)).c_str());
+    sfText_setString(textArray[6],  ("7. Lean Right: "    + keyboardKeyToString(binds.leanRight)).c_str());
+    sfText_setString(textArray[7],  ("8. Shoot: "         + mouseButtonToString(binds.shoot)).c_str());
+    sfText_setString(textArray[8],  ("9. Aim: "           + mouseButtonToString(binds.aim)).c_str());
+    sfText_setString(textArray[9],  ("10. Reload: "       + keyboardKeyToString(binds.reload)).c_str());
+    sfText_setString(textArray[10], ("11. Check Ammo: "   + keyboardKeyToString(binds.checkAmmo)).c_str());
     float minHSens = 0.0001f, maxHSens = 0.0100f;
     float minVSens = 0.9f,    maxVSens = 2.0f;
     int hDisplay = std::clamp((int)(((horizontal_sensitivity - minHSens) / (maxHSens - minHSens)) * 100.f), 0, 100);
     int vDisplay = std::clamp((int)(((vertical_sensitivity   - minVSens) / (maxVSens - minVSens)) * 100.f), 0, 100);
-    sfText_setString(textArray[10], ("11. Horizontal Sens: " + std::to_string(hDisplay)).c_str());
-    sfText_setString(textArray[11], ("12. Vertical Sens: "   + std::to_string(vDisplay)).c_str());
+    sfText_setString(textArray[11], ("12. Horizontal Sens: " + std::to_string(hDisplay)).c_str());
+    sfText_setString(textArray[12], ("13. Vertical Sens: "   + std::to_string(vDisplay)).c_str());
     std::string fpsStr = (fps == 0) ? "Unlimited" : std::to_string(fps);
-    sfText_setString(textArray[12], ("13. FPS Limit: " + fpsStr + "  [click to change]").c_str());
-    sfText_setString(textArray[13], ("14. Resolution: " + std::to_string(windowWidth) + "x" + std::to_string(windowHeight) + "  [click to change]").c_str());
-    sfText_setString(textArray[14], ("15. Fullscreen: " + std::string(fullscreen ? "On" : "Off") + "  [click to toggle]").c_str());
-    sfText_setString(textArray[15], ("16. Sound Volume: " + std::to_string(soundVolume) + "%").c_str());
-    sfText_setString(textArray[16], ("17. Music Volume: " + std::to_string(musicVolume) + "%").c_str());
-    sfText_setString(textArray[17], ("18. FOV: " + std::to_string(Pfov)).c_str());
+    sfText_setString(textArray[13], ("14. FPS Limit: " + fpsStr + "  [click to change]").c_str());
+    sfText_setString(textArray[14], ("15. Resolution: " + std::to_string(windowWidth) + "x" + std::to_string(windowHeight) + "  [click to change]").c_str());
+    sfText_setString(textArray[15], ("16. Fullscreen: " + std::string(fullscreen ? "On" : "Off") + "  [click to toggle]").c_str());
+    sfText_setString(textArray[16], ("17. Sound Volume: " + std::to_string(soundVolume) + "%").c_str());
+    sfText_setString(textArray[17], ("18. Music Volume: " + std::to_string(musicVolume) + "%").c_str());
+    sfText_setString(textArray[18], ("19. FOV: " + std::to_string(Pfov)).c_str());
 }
 
 void Settings::saveSettings()
 {
     std::string path("settings.conf");
     writeDefaultBinds(path, binds, horizontal_sensitivity, vertical_sensitivity,
-                     fps, windowWidth, windowHeight, fullscreen, soundVolume, musicVolume, Pfov);
+                      fps, windowWidth, windowHeight, fullscreen, soundVolume, musicVolume, Pfov);
 }

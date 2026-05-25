@@ -13,6 +13,8 @@
 #include "Weapons.hpp"
 #include "Player.hpp"
 #include "math.h"
+#include "InterfaceItems.hpp"
+
 int main(int argc, char *argv[])
 {
     ErrorHandler errorHandler(argc, argv);
@@ -29,6 +31,7 @@ int main(int argc, char *argv[])
     menu.setMusicVolume(settings.musicVolume);
     settings.Pfov = (int)(atan(player.planeY) * 2.0 * 180.0 / M_PI);
     Core core(&window, &menu, &gameData, &settings, weapons, &player);
+    core.interfaceItems = buildInterfaceItems(gameData.game_array, errorHandler.isDebug());
     sfRenderWindow_setFramerateLimit(window.getWindow(), settings.fps);
     
     while (sfRenderWindow_isOpen(window.getWindow()))

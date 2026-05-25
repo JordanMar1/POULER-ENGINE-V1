@@ -25,6 +25,7 @@ class Settings {
             sfKeyCode reload = sfKeyR;
             sfKeyCode leanLeft = sfKeyA;
             sfKeyCode leanRight = sfKeyE;
+            sfKeyCode checkAmmo = sfKeyF;
             sfMouseButton shoot = sfMouseLeft;
             sfMouseButton aim = sfMouseRight;
         } binds;
