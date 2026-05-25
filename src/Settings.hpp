@@ -31,6 +31,7 @@ class Settings {
         float horizontal_sensitivity;
         float vertical_sensitivity;
         int fps = 60;
+        int Pfov = 90;
         unsigned int windowWidth  = 1920;
         unsigned int windowHeight = 1080;
         bool fullscreen = false;
@@ -50,7 +51,8 @@ class Settings {
                             sfText *waitingText, int &draggingSlider,
                             float trackX, float trackWidth,
                             float hSliderY, float vSliderY,
-                            float sSliderY, float mSliderY,
+                            float sSliderY, float mSliderY, float fSliderY,
+                            float minFSens, float maxFSens,
                             float minHSens, float maxHSens,
                             float minVSens, float maxVSens,
                             State &state, int &waitingFor, sfText **textArray);

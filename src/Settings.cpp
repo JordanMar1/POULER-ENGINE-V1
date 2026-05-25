@@ -132,7 +132,7 @@ static sfKeyCode keyboardKeyFromString(const std::string &str)
     return sfKeyUnknown;
 }
 
-static void writeDefaultBinds(const std::string &path, const Settings::Binds &binds, float hSens, float vSens, int fps, int windowWidth, int windowHeight, bool fullscreen, int sVol, int mVol)
+static void writeDefaultBinds(const std::string &path, const Settings::Binds &binds, float hSens, float vSens, int fps, int windowWidth, int windowHeight, bool fullscreen, int sVol, int mVol, int Pfov)
 {
     std::ofstream output(path, std::ios::trunc);
     if (!output.is_open())
@@ -155,6 +155,7 @@ static void writeDefaultBinds(const std::string &path, const Settings::Binds &bi
     output << "fullscreen=" << (fullscreen ? "1" : "0") << "\n";
     output << "sound_volume=" << sVol << "\n";
     output << "music_volume=" << mVol << "\n";
+    output << "fov=" << Pfov << "\n";
 }
 
 Settings::Settings()
@@ -226,6 +227,8 @@ Settings::Settings()
                     try { soundVolume = std::stoi(val); } catch (...) { soundVolume = 100; }
                 } else if (key == "music_volume") {
                     try { musicVolume = std::stoi(val); } catch (...) { musicVolume = 100; }
+                } else if (key == "fov") {
+                    try { Pfov = std::stoi(val); } catch (...) { Pfov = 90; }
                 }
             }
             if (binds.moveForward == sfKeyUnknown || binds.moveLeft == sfKeyUnknown ||
@@ -239,7 +242,8 @@ Settings::Settings()
         input.close();
     }
     if (writeDefaults) {
-        writeDefaultBinds(path, binds, horizontal_sensitivity, vertical_sensitivity, fps, windowWidth, windowHeight, fullscreen, soundVolume, musicVolume);
+        writeDefaultBinds(path, binds, horizontal_sensitivity, vertical_sensitivity,
+                  fps, windowWidth, windowHeight, fullscreen, soundVolume, musicVolume, Pfov);
     }
 }
 
@@ -302,9 +306,10 @@ void Settings::handleMouseClick(int x, int y, sfRenderWindow *&rw, Window &win,
                                 sfText *waitingText, int &draggingSlider,
                                 float trackX, float trackWidth,
                                 float hSliderY, float vSliderY,
-                                float sSliderY, float mSliderY,
+                                float sSliderY, float mSliderY, float fSliderY,
                                 float minHSens, float maxHSens,
                                 float minVSens, float maxVSens,
+                                float minFSens, float maxFSens,
                                 State &state, int &waitingFor,
                                 sfText **textArray)
 {
@@ -313,6 +318,7 @@ void Settings::handleMouseClick(int x, int y, sfRenderWindow *&rw, Window &win,
         else if (y >= vSliderY - 15 && y <= vSliderY + 15) draggingSlider = 2;
         else if (y >= sSliderY - 15 && y <= sSliderY + 15) draggingSlider = 3;
         else if (y >= mSliderY - 15 && y <= mSliderY + 15) draggingSlider = 4;
+        else if (y >= fSliderY - 15 && y <= fSliderY + 15) draggingSlider = 5;
         
         if (draggingSlider != 0) {
             float newRatio = std::clamp((x - trackX) / trackWidth, 0.f, 1.f);
@@ -320,6 +326,7 @@ void Settings::handleMouseClick(int x, int y, sfRenderWindow *&rw, Window &win,
             else if (draggingSlider == 2) vertical_sensitivity   = minVSens + newRatio * (maxVSens - minVSens);
             else if (draggingSlider == 3) soundVolume = (int)(newRatio * 100.f);
             else if (draggingSlider == 4) musicVolume = (int)(newRatio * 100.f);
+            else if (draggingSlider == 5) Pfov = 60 + (int)(newRatio * 60.f);
             updateTexts(textArray);
             return;
         }
@@ -395,8 +402,8 @@ void Settings::changeSettings(Window& window, Menu& menu)
     sfText_setString(title, "Settings");
     sfText_setPosition(title, (sfVector2f){100, 50});
     sfText_setColor(title, sfWhite);
-    sfText* textArray[17];
-    for (int i = 0; i < 17; ++i) {
+    sfText* textArray[18];
+    for (int i = 0; i < 18; ++i) {
         textArray[i] = sfText_create();
         sfText_setFont(textArray[i], font);
         sfText_setCharacterSize(textArray[i], 20);
@@ -413,6 +420,8 @@ void Settings::changeSettings(Window& window, Menu& menu)
     float vSliderY = 120.f + (11 * 45.f) + 13.f;
     float sSliderY = 120.f + (15 * 45.f) + 13.f;
     float mSliderY = 120.f + (16 * 45.f) + 13.f;
+    float minFov = 60.f, maxFov = 120.f;
+    float fSliderY = 120.f + (17 * 45.f) + 13.f;
     
     auto createTrack = [&](float y) {
         sfRectangleShape* t = sfRectangleShape_create();
@@ -436,6 +445,8 @@ void Settings::changeSettings(Window& window, Menu& menu)
     sfRectangleShape* vKnob = createKnob();
     sfRectangleShape* sKnob = createKnob();
     sfRectangleShape* mKnob = createKnob();
+    sfRectangleShape* fTrack = createTrack(fSliderY);
+    sfRectangleShape* fKnob  = createKnob();
     updateTexts(textArray);
     State state = Normal;
     int waitingFor = -1;
@@ -445,6 +456,8 @@ void Settings::changeSettings(Window& window, Menu& menu)
         float vRatio = std::clamp((vertical_sensitivity   - minVSens) / (maxVSens - minVSens), 0.f, 1.f);
         float sRatio = std::clamp(soundVolume / 100.f, 0.f, 1.f);
         float mRatio = std::clamp(musicVolume / 100.f, 0.f, 1.f);
+        float fRatio = std::clamp((Pfov - minFov) / (maxFov - minFov), 0.f, 1.f);
+        sfRectangleShape_setPosition(fKnob, (sfVector2f){trackX + fRatio * trackWidth, fSliderY});
         sfRectangleShape_setPosition(hKnob, (sfVector2f){trackX + hRatio * trackWidth, hSliderY});
         sfRectangleShape_setPosition(vKnob, (sfVector2f){trackX + vRatio * trackWidth, vSliderY});
         sfRectangleShape_setPosition(sKnob, (sfVector2f){trackX + sRatio * trackWidth, sSliderY});
@@ -465,8 +478,8 @@ void Settings::changeSettings(Window& window, Menu& menu)
                 if (state == Normal) {
                     handleMouseClick(event.mouseButton.x, event.mouseButton.y,
                                      rw, window, waitingText, draggingSlider,
-                                     trackX, trackWidth, hSliderY, vSliderY, sSliderY, mSliderY,
-                                     minHSens, maxHSens, minVSens, maxVSens,
+                                     trackX, trackWidth, hSliderY, vSliderY, sSliderY, mSliderY, fSliderY,
+                                     minHSens, maxHSens, minVSens, maxVSens, 60, 120,
                                      state, waitingFor, textArray);
                 } else if (state == WaitingMouse) {
                     if (waitingFor == 8) binds.shoot = event.mouseButton.button;
@@ -488,6 +501,7 @@ void Settings::changeSettings(Window& window, Menu& menu)
                 else if (draggingSlider == 2) vertical_sensitivity   = minVSens + newRatio * (maxVSens - minVSens);
                 else if (draggingSlider == 3) soundVolume = (int)(newRatio * 100.f);
                 else if (draggingSlider == 4) musicVolume = (int)(newRatio * 100.f);
+                else if (draggingSlider == 5) Pfov = 60 + (int)(newRatio * (120 - 60));
                 updateTexts(textArray);
             }
         }
@@ -495,22 +509,26 @@ void Settings::changeSettings(Window& window, Menu& menu)
         sfRenderWindow_clear(rw, sfBlack);
         menu.display(rw, 2);
         sfRenderWindow_drawText(rw, title, NULL);
-        for (int i = 0; i < 17; ++i)
+        for (int i = 0; i < 18; ++i)
             sfRenderWindow_drawText(rw, textArray[i], NULL);    
         sfRenderWindow_drawRectangleShape(rw, hTrack, NULL); sfRenderWindow_drawRectangleShape(rw, hKnob,  NULL);
         sfRenderWindow_drawRectangleShape(rw, vTrack, NULL); sfRenderWindow_drawRectangleShape(rw, vKnob,  NULL);
         sfRenderWindow_drawRectangleShape(rw, sTrack, NULL); sfRenderWindow_drawRectangleShape(rw, sKnob,  NULL);
         sfRenderWindow_drawRectangleShape(rw, mTrack, NULL); sfRenderWindow_drawRectangleShape(rw, mKnob,  NULL);
+        sfRenderWindow_drawRectangleShape(rw, fTrack, NULL);
+        sfRenderWindow_drawRectangleShape(rw, fKnob,  NULL);
         if (state != Normal)
             sfRenderWindow_drawText(rw, waitingText, NULL);
         sfRenderWindow_display(rw);
     }
     sfText_destroy(title); sfText_destroy(waitingText);
-    for (int i = 0; i < 17; ++i) sfText_destroy(textArray[i]);
+    for (int i = 0; i < 18; ++i) sfText_destroy(textArray[i]);
     sfRectangleShape_destroy(hTrack); sfRectangleShape_destroy(hKnob);
     sfRectangleShape_destroy(vTrack); sfRectangleShape_destroy(vKnob);
     sfRectangleShape_destroy(sTrack); sfRectangleShape_destroy(sKnob);
     sfRectangleShape_destroy(mTrack); sfRectangleShape_destroy(mKnob);
+    sfRectangleShape_destroy(fTrack);
+    sfRectangleShape_destroy(fKnob);
     sfFont_destroy(font);
 }
 
@@ -538,10 +556,12 @@ void Settings::updateTexts(sfText** textArray)
     sfText_setString(textArray[14], ("15. Fullscreen: " + std::string(fullscreen ? "On" : "Off") + "  [click to toggle]").c_str());
     sfText_setString(textArray[15], ("16. Sound Volume: " + std::to_string(soundVolume) + "%").c_str());
     sfText_setString(textArray[16], ("17. Music Volume: " + std::to_string(musicVolume) + "%").c_str());
+    sfText_setString(textArray[17], ("18. FOV: " + std::to_string(Pfov)).c_str());
 }
 
 void Settings::saveSettings()
 {
     std::string path("settings.conf");
-    writeDefaultBinds(path, binds, horizontal_sensitivity, vertical_sensitivity, fps, windowWidth, windowHeight, fullscreen, soundVolume, musicVolume);
+    writeDefaultBinds(path, binds, horizontal_sensitivity, vertical_sensitivity,
+                     fps, windowWidth, windowHeight, fullscreen, soundVolume, musicVolume, Pfov);
 }

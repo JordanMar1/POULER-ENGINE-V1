@@ -12,7 +12,7 @@
 #include "Core.hpp"
 #include "Weapons.hpp"
 #include "Player.hpp"
-
+#include "math.h"
 int main(int argc, char *argv[])
 {
     ErrorHandler errorHandler(argc, argv);
@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
     Player player(gameData.game_array, errorHandler.isDebug());
     Settings settings = Settings();
     menu.setMusicVolume(settings.musicVolume);
+    settings.Pfov = (int)(atan(player.planeY) * 2.0 * 180.0 / M_PI);
     Core core(&window, &menu, &gameData, &settings, weapons, &player);
     sfRenderWindow_setFramerateLimit(window.getWindow(), settings.fps);
     
@@ -51,6 +52,8 @@ int main(int argc, char *argv[])
                         std::cout << "Opening options..." << std::endl;
                     settings.changeSettings(window, menu);
                     menu.setMusicVolume(settings.musicVolume);
+                    player.planeY = tan((settings.Pfov * M_PI / 180.0) / 2.0);
+                    std::cout << "FOV set to: " << player.planeY << std::endl;
                     sfMusic_play(menu.getMusic());
                     buttonId = 0;
                 } else if (buttonId == 3) {
