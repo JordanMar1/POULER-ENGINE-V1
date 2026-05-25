@@ -12,7 +12,7 @@
 #include <vector>
 #include "Maps.hpp"
 #include "Game.hpp"
-
+#include "math.h"
 void Core::displayLevels(Maps* selected)
 {
     sfVector2u winSize = sfRenderWindow_getSize(window->getWindow());
@@ -123,6 +123,7 @@ int Core::menu_return(void)
                         std::cout << "Opening options..." << std::endl;
                     settings->changeSettings(*window, *menu);
                     menu->setMusicVolume(settings->musicVolume);
+                    getPlayer()->planeY = tan((getSettings()->Pfov * M_PI / 180.0) / 2.0);
                     sfMusic_play(menu->getMusic());
                 } else if (buttonId == 3) {
                     sfMusic_stop(menu->getMusic());
