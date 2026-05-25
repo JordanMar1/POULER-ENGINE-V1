@@ -62,6 +62,22 @@ Player::Player(char ***parsed_file, bool debug)
                     if (debug)
                         std::cout << "Player stamina set to: " << stamina << std::endl;
                 }
+                if (strcmp(parsed_file[i][j], "speed") == 0 && parsed_file[i][j + 1] != NULL) {
+                    float speed = atof(parsed_file[i][j + 1]);
+                    if (speed <= 0.0f) {
+                        speed = 5.0f;
+                    }
+                    if (debug)
+                        std::cout << "Player speed set to: " << speed << std::endl;
+                }
+                if (strcmp(parsed_file[i][j], "sprint_speed") == 0 && parsed_file[i][j + 1] != NULL) {
+                    float sprint_speed = atof(parsed_file[i][j + 1]);
+                    if (sprint_speed <= 0.0f) {
+                        sprint_speed = 8.0f;
+                    }
+                    if (debug)
+                        std::cout << "Player sprint speed set to: " << sprint_speed << std::endl;
+                }
             }
              if (debug)
                 std::cout << "Player HP: " << hp << "/" << maxHp << std::endl;

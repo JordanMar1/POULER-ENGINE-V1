@@ -76,6 +76,7 @@ static Weapons *create_weapon_from_block(char **block)
         w->max_ammo = w->ammo;
         std::string mag_str = get_field(block, "mag");
         w->mag           = mag_str.empty() ? 0 : std::stoi(mag_str);
+        w->max_mag = w->mag;
         std::string fr_str = get_field(block, "firerate");
         w->firerate      = fr_str.empty() ? 0.f : std::stof(fr_str);
         std::string fd_str = get_field(block, "fire_distance");

@@ -11,6 +11,7 @@
 #include <cstring>
 #include <cmath>
 #include <iostream>
+#include <algorithm>
 
 static constexpr const char *FALLBACK_FONT_PATH = "assets/fonts/menu.ttf";
 
@@ -18,6 +19,33 @@ static constexpr float BEAT_PERIOD   = 0.85f;
 static constexpr float BEAT_PULSE1   = 0.12f;
 static constexpr float BEAT_PULSE2   = 0.28f;
 static constexpr float BEAT_MAX_SCALE = 1.18f;
+
+static sfColor getGradientColor(const InterfaceItemDef& def, float ratio)
+{
+    ratio = std::clamp(ratio, 0.0f, 1.0f);
+
+    int mid_r = (def.mid_r == -1) ? def.r : def.mid_r;
+    int mid_g = (def.mid_g == -1) ? def.g : def.mid_g;
+    int mid_b = (def.mid_b == -1) ? def.b : def.mid_b;
+    
+    int low_r = (def.low_r == -1) ? mid_r : def.low_r;
+    int low_g = (def.low_g == -1) ? mid_g : def.low_g;
+    int low_b = (def.low_b == -1) ? mid_b : def.low_b;
+    
+    sfUint8 r, g, b;
+    if (ratio >= 0.5f) {
+        float t = (ratio - 0.5f) * 2.0f;
+        r = static_cast<sfUint8>(mid_r + (def.r - mid_r) * t);
+        g = static_cast<sfUint8>(mid_g + (def.g - mid_g) * t);
+        b = static_cast<sfUint8>(mid_b + (def.b - mid_b) * t);
+    } else {
+        float t = ratio * 2.0f;
+        r = static_cast<sfUint8>(low_r + (mid_r - low_r) * t);
+        g = static_cast<sfUint8>(low_g + (mid_g - low_g) * t);
+        b = static_cast<sfUint8>(low_b + (mid_b - low_b) * t);
+    }
+    return sfColor_fromRGB(r, g, b);
+}
 
 InterfaceItems::InterfaceItems(sfFont *fallbackFont)
     : _fallbackFont(fallbackFont)
@@ -56,6 +84,7 @@ void InterfaceItems::loadItems(const std::vector<InterfaceItemDef> &defs)
         delete s;
     }
     _items.clear();
+    
     for (const auto &def : defs) {
         auto *s = new InterfaceItemState();
         s->def = def;
@@ -135,13 +164,29 @@ void InterfaceItems::_renderHpText(sfRenderWindow *window,
     int currentHp = (int)player->hp;
     int maxHp = (int)player->maxHp;
     float hpRatio = (maxHp > 0) ? (float)currentHp / (float)maxHp : 0.0f;
-    if (hpRatio < 0.0f) hpRatio = 0.0f;
-    if (hpRatio > 1.0f) hpRatio = 1.0f;
-    sfColor col = sfColor_fromRGB((sfUint8)s->def.r, (sfUint8)s->def.g, (sfUint8)s->def.b);
-    if (hpRatio < 0.3f)      col = sfRed;
-    else if (hpRatio < 0.6f) col = sfYellow;
+    hpRatio = std::clamp(hpRatio, 0.0f, 1.0f);
+    
+    sfColor col = getGradientColor(s->def, hpRatio);
+    
     char buf[32];
     snprintf(buf, sizeof(buf), "HP: %d / %d", currentHp, maxHp);
+    _drawText(window, s->font, buf, 20, col, s->def.x, s->def.y);
+}
+
+void InterfaceItems::_renderStaminaText(sfRenderWindow *window,
+                                        InterfaceItemState *s,
+                                        Player *player)
+{
+    if (!player || !window || !s) return;
+    int currentStamina = (int)player->stamina;
+    int maxStamina = (int)player->maxStamina;
+    float staminaRatio = (maxStamina > 0) ? (float)currentStamina / (float)maxStamina : 0.0f;
+    staminaRatio = std::clamp(staminaRatio, 0.0f, 1.0f);
+    
+    sfColor col = getGradientColor(s->def, staminaRatio);
+    
+    char buf[32];
+    snprintf(buf, sizeof(buf), "STAMINA: %d / %d", currentStamina, maxStamina);
     _drawText(window, s->font, buf, 20, col, s->def.x, s->def.y);
 }
 
@@ -155,7 +200,12 @@ void InterfaceItems::_renderAmmoText(sfRenderWindow *window,
     if (!w) return;
     sfFont *font = s->font ? s->font : _fallbackFont;
     if (!font) return;
-    sfColor col = sfColor_fromRGB((sfUint8)s->def.r, (sfUint8)s->def.g, (sfUint8)s->def.b);
+    
+    float ammoRatio = (w->max_ammo > 0) ? (float)w->ammo / (float)w->max_ammo : 0.0f;
+    ammoRatio = std::clamp(ammoRatio, 0.0f, 1.0f);
+    
+    sfColor col = getGradientColor(s->def, ammoRatio);
+    
     char buf[64];
     snprintf(buf, sizeof(buf), "%d | %d/%d", w->ammo, w->mag, w->max_mag);
     _drawText(window, font, buf, 20, col, s->def.x, s->def.y);
@@ -168,19 +218,51 @@ void InterfaceItems::_renderHpImage(sfRenderWindow *window,
     if (!s->sprite || !player) return;
     float hpRatio = (player->maxHp > 0)
         ? (float)player->hp / (float)player->maxHp : 0.0f;
-    if (hpRatio < 0.0f) hpRatio = 0.0f;
-    if (hpRatio > 1.0f) hpRatio = 1.0f;
+    hpRatio = std::clamp(hpRatio, 0.0f, 1.0f);
+    
     sfVector2u texSz = sfTexture_getSize(s->texture);
     unsigned int visibleH = (unsigned int)(texSz.y * hpRatio);
     unsigned int cropTop  = texSz.y - visibleH;
     sfIntRect rect = { 0, (int)cropTop, (int)texSz.x, (int)visibleH };
     sfSprite_setTextureRect(s->sprite, rect);
-    sfColor col = sfColor_fromRGB((sfUint8)s->def.r, (sfUint8)s->def.g, (sfUint8)s->def.b);
+    sfColor col = getGradientColor(s->def, hpRatio);
     sfSprite_setColor(s->sprite, col);
+    
     float scale = 1.0f;
     if (s->def.beating) {
         s->beat_timer += dt;
         scale = heartbeatScale(s->beat_timer, hpRatio);
+    }
+    sfSprite_setScale(s->sprite, {scale, scale});
+    sfFloatRect lb = sfSprite_getLocalBounds(s->sprite);
+    sfSprite_setOrigin(s->sprite, {lb.width / 2.0f, lb.height / 2.0f});
+    float posX = s->def.x;
+    float posY = s->def.y + (float)cropTop * scale;
+    sfSprite_setPosition(s->sprite, {posX, posY});
+    sfRenderWindow_drawSprite(window, s->sprite, nullptr);
+}
+
+void InterfaceItems::_renderStaminaImage(sfRenderWindow *window,
+                                         InterfaceItemState *s,
+                                         Player *player, float dt)
+{
+    if (!s->sprite || !player) return;
+    float staminaRatio = (player->maxStamina > 0)
+        ? (float)player->stamina / (float)player->maxStamina : 0.0f;
+    staminaRatio = std::clamp(staminaRatio, 0.0f, 1.0f);
+    
+    sfVector2u texSz = sfTexture_getSize(s->texture);
+    unsigned int visibleH = (unsigned int)(texSz.y * staminaRatio);
+    unsigned int cropTop  = texSz.y - visibleH;
+    sfIntRect rect = { 0, (int)cropTop, (int)texSz.x, (int)visibleH };
+    sfSprite_setTextureRect(s->sprite, rect);
+    sfColor col = getGradientColor(s->def, staminaRatio);
+    sfSprite_setColor(s->sprite, col);
+    
+    float scale = 1.0f;
+    if (s->def.beating) {
+        s->beat_timer += dt;
+        scale = heartbeatScale(s->beat_timer, staminaRatio);
     }
     sfSprite_setScale(s->sprite, {scale, scale});
     sfFloatRect lb = sfSprite_getLocalBounds(s->sprite);
@@ -201,14 +283,14 @@ void InterfaceItems::_renderAmmoImage(sfRenderWindow *window,
     if (!w) return;
     float ammoRatio = (w->max_ammo > 0)
         ? (float)w->ammo / (float)w->max_ammo : 0.0f;
-    if (ammoRatio < 0.0f) ammoRatio = 0.0f;
-    if (ammoRatio > 1.0f) ammoRatio = 1.0f;
+    ammoRatio = std::clamp(ammoRatio, 0.0f, 1.0f);
+    
     sfVector2u texSz = sfTexture_getSize(s->texture);
     unsigned int visibleH = (unsigned int)(texSz.y * ammoRatio);
     unsigned int cropTop  = texSz.y - visibleH;
     sfIntRect rect = { 0, (int)cropTop, (int)texSz.x, (int)visibleH };
     sfSprite_setTextureRect(s->sprite, rect);
-    sfColor col = sfColor_fromRGB((sfUint8)s->def.r, (sfUint8)s->def.g, (sfUint8)s->def.b);
+    sfColor col = getGradientColor(s->def, ammoRatio);
     sfSprite_setColor(s->sprite, col);
 
     float scale = 1.0f;
@@ -233,6 +315,7 @@ void InterfaceItems::render(sfRenderWindow *window, Player *player,
     for (auto *s : _items)
         if (s->def.on_check && s->check_timer > 0.0f)
             s->check_timer -= dt;
+            
     if (_items.empty()) {
         drawWeaponList(window, weapons, current_weapon_idx);
         drawHealthBar(window, player);
@@ -240,16 +323,25 @@ void InterfaceItems::render(sfRenderWindow *window, Player *player,
         drawItemInfo(window, player, weapons);
         return;
     }
+    
     for (auto *s : _items) {
         if (s->def.on_check && s->check_timer <= 0.0f)
             continue;
         const std::string &info = s->def.info;
+        
         if (info == "hp") {
             if (s->texture)
                 _renderHpImage(window, s, player, dt);
         }
         else if (info == "hp_text") {
             _renderHpText(window, s, player);
+        }
+        else if (info == "stamina") {
+            if (s->texture)
+                _renderStaminaImage(window, s, player, dt);
+        }
+        else if (info == "stamina_text") {
+            _renderStaminaText(window, s, player);
         }
         else if (info == "ammo") {
             if (s->texture)
@@ -268,8 +360,9 @@ void InterfaceItems::drawHealthBar(sfRenderWindow *window, Player *player)
 {
     if (!player || !window || !_fallbackFont) return;
     sfVector2u winSize = sfRenderWindow_getSize(window);
-    float barWidth = 200.0f, barHeight = 30.0f;
-    float barX = 20.0f, barY = (float)winSize.y - 60.0f;
+    
+    float barWidth = 200.0f, barHeight = 25.0f;
+    float barX = 20.0f, barY = (float)winSize.y - 75.0f;
     sfRectangleShape *bgBar = sfRectangleShape_create();
     sfRectangleShape_setSize(bgBar, {barWidth, barHeight});
     sfRectangleShape_setPosition(bgBar, {barX, barY});
@@ -277,23 +370,42 @@ void InterfaceItems::drawHealthBar(sfRenderWindow *window, Player *player)
     sfRectangleShape_setOutlineThickness(bgBar, 2.0f);
     sfRectangleShape_setOutlineColor(bgBar, sfWhite);
     sfRenderWindow_drawRectangleShape(window, bgBar, nullptr);
-    float healthRatio = (player->maxHp > 0)
-        ? (float)player->hp / (float)player->maxHp : 0.0f;
-    if (healthRatio < 0.0f) healthRatio = 0.0f;
-    if (healthRatio > 1.0f) healthRatio = 1.0f;
+    
+    float healthRatio = (player->maxHp > 0) ? (float)player->hp / (float)player->maxHp : 0.0f;
+    healthRatio = std::clamp(healthRatio, 0.0f, 1.0f);
     sfColor healthColor = sfGreen;
     if (healthRatio < 0.3f)      healthColor = sfRed;
     else if (healthRatio < 0.6f) healthColor = sfYellow;
     sfRectangleShape *healthFill = sfRectangleShape_create();
-    sfRectangleShape_setSize(healthFill, {barWidth * healthRatio - 4.0f, barHeight - 4.0f});
+    sfRectangleShape_setSize(healthFill, {std::max(0.0f, barWidth * healthRatio - 4.0f), barHeight - 4.0f});
     sfRectangleShape_setPosition(healthFill, {barX + 2.0f, barY + 2.0f});
     sfRectangleShape_setFillColor(healthFill, healthColor);
     sfRenderWindow_drawRectangleShape(window, healthFill, nullptr);
     char healthStr[32];
     snprintf(healthStr, sizeof(healthStr), "HP: %d/%d", player->hp, player->maxHp);
-    _drawText(window, _fallbackFont, healthStr, 14, sfWhite, barX + 50.0f, barY + 7.0f);
+    _drawText(window, _fallbackFont, healthStr, 12, sfWhite, barX + 50.0f, barY + 5.0f);
+    float stamY = barY + barHeight + 8.0f;
+    float stamHeight = 12.0f;
+    sfRectangleShape *bgStam = sfRectangleShape_create();
+    sfRectangleShape_setSize(bgStam, {barWidth, stamHeight});
+    sfRectangleShape_setPosition(bgStam, {barX, stamY});
+    sfRectangleShape_setFillColor(bgStam, sfBlack);
+    sfRectangleShape_setOutlineThickness(bgStam, 1.5f);
+    sfRectangleShape_setOutlineColor(bgStam, sfWhite);
+    sfRenderWindow_drawRectangleShape(window, bgStam, nullptr);
+
+    float staminaRatio = (player->maxStamina > 0) ? (float)player->stamina / (float)player->maxStamina : 0.0f;
+    staminaRatio = std::clamp(staminaRatio, 0.0f, 1.0f);
+    
+    sfRectangleShape *stamFill = sfRectangleShape_create();
+    sfRectangleShape_setSize(stamFill, {std::max(0.0f, barWidth * staminaRatio - 3.0f), stamHeight - 3.0f});
+    sfRectangleShape_setPosition(stamFill, {barX + 1.5f, stamY + 1.5f});
+    sfRectangleShape_setFillColor(stamFill, sfColor_fromRGB(0, 150, 255)); 
+    sfRenderWindow_drawRectangleShape(window, stamFill, nullptr);
     sfRectangleShape_destroy(bgBar);
     sfRectangleShape_destroy(healthFill);
+    sfRectangleShape_destroy(bgStam);
+    sfRectangleShape_destroy(stamFill);
 }
 
 void InterfaceItems::drawAmmoInfo(sfRenderWindow *window,
@@ -365,9 +477,9 @@ void InterfaceItems::drawItemInfo(sfRenderWindow *window, Player *player,
     int totalAmmo = 0;
     for (const auto *w : weapons) if (w) totalAmmo += w->ammo;
     char statsStr[128];
-    snprintf(statsStr, sizeof(statsStr), "HP: %d/%d  Weapons: %zu  Ammo: %d",
-             player->hp, player->maxHp, weapons.size(), totalAmmo);
-    _drawText(window, _fallbackFont, statsStr, 12, sfWhite, infoX + 10.0f, infoY + 30.0f);
+    snprintf(statsStr, sizeof(statsStr), "HP: %d/%d  STM: %d/%d  Ammo: %d",
+             player->hp, player->maxHp, (int)player->stamina, (int)player->maxStamina, totalAmmo);
+    _drawText(window, _fallbackFont, statsStr, 11, sfWhite, infoX + 10.0f, infoY + 30.0f);
     sfRectangleShape_destroy(infoBg);
 }
 
@@ -375,9 +487,7 @@ std::vector<InterfaceItemDef> buildInterfaceItems(char ***parsed_lines, bool deb
 {
     if (debug)
         std::cout << "Parsing interface items from game data..." << std::endl;
-
     std::vector<InterfaceItemDef> defs;
-
     for (int i = 0; parsed_lines[i] != nullptr; i++) {
         if (parsed_lines[i][0] != nullptr && strcmp(parsed_lines[i][0], "interface_item") == 0) {
             InterfaceItemDef def;
@@ -406,6 +516,24 @@ std::vector<InterfaceItemDef> buildInterfaceItems(char ***parsed_lines, bool deb
                 }
                 if (strcmp(parsed_lines[i][j], "b") == 0 && parsed_lines[i][j + 1] != nullptr) {
                     def.b = std::stoi(parsed_lines[i][j + 1]);
+                }
+                if (strcmp(parsed_lines[i][j], "mid_r") == 0 && parsed_lines[i][j + 1] != nullptr) {
+                    def.mid_r = std::stoi(parsed_lines[i][j + 1]);
+                }
+                if (strcmp(parsed_lines[i][j], "mid_g") == 0 && parsed_lines[i][j + 1] != nullptr) {
+                    def.mid_g = std::stoi(parsed_lines[i][j + 1]);
+                }
+                if (strcmp(parsed_lines[i][j], "mid_b") == 0 && parsed_lines[i][j + 1] != nullptr) {
+                    def.mid_b = std::stoi(parsed_lines[i][j + 1]);
+                }
+                if (strcmp(parsed_lines[i][j], "low_r") == 0 && parsed_lines[i][j + 1] != nullptr) {
+                    def.low_r = std::stoi(parsed_lines[i][j + 1]);
+                }
+                if (strcmp(parsed_lines[i][j], "low_g") == 0 && parsed_lines[i][j + 1] != nullptr) {
+                    def.low_g = std::stoi(parsed_lines[i][j + 1]);
+                }
+                if (strcmp(parsed_lines[i][j], "low_b") == 0 && parsed_lines[i][j + 1] != nullptr) {
+                    def.low_b = std::stoi(parsed_lines[i][j + 1]);
                 }
                 if (strcmp(parsed_lines[i][j], "beating") == 0 && parsed_lines[i][j + 1] != nullptr) {
                     def.beating = (strcmp(parsed_lines[i][j + 1], "true") == 0);

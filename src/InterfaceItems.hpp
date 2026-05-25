@@ -20,11 +20,17 @@ struct InterfaceItemDef {
     std::string font_path;
     float x = 0.0f;
     float y = 0.0f;
-    bool beating = false;
-    bool on_check = false;
     int r = 255;
     int g = 255;
     int b = 255;
+    int mid_r = -1;
+    int mid_g = -1;
+    int mid_b = -1;
+    int low_r = -1;
+    int low_g = -1;
+    int low_b = -1;
+    bool beating = false;
+    bool on_check = false;
 };
 
 struct InterfaceItemState {
@@ -61,12 +67,16 @@ public:
 private:
     sfFont *_fallbackFont = nullptr;
     std::vector<InterfaceItemState *> _items;
-    void _renderHpImage   (sfRenderWindow *window, InterfaceItemState *s, Player *player, float dt);
-    void _renderHpText    (sfRenderWindow *window, InterfaceItemState *s, Player *player);
-    void _renderAmmoImage (sfRenderWindow *window, InterfaceItemState *s,
-                           const std::vector<Weapons *> &weapons, int idx, float dt);
-    void _renderAmmoText  (sfRenderWindow *window, InterfaceItemState *s,
-                           const std::vector<Weapons *> &weapons, int idx);
+    
+    void _renderHpImage        (sfRenderWindow *window, InterfaceItemState *s, Player *player, float dt);
+    void _renderHpText         (sfRenderWindow *window, InterfaceItemState *s, Player *player);
+    void _renderStaminaImage   (sfRenderWindow *window, InterfaceItemState *s, Player *player, float dt);
+    void _renderStaminaText    (sfRenderWindow *window, InterfaceItemState *s, Player *player);
+    void _renderAmmoImage      (sfRenderWindow *window, InterfaceItemState *s,
+                                const std::vector<Weapons *> &weapons, int idx, float dt);
+    void _renderAmmoText       (sfRenderWindow *window, InterfaceItemState *s,
+                                const std::vector<Weapons *> &weapons, int idx);
+                                
     sfFont *_resolveFont(const std::string &path);
     void _drawText(sfRenderWindow *window, sfFont *font,
                    const std::string &str, unsigned int size,
