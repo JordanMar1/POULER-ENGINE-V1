@@ -113,8 +113,8 @@ void Renderer::renderColumn(Core* core, int x, const Player& p, int map_rows, in
         double dist = (side == 0) ? (ray.sideX - ray.deltaX) : (ray.sideY - ray.deltaY);
         if (dist < 0.01) dist = 0.01;
         int curH = getMapHeight(core, ray.mapX, ray.mapY, map_rows);
-        double lineH = (double)m_size.y / dist;
-        int floor_px = (int)(horizon - (lastH - p.eyeHeight) * lineH);
+        double heightScale = (double)m_size.y / dist;
+        int floor_px = (int)(horizon - (lastH - p.eyeHeight) * heightScale);
         if (floor_px < screen_floor_limit) {
             float dShade = std::min(1.0f, 14.0f / (float)(dist + 1.0f));
             sfUint8 shade = (sfUint8)std::max(0, (int)((38 + lastH * 9) * dShade));
@@ -127,8 +127,9 @@ void Renderer::renderColumn(Core* core, int x, const Player& p, int map_rows, in
         if (curH != lastH) {
             double wallTopH = (curH == 99) ? (double)lastH + 3.0 : (double)std::max(curH, lastH);
             double wallBotH = (double)std::min(curH, lastH);
-            int pxTop = (int)(horizon - (wallTopH - p.eyeHeight) * lineH);
-            int pxBot = (int)(horizon - (wallBotH - p.eyeHeight) * lineH);
+            int pxTop = (int)(horizon - (wallTopH - p.eyeHeight) * heightScale);
+            int pxBot = (int)(horizon - (wallBotH - p.eyeHeight) * heightScale);
+            
             int drawTop = std::max(pxTop, 0);
             int drawBot = std::min(pxBot, screen_floor_limit);
 
@@ -139,7 +140,6 @@ void Renderer::renderColumn(Core* core, int x, const Player& p, int map_rows, in
                     int val = (curH == 99) ? (145 - fGrad * 65) : (135 - fGrad * 55);
                     val = (int)(std::max(0, std::min(255, val)) * dShade);
                     if (side == 1) val = val * 7 / 10;
-                    
                     int idx = (y * m_size.x + x) * 4;
                     m_pixels[idx] = m_pixels[idx+1] = m_pixels[idx+2] = (sfUint8)val;
                 }
@@ -149,7 +149,6 @@ void Renderer::renderColumn(Core* core, int x, const Player& p, int map_rows, in
         lastH = curH;
     }
 }
-
 void Renderer::initFrameRender(Core* core, Player p, int map_rows)
 {
     if (m_isRendering && m_renderFuture.valid()) {
