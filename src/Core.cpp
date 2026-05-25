@@ -112,10 +112,9 @@ int Core::menu_return(void)
         while (sfRenderWindow_pollEvent(window->getWindow(), &event)) {
             if (event.type == sfEvtClosed)
                 sfRenderWindow_close(window->getWindow());
+            sfVector2i mousePos = sfMouse_getPositionRenderWindow(window->getWindow());
             if (event.type == sfEvtMouseButtonPressed) {
-                sfVector2i mousePos = sfMouse_getPositionRenderWindow(window->getWindow());
                 buttonId = menu->handleClick(mousePos.x, mousePos.y);
-                menu->handleHover(mousePos.x, mousePos.y);
                 if (buttonId == 1) {
                     sfMusic_stop(menu->getMusic());
                     if (window->isDebug())
@@ -132,6 +131,7 @@ int Core::menu_return(void)
                     sfRenderWindow_close(window->getWindow());
                 }
             }
+            menu->handleHover(mousePos.x, mousePos.y);
         }
         sfRenderWindow_clear(window->getWindow(), sfBlack);
         menu->display(window->getWindow(), buttonId);
