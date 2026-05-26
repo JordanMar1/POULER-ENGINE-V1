@@ -92,6 +92,13 @@ Player::Player(char ***parsed_file, bool debug)
                     if (debug)
                         std::cout << "Player stamina consumption set to: " << staminaConsumption << std::endl;
                 }
+                if (strcmp(parsed_file[i][j], "stamina_recovery") == 0 && parsed_file[i][j + 1] != NULL) {
+                    staminaRecovery = std::stof(parsed_file[i][j + 1]);
+                    if (staminaRecovery < 0.0f)
+                        staminaRecovery = 15.0f;
+                    if (debug)
+                        std::cout << "Player stamina recovery set to: " << staminaRecovery << std::endl;
+                }
             }
         }
         if (debug)

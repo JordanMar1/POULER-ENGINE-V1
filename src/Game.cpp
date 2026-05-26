@@ -216,13 +216,13 @@ void Game::HandleInputs(Core *core, Player &p, float dt, int map_rows, std::vect
     bool isTryingToSprint = sfKeyboard_isKeyPressed(core->getSettings()->binds.sprint) && isMoving;
     if (isTryingToSprint && p.stamina > 0.0f && !p.staminaCooldown) {
         mv = p.sprint_speed * dt;
-        p.stamina -= 30.0f * dt;
+        p.stamina -= p.staminaConsumption * dt;
         if (p.stamina <= 0.0f) {
             p.stamina = 0.0f;
             p.staminaCooldown = true;
         }
     } else {
-        p.stamina += 15.0f * dt;
+        p.stamina += p.staminaRecovery * dt;
         if (p.stamina > p.maxStamina)
             p.stamina = p.maxStamina;
         if (p.stamina >= p.sprintCooldown)

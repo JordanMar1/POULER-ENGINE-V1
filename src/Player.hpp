@@ -31,4 +31,5 @@ class Player {
         bool staminaCooldown = false;
         int maxWeapons = 2;
         float staminaConsumption = 30.0f;
+        float staminaRecovery = 15.0f;
 };
