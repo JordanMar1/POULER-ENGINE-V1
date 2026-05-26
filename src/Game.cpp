@@ -174,7 +174,7 @@ void Game::ManageMouse(sfRenderWindow *window, Player &p, Settings *settings){
     int deltaX = mousePos.x - center.x;
     int deltaY = mousePos.y - center.y;
     if (deltaX != 0) {
-        float sensitivity = settings->horizontal_sensitivity;
+        float sensitivity = settings->getEffectiveHSens();
         double angle = deltaX * sensitivity;
         double oldDirX = p.dirX;
         p.dirX = p.dirX * cos(angle) - p.dirY * sin(angle);
@@ -184,7 +184,7 @@ void Game::ManageMouse(sfRenderWindow *window, Player &p, Settings *settings){
         p.planeY = oldPlaneX * sin(angle) + p.planeY * cos(angle);
     }
     if (deltaY != 0) {
-        float vertSensitivity = settings->vertical_sensitivity;
+        float vertSensitivity = settings->getEffectiveVSens();
         p.pitch -= deltaY * vertSensitivity;
         int pitchLimit = (int)(winSize.y / 2);
         if (p.pitch > pitchLimit)  p.pitch = pitchLimit;
@@ -199,9 +199,12 @@ void Game::HandleInputs(Core *core, Player &p, float dt, int map_rows, std::vect
     auto tryMove = [&](double nx, double ny) {
         int nh = getH(core, (int)nx, (int)ny, map_rows);
         int ch = getH(core, (int)p.x, (int)p.y, map_rows);
-        if (nh != 99 && nh - ch <= 1) {
-            p.x = nx;
-            p.y = ny;
+        if (nh == 99) return;
+        if (nh - ch > 1) return;
+        p.x = nx;
+        p.y = ny;
+        if (nh > ch) {
+            p.height = (double)nh + (p.crouching ? p.crouchHeight : p.defaultHeight);
         }
     };
     bool isMoving = sfKeyboard_isKeyPressed(core->getSettings()->binds.moveForward) ||
@@ -211,13 +214,19 @@ void Game::HandleInputs(Core *core, Player &p, float dt, int map_rows, std::vect
     float leanTarget = 0.0f;
     float mv = p.speed * dt;
     bool isTryingToSprint = sfKeyboard_isKeyPressed(core->getSettings()->binds.sprint) && isMoving;
-    if (isTryingToSprint && p.stamina > 0.0f) {
+    if (isTryingToSprint && p.stamina > 0.0f && !p.staminaCooldown) {
         mv = p.sprint_speed * dt;
         p.stamina -= 30.0f * dt;
-        if (p.stamina < 0.0f) p.stamina = 0.0f;
+        if (p.stamina <= 0.0f) {
+            p.stamina = 0.0f;
+            p.staminaCooldown = true;
+        }
     } else {
         p.stamina += 15.0f * dt;
-        if (p.stamina > p.maxStamina) p.stamina = p.maxStamina;
+        if (p.stamina > p.maxStamina)
+            p.stamina = p.maxStamina;
+        if (p.stamina >= p.sprintCooldown)
+            p.staminaCooldown = false;
     }
     if (sfKeyboard_isKeyPressed(core->getSettings()->binds.leanLeft))  leanTarget = -1.0f;
     if (sfKeyboard_isKeyPressed(core->getSettings()->binds.leanRight)) leanTarget =  1.0f;

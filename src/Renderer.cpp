@@ -97,9 +97,12 @@ void Renderer::renderColumn(Core* core, int x, const Player& p, int map_rows, in
     Ray ray;
     setupRay(p, cameraX, ray);
     int screen_floor_limit = m_size.y;
+    int playerH = getMapHeight(core, (int)p.x, (int)p.y, map_rows);
     int lastH = getMapHeight(core, ray.mapX, ray.mapY, map_rows);
     int steps = 0;
     int side = 0;
+    bool hadTransition = (lastH != playerH);
+
     while (steps++ < 64) {
         if (ray.sideX < ray.sideY) {
             ray.sideX += ray.deltaX;
@@ -114,25 +117,32 @@ void Renderer::renderColumn(Core* core, int x, const Player& p, int map_rows, in
         if (dist < 0.01) dist = 0.01;
         int curH = getMapHeight(core, ray.mapX, ray.mapY, map_rows);
         double heightScale = (double)m_size.y / dist;
-        int floor_px = (int)(horizon - (lastH - p.eyeHeight) * heightScale);
+
+        int drawFloorH = (hadTransition || curH != lastH) ? lastH : playerH;
+        int floor_px = (int)(horizon - (drawFloorH - p.eyeHeight) * heightScale);
         if (floor_px < screen_floor_limit) {
-            float dShade = std::min(1.0f, 14.0f / (float)(dist + 1.0f));
-            sfUint8 shade = (sfUint8)std::max(0, (int)((38 + lastH * 9) * dShade));
-            for (int y = std::max(0, floor_px); y < screen_floor_limit; y++) {
+            int yStart = std::max(0, floor_px);
+            int yEnd   = screen_floor_limit;
+            for (int y = yStart; y < yEnd; y++) {
+                int dy = horizon - y;
+                double rowDist = (dy != 0)
+                    ? fabs((p.eyeHeight - (double)drawFloorH) * (double)m_size.y / (double)dy)
+                    : 1000.0;
+                float rowShade = std::min(1.0f, 14.0f / (float)(rowDist + 1.0f));
+                sfUint8 rowColor = (sfUint8)std::max(0, (int)((38 + drawFloorH * 9) * rowShade));
                 int idx = (y * m_size.x + x) * 4;
-                m_pixels[idx] = m_pixels[idx+1] = m_pixels[idx+2] = shade;
+                m_pixels[idx] = m_pixels[idx+1] = m_pixels[idx+2] = rowColor;
             }
             screen_floor_limit = std::max(0, floor_px);
         }
         if (curH != lastH) {
+            hadTransition = true;
             double wallTopH = (curH == 99) ? (double)lastH + 3.0 : (double)std::max(curH, lastH);
             double wallBotH = (double)std::min(curH, lastH);
             int pxTop = (int)(horizon - (wallTopH - p.eyeHeight) * heightScale);
             int pxBot = (int)(horizon - (wallBotH - p.eyeHeight) * heightScale);
-            
             int drawTop = std::max(pxTop, 0);
             int drawBot = std::min(pxBot, screen_floor_limit);
-
             if (drawTop < drawBot) {
                 float dShade = std::min(1.0f, 12.0f / (float)(dist + 1.0f));
                 for (int y = drawTop; y < drawBot; y++) {
@@ -149,6 +159,7 @@ void Renderer::renderColumn(Core* core, int x, const Player& p, int map_rows, in
         lastH = curH;
     }
 }
+
 void Renderer::initFrameRender(Core* core, Player p, int map_rows)
 {
     if (m_isRendering && m_renderFuture.valid()) {
