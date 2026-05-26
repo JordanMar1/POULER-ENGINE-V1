@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <cctype>
 #include <sstream>
+#include <cmath>
 
 static std::string trim(const std::string &s)
 {
@@ -163,6 +164,25 @@ static void writeDefaultBinds(const std::string &path, const Settings::Binds &bi
     output << "fov="                    << Pfov         << "\n";
 }
 
+static constexpr float FOV_REFERENCE = 90.0f;
+
+float Settings::getFovCompensation() const
+{
+    float fovRad = Pfov * (float)(M_PI / 180.0);
+    float refRad = FOV_REFERENCE * (float)(M_PI / 180.0);
+    return tanf(fovRad / 2.0f) / tanf(refRad / 2.0f);
+}
+
+float Settings::getEffectiveHSens() const
+{
+    return horizontal_sensitivity * getFovCompensation();
+}
+
+float Settings::getEffectiveVSens() const
+{
+    return vertical_sensitivity * getFovCompensation();
+}
+
 Settings::Settings()
 {
     std::string path("settings.conf");
@@ -228,7 +248,7 @@ Settings::Settings()
                 } else if (key == "music_volume") {
                     try { musicVolume = std::stoi(val); } catch (...) { musicVolume = 100; }
                 } else if (key == "fov") {
-                    try { Pfov = std::stoi(val); } catch (...) { Pfov = 90; }
+                    try { Pfov = std::clamp(std::stoi(val), 30, 120); } catch (...) { Pfov = 90; }
                 }
             }
             if (binds.moveForward == sfKeyUnknown || binds.moveLeft    == sfKeyUnknown ||
@@ -327,14 +347,16 @@ void Settings::handleMouseClick(int x, int y, sfRenderWindow *&rw, Window &win,
             else if (draggingSlider == 2) vertical_sensitivity   = minVSens + newRatio * (maxVSens - minVSens);
             else if (draggingSlider == 3) soundVolume = (int)(newRatio * 100.f);
             else if (draggingSlider == 4) musicVolume = (int)(newRatio * 100.f);
-            else if (draggingSlider == 5) Pfov = (int)(minFSens + newRatio * (maxFSens - minFSens));
+            else if (draggingSlider == 5) {
+                Pfov = std::clamp((int)(minFSens + newRatio * (maxFSens - minFSens)), 30, 120);
+            }
             updateTexts(textArray);
             return;
         }
     }
     auto setWaitKey   = [&](int id, const char *msg){ state = WaitingKey;   waitingFor = id; sfText_setString(waitingText, msg); };
     auto setWaitMouse = [&](int id, const char *msg){ state = WaitingMouse; waitingFor = id; sfText_setString(waitingText, msg); };
-    
+
     if      (y >= 120 && y < 165) setWaitKey  (1,  "Press new key for Move Forward");
     else if (y >= 165 && y < 210) setWaitKey  (2,  "Press new key for Move Left");
     else if (y >= 210 && y < 255) setWaitKey  (3,  "Press new key for Move Back");
@@ -408,7 +430,7 @@ void Settings::changeSettings(Window& window, Menu& menu)
     sfText_setString(title, "Settings");
     sfText_setPosition(title, (sfVector2f){100, 50});
     sfText_setColor(title, sfWhite);
-    
+
     sfText* textArray[20];
     for (int i = 0; i < 20; ++i) {
         textArray[i] = sfText_create();
@@ -422,7 +444,7 @@ void Settings::changeSettings(Window& window, Menu& menu)
     sfText_setColor(waitingText, sfYellow);
     float minHSens = 0.0001f, maxHSens = 0.0100f;
     float minVSens = 0.9f,    maxVSens = 2.0f;
-    float minFov   = 60.f,    maxFov   = 90.f;
+    float minFov   = 60.f,    maxFov   = 120.f;
     float trackX = 450.f, trackWidth = 200.f;
     float hSliderY = 120.f + (12 * 45.f) + 13.f;
     float vSliderY = 120.f + (13 * 45.f) + 13.f;
@@ -508,7 +530,9 @@ void Settings::changeSettings(Window& window, Menu& menu)
                 else if (draggingSlider == 2) vertical_sensitivity   = minVSens + newRatio * (maxVSens - minVSens);
                 else if (draggingSlider == 3) soundVolume = (int)(newRatio * 100.f);
                 else if (draggingSlider == 4) musicVolume = (int)(newRatio * 100.f);
-                else if (draggingSlider == 5) Pfov = (int)(minFov + newRatio * (maxFov - minFov));
+                else if (draggingSlider == 5) {
+                    Pfov = std::clamp((int)(minFov + newRatio * (maxFov - minFov)), 30, 120);
+                }
                 updateTexts(textArray);
             }
         }
