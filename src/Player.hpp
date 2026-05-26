@@ -27,4 +27,8 @@ class Player {
         float maxStamina = 100.0f;
         float speed = 5.0f;
         float sprint_speed = 8.0f;
+        float sprintCooldown = 100.0f;
+        bool staminaCooldown = false;
+        int maxWeapons = 2;
+        float staminaConsumption = 30.0f;
 };
