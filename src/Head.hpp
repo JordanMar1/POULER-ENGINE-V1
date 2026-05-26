@@ -6,7 +6,7 @@
 */
 #pragma once
 #include <SFML/Graphics.h>
-
+#include <vector>
 struct HeadThreshold {
     int hp;
     int x1, y1;
@@ -16,30 +16,25 @@ struct HeadThreshold {
 class Head {
 public:
     int             x, y;
-    HeadThreshold   thresholds[6];
-    int             threshold_count;
     Head           *next;
     Head           *prev;
     sfSprite        *sprite;
     sfTexture       *texture;
-
-    Head() : x(0), y(0), threshold_count(0), next(nullptr), prev(nullptr), sprite(nullptr), texture(nullptr) {}
-    
+    float scale;
+    std::vector<std::pair<int, HeadThreshold>> thresholds;
+    Head() : x(0), y(0), next(nullptr), prev(nullptr), sprite(nullptr), texture(nullptr), scale(1.0f), thresholds {} {}
     ~Head() {
         if (sprite)
             sfSprite_destroy(sprite);
         if (texture)
             sfTexture_destroy(texture);
     }
-
-    HeadThreshold *get_threshold(int current_hp)
-    {
-        for (int i = 0; i < threshold_count; i++) {
-            if (current_hp >= thresholds[i].hp)
-                return &thresholds[i];
+    HeadThreshold *get_threshold(int current_hp) {
+        for (auto &[hp, t] : thresholds) {
+            if (current_hp >= hp)
+                return &t;
         }
-        return (threshold_count > 0) ? &thresholds[threshold_count - 1] : nullptr;
+        return thresholds.empty() ? nullptr : &thresholds.back().second;
     }
 };
 Head *parse_heads(char ***parsed_file, bool debug);
-void renderHead(sfRenderWindow *window, sfSprite *head_sprite, sfTexture *head_texture, Head *head, int current_hp);

@@ -14,21 +14,23 @@ Head *parse_heads(char ***parsed_file, bool debug)
 {
     Head *root    = nullptr;
     Head *current = nullptr;
-
     for (int i = 0; parsed_file[i] != nullptr; i++) {
         if (strcmp(parsed_file[i][0], "head") != 0)
             continue;
-
         Head *h = new Head();
-
         for (int j = 1; parsed_file[i][j] != nullptr; j++) {
             if (strcmp(parsed_file[i][j], "x") == 0
-                && parsed_file[i][j + 1] != nullptr) {
+            && parsed_file[i][j + 1] != nullptr) {
                 h->x = atoi(parsed_file[i][++j]);
                 continue;
             }
+            if (strcmp(parsed_file[i][j], "scale") == 0
+            && parsed_file[i][j + 1] != nullptr) {
+                h->scale = std::stof(parsed_file[i][++j]);
+                continue;
+            }
             if (strcmp(parsed_file[i][j], "image") == 0
-                && parsed_file[i][j + 1] != nullptr) {
+            && parsed_file[i][j + 1] != nullptr) {
                 h->texture = sfTexture_createFromFile(parsed_file[i][j + 1], nullptr);
                 if (h->texture) {
                     h->sprite = sfSprite_create();
@@ -38,33 +40,30 @@ Head *parse_heads(char ***parsed_file, bool debug)
                 }
             }
             if (strcmp(parsed_file[i][j], "y") == 0
-                && parsed_file[i][j + 1] != nullptr) {
+            && parsed_file[i][j + 1] != nullptr) {
                 h->y = atoi(parsed_file[i][++j]);
                 continue;
             }
             char *endptr = nullptr;
             long hp_val = strtol(parsed_file[i][j], &endptr, 10);
             if (endptr != parsed_file[i][j] && *endptr == '\0'
-                && parsed_file[i][j + 1] != nullptr
-                && h->threshold_count < 6)
-            {
-                HeadThreshold &t = h->thresholds[h->threshold_count++];
-                t.hp = (int)hp_val;
-                sscanf(parsed_file[i][j + 1], "%d,%d,%d,%d",
-                       &t.x1, &t.y1, &t.x2, &t.y2);
-                j++;
-            }
+                && parsed_file[i][j + 1] != nullptr) {
+                    HeadThreshold t;
+                    sscanf(parsed_file[i][j + 1], "%d,%d,%d,%d",
+                        &t.x1, &t.y1, &t.x2, &t.y2);
+                    h->thresholds.push_back({(int)hp_val, t});
+                    j++;
+                }
         }
-
         if (debug) {
-            std::cout << "[head] x=" << h->x << " y=" << h->y
-                      << " thresholds=" << h->threshold_count << std::endl;
-            for (int k = 0; k < h->threshold_count; k++) {
-                std::cout << "  [" << h->thresholds[k].hp << "%] "
-                          << h->thresholds[k].x1 << ","
-                          << h->thresholds[k].y1 << " -> "
-                          << h->thresholds[k].x2 << ","
-                          << h->thresholds[k].y2 << std::endl;
+            std::cout << "[head] x=" << h->x << " y=" << h->y << " scale=" << h->scale
+                << " thresholds=" << h->thresholds.size() << std::endl;
+            for (int k = 0; k < (int)h->thresholds.size(); k++) {
+                std::cout << "  [" << h->thresholds[k].first << "%] "
+                    << h->thresholds[k].second.x1 << ","
+                    << h->thresholds[k].second.y1 << " -> "
+                    << h->thresholds[k].second.x2 << ","
+                    << h->thresholds[k].second.y2 << std::endl;
             }
         }
         if (!root) {
@@ -77,26 +76,4 @@ Head *parse_heads(char ***parsed_file, bool debug)
         }
     }
     return root;
-}
-
-void renderHead(sfRenderWindow *window, sfSprite *head_sprite, sfTexture *head_texture, Head *head, int current_hp)
-{
-    if (!head || !head_texture || !head_sprite)
-        return;
-
-    HeadThreshold *t = head->get_threshold(current_hp);
-    if (!t)
-        return;
-
-    sfIntRect rect;
-    rect.left   = t->x1;
-    rect.top    = t->y1;
-    rect.width  = t->x2 - t->x1;
-    rect.height = t->y2 - t->y1;
-
-    sfSprite_setTexture(head_sprite, head_texture, sfTrue);
-    sfSprite_setTextureRect(head_sprite, rect);
-    sfSprite_setPosition(head_sprite, (sfVector2f){(float)head->x, (float)head->y});
-
-    sfRenderWindow_drawSprite(window, head_sprite, nullptr);
 }
