@@ -132,9 +132,11 @@ void Game::RenderHead(Core *core, sfRenderWindow *window, Player &p) {
     rect.top    = t->y1;
     rect.width  = t->x2 - t->x1;
     rect.height = t->y2 - t->y1;
+    sfSprite_setTexture(head->sprite, head->texture, sfTrue);
     sfSprite_setTextureRect(head->sprite, rect);
+    sfSprite_setOrigin(head->sprite, (sfVector2f){rect.width / 2.0f, rect.height / 2.0f});
+    sfSprite_setScale(head->sprite, (sfVector2f){head->scale, head->scale});
     sfSprite_setPosition(head->sprite, (sfVector2f){(float)head->x, (float)head->y});
-    
     sfRenderWindow_drawSprite(window, head->sprite, nullptr);
 }
 
