@@ -308,8 +308,7 @@ void InterfaceItems::_renderAmmoImage(sfRenderWindow *window,
 
 void InterfaceItems::render(sfRenderWindow *window, Player *player,
                             const std::vector<Weapons *> &weapons,
-                            int current_weapon_idx, float dt,
-                            float ammo_display_timer)
+                            int current_weapon_idx, float dt)
 {
     if (!window || !player) return;
     for (auto *s : _items)

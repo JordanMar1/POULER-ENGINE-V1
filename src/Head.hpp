@@ -32,7 +32,7 @@ public:
             sfTexture_destroy(texture);
     }
 
-    HeadThreshold *get_threshold(int current_hp, int max_hp)
+    HeadThreshold *get_threshold(int current_hp)
     {
         for (int i = 0; i < threshold_count; i++) {
             if (current_hp >= thresholds[i].hp)
@@ -42,4 +42,4 @@ public:
     }
 };
 Head *parse_heads(char ***parsed_file, bool debug);
-void renderHead(sfRenderWindow *window, sfSprite *head_sprite, sfTexture *head_texture, Head *head, int current_hp, int max_hp);
+void renderHead(sfRenderWindow *window, sfSprite *head_sprite, sfTexture *head_texture, Head *head, int current_hp);

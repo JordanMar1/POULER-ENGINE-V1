@@ -79,12 +79,12 @@ Head *parse_heads(char ***parsed_file, bool debug)
     return root;
 }
 
-void renderHead(sfRenderWindow *window, sfSprite *head_sprite, sfTexture *head_texture, Head *head, int current_hp, int max_hp)
+void renderHead(sfRenderWindow *window, sfSprite *head_sprite, sfTexture *head_texture, Head *head, int current_hp)
 {
     if (!head || !head_texture || !head_sprite)
         return;
 
-    HeadThreshold *t = head->get_threshold(current_hp, max_hp);
+    HeadThreshold *t = head->get_threshold(current_hp);
     if (!t)
         return;
 

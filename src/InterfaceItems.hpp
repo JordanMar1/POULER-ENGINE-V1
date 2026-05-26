@@ -57,8 +57,7 @@ public:
 
     void render(sfRenderWindow *window, Player *player,
             const std::vector<Weapons *> &weapons,
-            int current_weapon_idx, float dt,
-            float ammo_display_timer = 0.0f);
+            int current_weapon_idx, float dt);
     void drawHealthBar  (sfRenderWindow *window, Player *player);
     void drawAmmoInfo   (sfRenderWindow *window, const std::vector<Weapons *> &weapons, int current_weapon_idx);
     void drawWeaponList (sfRenderWindow *window, const std::vector<Weapons *> &weapons, int current_weapon_idx);

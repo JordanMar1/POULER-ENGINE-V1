@@ -33,7 +33,7 @@ int Game::getH(Core *core, int mx, int my, int map_rows){
     return (h < 0) ? 0 : h;
 }
 
-void Game::RenderWeapon(Core *core, sfRenderWindow *window, const std::vector<Weapons *> &weapons, const std::vector<sfTexture *> &weapon_textures, sfSprite *weapon_sprite, int current_weapon_idx, int weapon_state, float weapon_timer){
+void Game::RenderWeapon(sfRenderWindow *window, const std::vector<Weapons *> &weapons, const std::vector<sfTexture *> &weapon_textures, sfSprite *weapon_sprite, int current_weapon_idx, int weapon_state, float weapon_timer){
     if (weapons.empty() || current_weapon_idx >= (int)weapon_textures.size() || !weapon_textures[current_weapon_idx])
         return;
     Weapons *w = weapons[current_weapon_idx];
@@ -124,7 +124,7 @@ void Game::RenderHead(Core *core, sfRenderWindow *window, Player &p) {
     
     if (!head || !head->texture || !head->sprite)
         return;
-    HeadThreshold *t = head->get_threshold(p.hp, p.maxHp);
+    HeadThreshold *t = head->get_threshold(p.hp);
     if (!t)
         return;
     sfIntRect rect;
@@ -314,7 +314,6 @@ int Game::Play(Core *core, Maps *map){
     }
     sfTexture *head_texture = nullptr;
     sfSprite  *head_sprite  = sfSprite_create();
-    Head *head = core->getHead();
     sfRenderWindow_setMouseCursorVisible(window, sfFalse);
     sfRenderWindow_setFramerateLimit(window, core->getSettings()->fps);
     while (sfRenderWindow_isOpen(window)) {
@@ -369,7 +368,7 @@ int Game::Play(Core *core, Maps *map){
         renderer.initFrameRender(core, p, map_rows);
         sfRenderWindow_clear(window, sfBlack);
         renderer.drawScene(window, p.lean);
-        RenderWeapon(core, window, weapons, weapon_textures, weapon_sprite, current_weapon_idx, weapon_state, weapon_timer);
+        RenderWeapon(window, weapons, weapon_textures, weapon_sprite, current_weapon_idx, weapon_state, weapon_timer);
         RenderHead(core, window, p);
         ui.render(window, core->getPlayer(), weapons, current_weapon_idx, dt);
         UpdateWeaponTimer(weapons, current_weapon_idx, weapon_state, weapon_timer, dt);

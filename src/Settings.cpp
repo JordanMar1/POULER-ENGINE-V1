@@ -422,7 +422,7 @@ void Settings::changeSettings(Window& window, Menu& menu)
     sfText_setColor(waitingText, sfYellow);
     float minHSens = 0.0001f, maxHSens = 0.0100f;
     float minVSens = 0.9f,    maxVSens = 2.0f;
-    float minFov   = 60.f,    maxFov   = 120.f;
+    float minFov   = 60.f,    maxFov   = 90.f;
     float trackX = 450.f, trackWidth = 200.f;
     float hSliderY = 120.f + (12 * 45.f) + 13.f;
     float vSliderY = 120.f + (13 * 45.f) + 13.f;
