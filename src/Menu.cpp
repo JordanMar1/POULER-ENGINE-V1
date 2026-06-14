@@ -6,7 +6,6 @@
 */
 
 #include "Menu.hpp"
-#include "../include/array_lib.hpp"
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
@@ -144,7 +143,7 @@ void Menu::handleHover(int x, int y)
     while (current != nullptr) {
         bool isHovered = (x >= current->get_x() && x <= current->get_x() + current->get_width() &&
                           y >= current->get_y() && y <= current->get_y() + current->get_height());
-        
+
         if (isHovered) {
             sfRectangleShape_setScale(current->get_shape(), (sfVector2f){current->get_scale(), current->get_scale()});
         } else {

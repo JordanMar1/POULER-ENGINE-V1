@@ -7,7 +7,6 @@
 
 #include "Weapons.hpp"
 #include <sstream>
-#include <stdexcept>
 #include <iostream>
 
 static std::vector<int> parse_int_list(const std::string &s, char sep = '-')
@@ -104,7 +103,7 @@ static Weapons *create_weapon_from_block(char **block)
             sfSound_destroy(w->reload_sound);
         std::string rt_str = get_field(block, "RD_TIME");
         w->reload_time   = rt_str.empty() ? 0.f : std::stof(rt_str);
-        
+
     } catch (const std::exception &e) {
         delete w;
         return nullptr;
@@ -159,4 +158,4 @@ void setWeaponsVolume(std::vector<Weapons *> weapons, int volume)
     for (const auto &wp : weapons) {
         wp->setWeaponVolume(volume);
     }
-} 
+}

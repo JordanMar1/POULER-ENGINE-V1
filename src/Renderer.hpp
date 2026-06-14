@@ -7,9 +7,8 @@
 
 #pragma once
 #include <SFML/Graphics.h>
-#include <vector>
 #include <future>
-#include "Game.hpp"
+#include "Player.hpp"
 
 class Core;
 

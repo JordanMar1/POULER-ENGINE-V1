@@ -7,7 +7,7 @@
 
 #include "ErrorHandler.hpp"
 #include <cstring>
-
+#include <iostream>
 ErrorHandler::ErrorHandler(int argc, char **argv)
 {
     filepath = (char *)"maps/example.wac";

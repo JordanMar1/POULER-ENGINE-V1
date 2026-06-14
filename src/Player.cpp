@@ -17,9 +17,9 @@ Player::Player(char ***parsed_file, bool debug)
     planeY = 0.66;
     hp = 100;
     maxHp = 100;
-    for (int i = 0; parsed_file[i] != NULL; i++) {
+    for (int i = 0; parsed_file[i]; i++) {
         if (strcmp(parsed_file[i][0], "player") == 0) {
-            for (int j = 1; parsed_file[i][j] != NULL; j++) {
+            for (int j = 1; parsed_file[i][j] != nullptr; j++) {
                 if (strcmp(parsed_file[i][j], "hp") == 0 && parsed_file[i][j + 1] != NULL) {
                     hp = std::stoi(parsed_file[i][j + 1]);
                     if (hp < 0)
@@ -101,9 +101,10 @@ Player::Player(char ***parsed_file, bool debug)
                 }
             }
         }
-        if (debug)
+        if (debug) {
             std::cout << "Player HP: " << hp << "/" << maxHp << std::endl;
-        break;
+            break;
+        }
     }
     eyeHeight = height + 0.5;
 }

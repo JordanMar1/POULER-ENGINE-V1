@@ -7,7 +7,6 @@
 #pragma once
 #include <SFML/Window.h>
 #include <SFML/Graphics.h>
-#include <string>
 
 class Window;
 class Menu;

@@ -6,7 +6,6 @@
 */
 
 #include "Renderer.hpp"
-#include "Game.hpp"
 #include "Core.hpp"
 #include <math.h>
 #include <algorithm>

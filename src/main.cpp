@@ -15,6 +15,7 @@
 #include "math.h"
 #include "InterfaceItems.hpp"
 #include "Head.hpp"
+#include <iostream>
 
 int main(int argc, char *argv[])
 {
@@ -35,7 +36,7 @@ int main(int argc, char *argv[])
     Core core(&window, &menu, &gameData, &settings, weapons, &player, &head);
     core.interfaceItems = buildInterfaceItems(gameData.game_array, errorHandler.isDebug());
     sfRenderWindow_setFramerateLimit(window.getWindow(), settings.fps);
-    
+
     while (sfRenderWindow_isOpen(window.getWindow()))
     {
         sfEvent event;

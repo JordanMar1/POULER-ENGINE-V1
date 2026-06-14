@@ -7,11 +7,6 @@
 
 #pragma once
 
-#include "Settings.hpp"
-#include "Window.hpp"
-#include "Ray.hpp"
-#include <string>
-
 #define SCREEN_WIDTH 1920
 #define SCREEN_HEIGHT 1080
 #define MOVE_SPEED 4

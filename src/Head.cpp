@@ -24,6 +24,11 @@ Head *parse_heads(char ***parsed_file, bool debug)
                 h->x = atoi(parsed_file[i][++j]);
                 continue;
             }
+            if (strcmp(parsed_file[i][j], "y") == 0
+            && parsed_file[i][j + 1] != nullptr) {
+                h->y = atoi(parsed_file[i][++j]);
+                continue;
+            }
             if (strcmp(parsed_file[i][j], "scale") == 0
             && parsed_file[i][j + 1] != nullptr) {
                 h->scale = std::stof(parsed_file[i][++j]);
@@ -36,28 +41,29 @@ Head *parse_heads(char ***parsed_file, bool debug)
                     h->sprite = sfSprite_create();
                     sfSprite_setTexture(h->sprite, h->texture, sfTrue);
                 } else {
-                    std::cerr << "Failed to load head texture: " << parsed_file[i][j + 1] << std::endl;
+                    std::cerr << "Failed to load head texture: "
+                              << parsed_file[i][j + 1] << std::endl;
                 }
-            }
-            if (strcmp(parsed_file[i][j], "y") == 0
-            && parsed_file[i][j + 1] != nullptr) {
-                h->y = atoi(parsed_file[i][++j]);
+                j++;
                 continue;
             }
             char *endptr = nullptr;
             long hp_val = strtol(parsed_file[i][j], &endptr, 10);
             if (endptr != parsed_file[i][j] && *endptr == '\0'
-                && parsed_file[i][j + 1] != nullptr) {
-                    HeadThreshold t;
-                    sscanf(parsed_file[i][j + 1], "%d,%d,%d,%d",
-                        &t.x1, &t.y1, &t.x2, &t.y2);
+            && parsed_file[i][j + 1] != nullptr) {
+                HeadThreshold t = {0, 0, 0, 0};
+                int parsed_count = sscanf(parsed_file[i][j + 1], "%d,%d,%d,%d",
+                    &t.x1, &t.y1, &t.x2, &t.y2);
+                if (parsed_count == 4) {
                     h->thresholds.push_back({(int)hp_val, t});
                     j++;
                 }
+            }
         }
         if (debug) {
-            std::cout << "[head] x=" << h->x << " y=" << h->y << " scale=" << h->scale
-                << " thresholds=" << h->thresholds.size() << std::endl;
+            std::cout << "[head] x=" << h->x << " y=" << h->y
+                      << " scale=" << h->scale
+                      << " thresholds=" << h->thresholds.size() << std::endl;
             for (int k = 0; k < (int)h->thresholds.size(); k++) {
                 std::cout << "  [" << h->thresholds[k].first << "%] "
                     << h->thresholds[k].second.x1 << ","

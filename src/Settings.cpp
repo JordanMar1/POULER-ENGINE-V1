@@ -11,8 +11,6 @@
 #include <fstream>
 #include <string>
 #include <algorithm>
-#include <cctype>
-#include <sstream>
 #include <cmath>
 
 static std::string trim(const std::string &s)

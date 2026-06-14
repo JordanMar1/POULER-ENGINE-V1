@@ -5,15 +5,10 @@
 ** ChooseLevel
 */
 #include "Core.hpp"
-#include <cstring>
 #include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
 #include "Maps.hpp"
 #include "Game.hpp"
 #include "math.h"
-#include "Head.hpp"
 Core::~Core()
 {
 }
@@ -40,7 +35,7 @@ void Core::displayLevels(Maps* selected)
         scrollOffset = idealSelectedY - centerY;
     }
     float maxScroll = (totalItems * spacing) + startY - (winSize.y * 0.8f);
-    if (maxScroll < 0.0f) maxScroll = 0.0f; 
+    if (maxScroll < 0.0f) maxScroll = 0.0f;
 
     if (scrollOffset > maxScroll) {
         scrollOffset = maxScroll;
@@ -53,7 +48,7 @@ void Core::displayLevels(Maps* selected)
         sfText_setString(text, clone->getName());
         sfText_setCharacterSize(text, 24);
         if (clone == selected) {
-            sfText_setFillColor(text, sfRed); 
+            sfText_setFillColor(text, sfRed);
         } else {
             sfText_setFillColor(text, sfWhite);
         }
@@ -97,7 +92,7 @@ int Core::chooseLevel(void)
                 }
             }
         }
-        displayLevels(selected); 
+        displayLevels(selected);
         sfRenderWindow_display(window->getWindow());
     }
     return 0;

@@ -6,7 +6,6 @@
 */
 
 #include "Maps.hpp"
-#include "GameData.hpp"
 #include <iostream>
 #include <cstring>
 #include "../include/array_lib.hpp"
