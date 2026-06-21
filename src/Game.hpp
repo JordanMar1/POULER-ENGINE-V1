@@ -7,6 +7,8 @@
 #pragma once
 #include "Core.hpp"
 #include "Player.hpp"
+#include "ActiveEnemy.hpp"
+
 class Game {
 public:
     int Play(Core *core, Maps *map);
@@ -18,4 +20,6 @@ private:
     void ManageMouse(sfRenderWindow *window, Player &p, Settings *settings);
     int getH(Core *core, int mx, int my, int map_rows);
     void RenderHead(Core *core, sfRenderWindow *window, Player &p);
+    std::vector<ActiveEnemy> InitEnemies(Core *core, char **mapArray, int map_rows);
+            void UpdateEnemies(std::vector<ActiveEnemy> &enemies, Player &p, float dt);
 };

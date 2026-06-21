@@ -16,6 +16,7 @@
 #include "Player.hpp"
 #include "InterfaceItems.hpp"
 #include "Head.hpp"
+#include "Enemy.hpp"
 
 class Core {
     private:
@@ -28,8 +29,9 @@ class Core {
         std::vector<Weapons *> weapons;
         Player *player;
         Head *head;
-        public:
-        Core(Window *window, Menu *menu, GameData *gameData, Settings *settings, std::vector<Weapons *> weapons, Player *player, Head *head) : window(window), menu(menu), gameData(gameData), settings(settings), weapons(weapons), player(player), head(head), interfaceItems({}) {};
+        Enemy **enemies;
+    public:
+        Core(Window *window, Menu *menu, GameData *gameData, Settings *settings, std::vector<Weapons *> weapons, Player *player, Head *head, Enemy **enemies) : window(window), menu(menu), gameData(gameData), settings(settings), weapons(weapons), player(player), head(head), enemies(enemies), interfaceItems({}) {};
         ~Core();
         int chooseLevel(void);
         int menu_return(void);
@@ -37,6 +39,7 @@ class Core {
         Maps *getMaps() const { return maps; }
         Window *getWindow() const { return window; }
         Menu *getMenu() const { return menu; }
+        Enemy **getEnemies() const { return enemies; }
         GameData *getGameData() const { return gameData; }
         Settings *getSettings() const { return settings; }
         std::vector<Weapons *> getWeapons() const {return weapons;};

@@ -16,6 +16,7 @@
 #include "InterfaceItems.hpp"
 #include "Head.hpp"
 #include <iostream>
+#include "Enemy.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -31,9 +32,11 @@ int main(int argc, char *argv[])
     Player player(gameData.game_array, errorHandler.isDebug());
     Head head = *parse_heads(gameData.game_array, errorHandler.isDebug());
     Settings settings = Settings();
+    Enemy **enemies = enemyBuilder(gameData.game_array);
     menu.setMusicVolume(settings.musicVolume);
     settings.Pfov = (int)(atan(player.planeY) * 2.0 * 180.0 / M_PI);
-    Core core(&window, &menu, &gameData, &settings, weapons, &player, &head);
+    Core core(&window, &menu, &gameData, &settings, weapons, &player, &head, enemies);
+
     core.interfaceItems = buildInterfaceItems(gameData.game_array, errorHandler.isDebug());
     sfRenderWindow_setFramerateLimit(window.getWindow(), settings.fps);
 
