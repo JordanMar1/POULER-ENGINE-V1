@@ -256,41 +256,75 @@ void Renderer::drawEnemies(sfRenderWindow* window, Core* core, const Player& p,
         sfTexture* tex = enemyTextures[idx];
         if (!tex) continue;
 
-        sfVector2u texSize = sfTexture_getSize(tex);
-
-        int totalCols = 4; // TODO: ajuster selon le sprite-sheet réel
-        int totalRows = 3; // TODO: ajuster selon le sprite-sheet réel (idle/attaque/marche)
-        int frameW = (int)texSize.x / totalCols;
-        int frameH = (int)texSize.y / totalRows;
+        Enemy *tpl = e.templateData;
+        std::vector<int> sprite_x = tpl->getSpriteX();
+        std::vector<int> sprite_y = tpl->getSpriteY();
+        std::vector<std::pair<int,int>> shoot_anim = tpl->getShootAnim();
 
         int gridX = 0;
         int gridY = 0;
+        int default_frame_size = 64;
+
         if (e.state == 1) {
-            float progress = (e.templateData->getReshootTime() > 0.0f)
-                ? (e.animTimer / e.templateData->getReshootTime()) : 0.0f;
-            gridX = (int)(progress * totalCols);
-            if (gridX >= totalCols) gridX = totalCols - 1;
-            gridY = 1;
+            if (shoot_anim.empty()) {
+                float progress = (tpl->getReshootTime() > 0.0f) ? (e.animTimer / tpl->getReshootTime()) : 0.0f;
+                gridX = (int)(progress * 4);
+                if (gridX > 3) gridX = 3;
+                gridY = 0;
+            } else {
+                int total_frames = shoot_anim.size();
+                float progress = (tpl->getReshootTime() > 0.0f) ? (e.animTimer / tpl->getReshootTime()) : 0.0f;
+                int current_frame = (int)(progress * total_frames);
+                if (current_frame >= total_frames) current_frame = total_frames - 1;
+                gridX = shoot_anim[current_frame].first;
+                gridY = shoot_anim[current_frame].second;
+            }
         } else if (e.state == 2) {
-            gridX = (int)(e.animTimer * 6.0f) % totalCols;
-            gridY = 2;
+            gridX = (int)(e.animTimer * 6.0f) % 4;
+            gridY = 0;
         } else {
             gridX = 0;
             gridY = 0;
         }
-        if (gridY >= totalRows) gridY = totalRows - 1;
 
-        int baseTexX = gridX * frameW;
-        int baseTexY = gridY * frameH;
+        int pixel_X_start = 0;
+        int pixel_X_end   = 0;
+        int pixel_Y_start = 0;
+        int pixel_Y_end   = 0;
+
+        if (!sprite_x.empty() && gridX < (int)sprite_x.size()) {
+            pixel_X_start = sprite_x[gridX];
+            pixel_X_end = (gridX + 1 < (int)sprite_x.size())
+                ? sprite_x[gridX + 1]
+                : pixel_X_start + default_frame_size;
+        } else {
+            pixel_X_start = gridX * default_frame_size;
+            pixel_X_end   = pixel_X_start + default_frame_size;
+        }
+
+        if (!sprite_y.empty() && gridY < (int)sprite_y.size()) {
+            pixel_Y_start = sprite_y[gridY];
+            pixel_Y_end = (gridY + 1 < (int)sprite_y.size())
+                ? sprite_y[gridY + 1]
+                : pixel_Y_start + default_frame_size;
+        } else {
+            pixel_Y_start = gridY * default_frame_size;
+            pixel_Y_end   = pixel_Y_start + default_frame_size;
+        }
+
+        int frameW = pixel_X_end - pixel_X_start;
+        int frameH = pixel_Y_end - pixel_Y_start;
+        if (frameW <= 0) frameW = default_frame_size;
+        if (frameH <= 0) frameH = default_frame_size;
 
         for (int stripe = std::max(0, drawStartX); stripe < std::min((int)m_size.x, drawEndX); stripe++) {
             if (transformY >= m_depthBuffer[stripe])
                 continue;
             int localX = (int)(((stripe - drawStartX) * frameW) / (float)spriteWidth);
             localX = std::max(0, std::min(frameW - 1, localX));
-            int texX = baseTexX + localX;
+            int texX = pixel_X_start + localX;
 
-            sfIntRect rect = { texX, baseTexY, 1, frameH };
+            sfIntRect rect = { texX, pixel_Y_start, 1, frameH };
             sfSprite_setTexture(m_enemySprite, tex, sfFalse);
             sfSprite_setTextureRect(m_enemySprite, rect);
             sfSprite_setPosition(m_enemySprite, (sfVector2f){ (float)stripe, (float)std::max(0, drawStartY) });
