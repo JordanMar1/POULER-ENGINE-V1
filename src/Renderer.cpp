@@ -14,6 +14,7 @@
 Renderer::Renderer(sfVector2u size) : m_pixels(nullptr), m_texture(nullptr), m_sprite(nullptr), m_isRendering(false)
 {
     m_sprite = sfSprite_create();
+    m_enemySprite = sfSprite_create();
     resize(size);
 }
 
@@ -23,6 +24,7 @@ Renderer::~Renderer()
     delete[] m_pixels;
     sfTexture_destroy(m_texture);
     sfSprite_destroy(m_sprite);
+    sfSprite_destroy(m_enemySprite);
 }
 
 void Renderer::resize(sfVector2u newSize)
@@ -36,6 +38,7 @@ void Renderer::resize(sfVector2u newSize)
     m_pixels = new sfUint8[m_size.x * m_size.y * 4];
     m_texture = sfTexture_create(m_size.x, m_size.y);
     sfSprite_setTexture(m_sprite, m_texture, sfTrue);
+    m_depthBuffer.assign(m_size.x, 1e9);
 }
 
 int Renderer::getMapHeight(Core* core, int mx, int my, int map_rows) const
@@ -101,7 +104,7 @@ void Renderer::renderColumn(Core* core, int x, const Player& p, int map_rows, in
     int steps = 0;
     int side = 0;
     bool hadTransition = (lastH != playerH);
-
+    m_depthBuffer[x] = 1e9;
     while (steps++ < 64) {
         if (ray.sideX < ray.sideY) {
             ray.sideX += ray.deltaX;
@@ -116,7 +119,6 @@ void Renderer::renderColumn(Core* core, int x, const Player& p, int map_rows, in
         if (dist < 0.01) dist = 0.01;
         int curH = getMapHeight(core, ray.mapX, ray.mapY, map_rows);
         double heightScale = (double)m_size.y / dist;
-
         int drawFloorH = (hadTransition || curH != lastH) ? lastH : playerH;
         int floor_px = (int)(horizon - (drawFloorH - p.eyeHeight) * heightScale);
         if (floor_px < screen_floor_limit) {
@@ -152,7 +154,10 @@ void Renderer::renderColumn(Core* core, int x, const Player& p, int map_rows, in
                     int idx = (y * m_size.x + x) * 4;
                     m_pixels[idx] = m_pixels[idx+1] = m_pixels[idx+2] = (sfUint8)val;
                 }
-                if (curH == 99) break;
+                if (curH == 99) {
+                    m_depthBuffer[x] = dist;
+                    break;
+                }
             }
         }
         lastH = curH;
@@ -196,4 +201,136 @@ void Renderer::drawScene(sfRenderWindow* window, float lean)
     sfSprite_setScale(m_sprite, (sfVector2f){ zoom, zoom });
 
     sfRenderWindow_drawSprite(window, m_sprite, nullptr);
+}
+
+void Renderer::drawEnemies(sfRenderWindow* window, Core* core, const Player& p,
+                            std::vector<ActiveEnemy>& enemies,
+                            std::vector<sfTexture*>& enemyTextures, int map_rows)
+{
+    std::vector<ActiveEnemy*> visible;
+    for (auto &e : enemies) {
+        if (e.isAlive) visible.push_back(&e);
+    }
+    std::sort(visible.begin(), visible.end(), [&](ActiveEnemy* a, ActiveEnemy* b) {
+        double da = (a->x - p.x) * (a->x - p.x) + (a->y - p.y) * (a->y - p.y);
+        double db = (b->x - p.x) * (b->x - p.x) + (b->y - p.y) * (b->y - p.y);
+        return da > db;
+    });
+
+    double invDet = 1.0 / (p.planeX * p.dirY - p.dirX * p.planeY);
+    Enemy **templates = core->getEnemies();
+
+    for (auto* ePtr : visible) {
+        ActiveEnemy &e = *ePtr;
+        double spriteX = e.x - p.x;
+        double spriteY = e.y - p.y;
+
+        double transformX = invDet * (p.dirY * spriteX - p.dirX * spriteY);
+        double transformY = invDet * (-p.planeY * spriteX + p.planeX * spriteY);
+
+        if (transformY <= 0.3) continue;
+
+        int spriteScreenX = (int)((m_size.x / 2.0) * (1 + transformX / transformY));
+
+        double heightScale = m_size.y / transformY;
+        int spriteHeight = abs((int)heightScale);
+        spriteHeight = std::min(spriteHeight, (int)m_size.y * 3);
+        int spriteWidth = spriteHeight;
+
+        int horizon = (int)(m_size.y * 0.5 + p.pitch);
+        double enemyFootH = (double)getMapHeight(core, (int)e.x, (int)e.y, map_rows);
+
+        int footPx = (int)(horizon - (enemyFootH - p.eyeHeight) * heightScale);
+        int drawStartY = footPx - spriteHeight;
+
+        int drawStartX = spriteScreenX - spriteWidth / 2;
+        int drawEndX   = spriteScreenX + spriteWidth / 2;
+
+        int idx = -1;
+        if (templates) {
+            for (int k = 0; templates[k] != nullptr; k++) {
+                if (templates[k] == e.templateData) { idx = k; break; }
+            }
+        }
+        if (idx < 0 || idx >= (int)enemyTextures.size()) continue;
+        sfTexture* tex = enemyTextures[idx];
+        if (!tex) continue;
+
+        Enemy *tpl = e.templateData;
+        std::vector<int> sprite_x = tpl->getSpriteX();
+        std::vector<int> sprite_y = tpl->getSpriteY();
+        std::vector<std::pair<int,int>> shoot_anim = tpl->getShootAnim();
+
+        int gridX = 0;
+        int gridY = 0;
+        int default_frame_size = 64;
+
+        if (e.state == 1) {
+            if (shoot_anim.empty()) {
+                float progress = (tpl->getReshootTime() > 0.0f) ? (e.animTimer / tpl->getReshootTime()) : 0.0f;
+                gridX = (int)(progress * 4);
+                if (gridX > 3) gridX = 3;
+                gridY = 0;
+            } else {
+                int total_frames = shoot_anim.size();
+                float progress = (tpl->getReshootTime() > 0.0f) ? (e.animTimer / tpl->getReshootTime()) : 0.0f;
+                int current_frame = (int)(progress * total_frames);
+                if (current_frame >= total_frames) current_frame = total_frames - 1;
+                gridX = shoot_anim[current_frame].first;
+                gridY = shoot_anim[current_frame].second;
+            }
+        } else if (e.state == 2) {
+            gridX = (int)(e.animTimer * 6.0f) % 4;
+            gridY = 0;
+        } else {
+            gridX = 0;
+            gridY = 0;
+        }
+
+        int pixel_X_start = 0;
+        int pixel_X_end   = 0;
+        int pixel_Y_start = 0;
+        int pixel_Y_end   = 0;
+
+        if (!sprite_x.empty() && gridX < (int)sprite_x.size()) {
+            pixel_X_start = sprite_x[gridX];
+            pixel_X_end = (gridX + 1 < (int)sprite_x.size())
+                ? sprite_x[gridX + 1]
+                : pixel_X_start + default_frame_size;
+        } else {
+            pixel_X_start = gridX * default_frame_size;
+            pixel_X_end   = pixel_X_start + default_frame_size;
+        }
+
+        if (!sprite_y.empty() && gridY < (int)sprite_y.size()) {
+            pixel_Y_start = sprite_y[gridY];
+            pixel_Y_end = (gridY + 1 < (int)sprite_y.size())
+                ? sprite_y[gridY + 1]
+                : pixel_Y_start + default_frame_size;
+        } else {
+            pixel_Y_start = gridY * default_frame_size;
+            pixel_Y_end   = pixel_Y_start + default_frame_size;
+        }
+
+        int frameW = pixel_X_end - pixel_X_start;
+        int frameH = pixel_Y_end - pixel_Y_start;
+        if (frameW <= 0) frameW = default_frame_size;
+        if (frameH <= 0) frameH = default_frame_size;
+
+        for (int stripe = std::max(0, drawStartX); stripe < std::min((int)m_size.x, drawEndX); stripe++) {
+            if (transformY >= m_depthBuffer[stripe])
+                continue;
+            int localX = (int)(((stripe - drawStartX) * frameW) / (float)spriteWidth);
+            localX = std::max(0, std::min(frameW - 1, localX));
+            int texX = pixel_X_start + localX;
+
+            sfIntRect rect = { texX, pixel_Y_start, 1, frameH };
+            sfSprite_setTexture(m_enemySprite, tex, sfFalse);
+            sfSprite_setTextureRect(m_enemySprite, rect);
+            sfSprite_setPosition(m_enemySprite, (sfVector2f){ (float)stripe, (float)std::max(0, drawStartY) });
+            float scaleY = spriteHeight / (float)frameH;
+            sfSprite_setScale(m_enemySprite, (sfVector2f){ 1.0f, scaleY });
+            sfRenderWindow_drawSprite(window, m_enemySprite, nullptr);
+        }
+    }
 }

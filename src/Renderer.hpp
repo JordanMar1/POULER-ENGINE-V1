@@ -9,7 +9,8 @@
 #include <SFML/Graphics.h>
 #include <future>
 #include "Player.hpp"
-
+#include <vector>
+#include "ActiveEnemy.hpp"
 class Core;
 
 class Renderer {
@@ -19,16 +20,19 @@ class Renderer {
         void resize(sfVector2u newSize);
         void initFrameRender(Core* core, Player p, int map_rows);
         void drawScene(sfRenderWindow* window, float lean);
-
         sfSprite* getSprite() { return m_sprite; }
+        void drawEnemies(sfRenderWindow* window, Core* core, const Player& p,
+                          std::vector<ActiveEnemy>& enemies,
+                          std::vector<sfTexture*>& enemyTextures, int map_rows);
     private:
         sfUint8* m_pixels;
         sfTexture* m_texture;
         sfSprite* m_sprite;
         sfVector2u m_size;
+        sfSprite *m_enemySprite;
         std::future<void> m_renderFuture;
         bool m_isRendering;
-
+        std::vector<double> m_depthBuffer;
         struct Ray {
             double posX, posY;
             double dirX, dirY;

@@ -51,7 +51,7 @@ Head *parse_heads(char ***parsed_file, bool debug)
             long hp_val = strtol(parsed_file[i][j], &endptr, 10);
             if (endptr != parsed_file[i][j] && *endptr == '\0'
             && parsed_file[i][j + 1] != nullptr) {
-                HeadThreshold t = {0, 0, 0, 0};
+                HeadThreshold t = {0, 0, 0, 0, 0};
                 int parsed_count = sscanf(parsed_file[i][j + 1], "%d,%d,%d,%d",
                     &t.x1, &t.y1, &t.x2, &t.y2);
                 if (parsed_count == 4) {

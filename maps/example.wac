@@ -57,7 +57,7 @@
 :y:750:
 :scale_x:3.5:
 :scale_y:3.5:
-:fire_distance:10:
+:fire_distance:100:
 :SP_x:0-127-265-377-473:
 :SP_y:0-107-210-288:
 :SH_AM:0,0-1,0-2,0:
@@ -70,34 +70,21 @@
 :AIM:2,3:
 :RD_TIME:4:
 :id:1:
+#enemy:
+:name:nugget anglais:
+:sprite:assets/enemy/englishmen.png:
+:dmg:10:
+:ammo:2:
+:fire_distance:1:
+:hp:20:
+:reload_time:2.5:
+:reshoot_time:1.5:
+:char:c:
+:SP_x:0-59-118-177-236-295-354-413-474:
+:SP_y:0-59:
+:SH_AM:0,1-1,2-2,3:
+:RD_AM:0,1-3,4-4,5-5,6-6,7-7,8:
 
-#map:
-:name:begin:
-:id:0:
-:type:1:
-:content:
-WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWTWWWWWW
-W                                                           W
-W                                                           W
-W                                                           W
-W                                                           W
-W                                                           W
-W                                                           W
-W       S  1W                                          1W   W
-W                                                           W
-WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW:
-:heatmap:
-00000000000000000000000000000000000000000000000000000000000
-01234567000000000000000000000000000000000000000000076543210
-00000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000:
-:music:assets/sounds/menu.ogg:
 #map:
 :name:Poulertisassion:
 :id:1:
@@ -107,8 +94,8 @@ WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
 W      1                                                    W
 W                                                           W
 W  S                                                        W
-W                                                           W
-W                                                           W
+W                                 c                         W
+W                    c                                      W
 W                                                           W
 W                                                           W
 W                                                           W

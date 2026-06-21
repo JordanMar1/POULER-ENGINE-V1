@@ -23,6 +23,35 @@ static bool findTeleport(Core *core, int map_rows, int srcX, int srcY, double &d
     return false;
 }
 
+void Game::TryDamageEnemy(Core *core, Player &p, Weapons *w, std::vector<ActiveEnemy> &enemies, int map_rows)
+{
+    double maxDist = w->fire_distance;
+    double stepSize = 0.05;
+    double traveled = 0.0;
+    double rayX = p.x;
+    double rayY = p.y;
+    while (traveled < maxDist) {
+        rayX += p.dirX * stepSize;
+        rayY += p.dirY * stepSize;
+        traveled += stepSize;
+        if (getH(core, (int)rayX, (int)rayY, map_rows) == 99)
+            return;
+        for (auto &enemy : enemies) {
+            if (!enemy.isAlive)
+                continue;
+            double dx = enemy.x - rayX;
+            double dy = enemy.y - rayY;
+            double dist = sqrt(dx * dx + dy * dy);
+            if (dist < 0.5) {
+                enemy.hp -= w->dmg;
+                if (enemy.hp <= 0)
+                    enemy.isAlive = false;
+                return;
+            }
+        }
+    }
+}
+
 int Game::getH(Core *core, int mx, int my, int map_rows){
     char **map = core->getMaps()->getMapArray();
     int **heatmap = core->getMaps()->getHeatmap();
@@ -121,7 +150,6 @@ void Game::RenderWeapon(sfRenderWindow *window, const std::vector<Weapons *> &we
 
 void Game::RenderHead(Core *core, sfRenderWindow *window, Player &p) {
     Head *head = core->getHead();
-    
     if (!head || !head->texture || !head->sprite)
         return;
     HeadThreshold *t = head->get_threshold(p.hp);
@@ -195,7 +223,8 @@ void Game::ManageMouse(sfRenderWindow *window, Player &p, Settings *settings){
     }
 }
 
-void Game::HandleInputs(Core *core, Player &p, float dt, int map_rows, std::vector<Weapons *> &weapons, int current_weapon_idx, int &weapon_state, float &weapon_timer){
+bool Game::HandleInputs(Core *core, Player &p, float dt, int map_rows, std::vector<Weapons *> &weapons, int current_weapon_idx, int &weapon_state, float &weapon_timer){
+    bool didShoot = false;
     auto tryMove = [&](double nx, double ny) {
         int nh = getH(core, (int)nx, (int)ny, map_rows);
         int ch = getH(core, (int)p.x, (int)p.y, map_rows);
@@ -234,7 +263,7 @@ void Game::HandleInputs(Core *core, Player &p, float dt, int map_rows, std::vect
     if (sfKeyboard_isKeyPressed(core->getSettings()->binds.moveForward)) tryMove(p.x + p.dirX * mv, p.y + p.dirY * mv);
     if (sfKeyboard_isKeyPressed(core->getSettings()->binds.moveBack))    tryMove(p.x - p.dirX * mv, p.y - p.dirY * mv);
     if (sfKeyboard_isKeyPressed(core->getSettings()->binds.moveLeft))        tryMove(p.x + p.dirY * mv, p.y - p.dirX * mv);
-    if (sfKeyboard_isKeyPressed(core->getSettings()->binds.moveRight))        tryMove(p.x - p.dirY * mv, p.y + p.dirX * mv);
+    if (sfKeyboard_isKeyPressed(core->getSettings()->binds.moveRight))       tryMove(p.x - p.dirY * mv, p.y + p.dirX * mv);
     double mapH = (double)getH(core, (int)p.x, (int)p.y, map_rows);
     if (mapH >= 99) mapH = p.height;
     double targetH = mapH + (p.crouching ? p.crouchHeight : p.defaultHeight);
@@ -258,8 +287,6 @@ void Game::HandleInputs(Core *core, Player &p, float dt, int map_rows, std::vect
         }
     }
     if (weapon_state == 0 && !weapons.empty() && sfKeyboard_isKeyPressed((core->getSettings()->binds.reload))) {
-        if (core->getWindow()->isDebug())
-            std::cout << "reloading..." << std::endl;
         Weapons *w = weapons[current_weapon_idx];
         if (w->mag > 0) {
             weapon_state = 2;
@@ -269,16 +296,82 @@ void Game::HandleInputs(Core *core, Player &p, float dt, int map_rows, std::vect
         }
     }
     if (weapon_state == 0 && !weapons.empty()) {
-        if (sfMouse_isButtonPressed((core->getSettings()->binds.shoot))) {
-            if (core->getWindow()->isDebug())
-                std::cout << "shooting..." << std::endl;
-            Weapons *w = weapons[current_weapon_idx];
-            if (w->ammo > 0) {
-                w->ammo--;
-                weapon_state = 1;
-                weapon_timer = 0.0f;
-                sfSound_play(w->shoot_sound);
+            if (sfMouse_isButtonPressed((core->getSettings()->binds.shoot))) {
+                Weapons *w = weapons[current_weapon_idx];
+                if (w->ammo > 0) {
+                    w->ammo--;
+                    weapon_state = 1;
+                    weapon_timer = 0.0f;
+                    sfSound_play(w->shoot_sound);
+                    didShoot = true;
+                }
             }
+        }
+        return didShoot;
+}
+
+std::vector<ActiveEnemy> Game::InitEnemies(Core *core, char **mapArray, int map_rows)
+{
+    std::vector<ActiveEnemy> activeEnemies;
+    Enemy **enemyTemplates = core->getEnemies();
+    if (!enemyTemplates)
+        return activeEnemies;
+    for (int i = 0; i < map_rows; i++) {
+        if (!mapArray[i]) continue;
+        for (int j = 0; mapArray[i][j]; j++) {
+            char tile = mapArray[i][j];
+            if (tile == 'S' || tile == '0')
+                continue;
+            for (int k = 0; enemyTemplates[k] != nullptr; k++) {
+                if (enemyTemplates[k]->getChar() == tile) {
+                    activeEnemies.emplace_back(enemyTemplates[k], j + 0.5, i + 0.5, enemyTemplates[k]->getHp());
+                    mapArray[i][j] = '0';
+                    break;
+                }
+            }
+        }
+    }
+    return activeEnemies;
+}
+
+void Game::UpdateEnemies(Core *core, std::vector<ActiveEnemy> &enemies, Player &p, int map_rows, float dt)
+{
+    const double ENEMY_SPEED = 1.5;
+
+    for (auto &enemy : enemies) {
+        if (!enemy.isAlive)
+            continue;
+        enemy.animTimer += dt;
+        if (enemy.state == 1 && enemy.animTimer >= enemy.templateData->getReshootTime()) {
+            enemy.state = 0;
+            enemy.animTimer = 0.0f;
+        }
+        double dx = p.x - enemy.x;
+        double dy = p.y - enemy.y;
+        double distance = sqrt(dx * dx + dy * dy);
+        if (distance > enemy.templateData->getDist() && distance > 0.01) {
+            double dirX = dx / distance;
+            double dirY = dy / distance;
+            double nx = enemy.x + dirX * ENEMY_SPEED * dt;
+            double ny = enemy.y + dirY * ENEMY_SPEED * dt;
+            if (getH(core, (int)nx, (int)enemy.y, map_rows) != 99)
+                enemy.x = nx;
+            if (getH(core, (int)enemy.x, (int)ny, map_rows) != 99)
+                enemy.y = ny;
+            if (enemy.state == 0) {
+                enemy.state = 2;
+            }
+        } else {
+            enemy.attackTimer += dt;
+            if (enemy.attackTimer >= enemy.templateData->getReshootTime()) {
+                p.hp -= enemy.templateData->getDmg();
+                enemy.attackTimer = 0.0f;
+                enemy.state = 1;
+                enemy.animTimer = 0.0f;
+            }
+        }
+        if (enemy.hp <= 0) {
+            enemy.isAlive = false;
         }
     }
 }
@@ -290,7 +383,7 @@ int Game::Play(Core *core, Maps *map){
     sfMusic_play(map->getMusic());
     int map_rows = 0;
     while (mapArray[map_rows]) map_rows++;
-    sfRenderWindow *window = core->getWindow()->getWindow();    
+    sfRenderWindow *window = core->getWindow()->getWindow();
     Player &p = *core->getPlayer();
     bool spawn_found = false;
     for (int i = 0; i < map_rows; i++) {
@@ -305,7 +398,16 @@ int Game::Play(Core *core, Maps *map){
     }
     if (!spawn_found) {
         std::cerr << "[ERROR] Aucun point de spawn 'S' trouvé dans la map !" << std::endl;
-        p.x = 1.5; p.y = 1.5; 
+        p.x = 1.5; p.y = 1.5;
+    }
+    std::vector<ActiveEnemy> activeEnemies = InitEnemies(core, mapArray, map_rows);
+    std::vector<sfTexture *> enemyTextures;
+    Enemy **enemyTemplates = core->getEnemies();
+    if (enemyTemplates) {
+        for (int i = 0; enemyTemplates[i] != nullptr; i++) {
+            sfTexture *t = enemyTemplates[i]->getTexture();
+            enemyTextures.push_back(t);
+        }
     }
     sfVector2u currentSize = sfRenderWindow_getSize(window);
     Renderer renderer(currentSize);
@@ -366,7 +468,7 @@ int Game::Play(Core *core, Maps *map){
                 return core->menu_return();
             }
             if (event.type == sfEvtKeyPressed && event.key.code == core->getSettings()->binds.crouch)
-                p.crouching = !p.crouching;   
+                p.crouching = !p.crouching;
             if (event.type == sfEvtKeyPressed && event.key.code >= sfKeyNum1 && event.key.code <= sfKeyNum9) {
                 int selected = event.key.code - sfKeyNum1;
                 if (selected < (int)weapons.size() && weapon_state == 0) {
@@ -375,10 +477,15 @@ int Game::Play(Core *core, Maps *map){
             }
         }
         ManageMouse(window, p, core->getSettings());
-        HandleInputs(core, p, dt, map_rows, weapons, current_weapon_idx, weapon_state, weapon_timer);
+        bool didShoot = HandleInputs(core, p, dt, map_rows, weapons, current_weapon_idx, weapon_state, weapon_timer);
+        if (didShoot) {
+            TryDamageEnemy(core, p, weapons[current_weapon_idx], activeEnemies, map_rows);
+        }
+        UpdateEnemies(core, activeEnemies, p, map_rows, dt);
         renderer.initFrameRender(core, p, map_rows);
         sfRenderWindow_clear(window, sfBlack);
         renderer.drawScene(window, p.lean);
+        renderer.drawEnemies(window, core, p, activeEnemies, enemyTextures, map_rows);
         RenderWeapon(window, weapons, weapon_textures, weapon_sprite, current_weapon_idx, weapon_state, weapon_timer);
         RenderHead(core, window, p);
         ui.render(window, core->getPlayer(), weapons, current_weapon_idx, dt);
@@ -386,6 +493,9 @@ int Game::Play(Core *core, Maps *map){
         sfRenderWindow_display(window);
     }
     for (auto *t : weapon_textures) {
+        if (t) sfTexture_destroy(t);
+    }
+    for (auto *t : enemyTextures) {
         if (t) sfTexture_destroy(t);
     }
     sfSprite_destroy(weapon_sprite);
