@@ -32,3 +32,17 @@ $> ./pouler_or_not -f path/to/your/config.wac -d #if you want debbuger activated
 | Documentation         | ❌ No |
 | Advertisement          | ❌ No |
 
+
+### 📊 FEATURES Roadmap
+| Feature | Advancement |  Modding |
+| ------------- | ------ | ------ |
+| Menu   | ✅ Yes |  ✅ Yes  |
+| Raycasting         | ✅ Yes | Not planned |
+|  Shoot  | ✅ Yes | ✅ Animation and controls |
+|   Enemy (take damage, inflict damage, kill, die) | 🚧 Doing | ✅ Animations
+| Reload         | ✅ Yes | ✅ controls and check ammo button |
+| Move          | ✅ Yes | ✅ Yes (with settings) |
+| Height          | ✅ Yes | ✅ Yes |
+| Teleporters          | ✅ Yes | ✅ Yes |
+| Textures          | ❌ No | ❌ No |
+
