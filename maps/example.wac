@@ -57,7 +57,7 @@
 :y:750:
 :scale_x:3.5:
 :scale_y:3.5:
-:fire_distance:10:
+:fire_distance:100:
 :SP_x:0-127-265-377-473:
 :SP_y:0-107-210-288:
 :SH_AM:0,0-1,0-2,0:
@@ -80,8 +80,8 @@
 :reload_time:2.5:
 :reshoot_time:1.5:
 :char:c:
-:SP_x:0-600-1200-1800-2400-3000-3600-4200-4800:
-:SP_y:0-600:
+:SP_x:0-59-118-177-236-295-354-413-474:
+:SP_y:0-59:
 :SH_AM:0,1-1,2-2,3:
 :RD_AM:0,1-3,4-4,5-5,6-6,7-7,8:
 
@@ -121,7 +121,7 @@ WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
 W      1                                                    W
 W                                                           W
 W  S                                                        W
-W                                 ccccc                     W
+W                                 c                         W
 W                    c                                      W
 W                                                           W
 W                                                           W

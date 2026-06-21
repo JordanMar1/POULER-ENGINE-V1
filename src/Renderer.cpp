@@ -258,16 +258,43 @@ void Renderer::drawEnemies(sfRenderWindow* window, Core* core, const Player& p,
 
         sfVector2u texSize = sfTexture_getSize(tex);
 
+        int totalCols = 4; // TODO: ajuster selon le sprite-sheet réel
+        int totalRows = 3; // TODO: ajuster selon le sprite-sheet réel (idle/attaque/marche)
+        int frameW = (int)texSize.x / totalCols;
+        int frameH = (int)texSize.y / totalRows;
+
+        int gridX = 0;
+        int gridY = 0;
+        if (e.state == 1) {
+            float progress = (e.templateData->getReshootTime() > 0.0f)
+                ? (e.animTimer / e.templateData->getReshootTime()) : 0.0f;
+            gridX = (int)(progress * totalCols);
+            if (gridX >= totalCols) gridX = totalCols - 1;
+            gridY = 1;
+        } else if (e.state == 2) {
+            gridX = (int)(e.animTimer * 6.0f) % totalCols;
+            gridY = 2;
+        } else {
+            gridX = 0;
+            gridY = 0;
+        }
+        if (gridY >= totalRows) gridY = totalRows - 1;
+
+        int baseTexX = gridX * frameW;
+        int baseTexY = gridY * frameH;
+
         for (int stripe = std::max(0, drawStartX); stripe < std::min((int)m_size.x, drawEndX); stripe++) {
             if (transformY >= m_depthBuffer[stripe])
                 continue;
-            int texX = (int)(((stripe - drawStartX) * texSize.x) / (float)spriteWidth);
-            texX = std::max(0, std::min((int)texSize.x - 1, texX));
-            sfIntRect rect = { texX, 0, 1, (int)texSize.y };
+            int localX = (int)(((stripe - drawStartX) * frameW) / (float)spriteWidth);
+            localX = std::max(0, std::min(frameW - 1, localX));
+            int texX = baseTexX + localX;
+
+            sfIntRect rect = { texX, baseTexY, 1, frameH };
             sfSprite_setTexture(m_enemySprite, tex, sfFalse);
             sfSprite_setTextureRect(m_enemySprite, rect);
             sfSprite_setPosition(m_enemySprite, (sfVector2f){ (float)stripe, (float)std::max(0, drawStartY) });
-            float scaleY = spriteHeight / (float)texSize.y;
+            float scaleY = spriteHeight / (float)frameH;
             sfSprite_setScale(m_enemySprite, (sfVector2f){ 1.0f, scaleY });
             sfRenderWindow_drawSprite(window, m_enemySprite, nullptr);
         }
