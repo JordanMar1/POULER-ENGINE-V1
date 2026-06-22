@@ -324,7 +324,15 @@ std::vector<ActiveEnemy> Game::InitEnemies(Core *core, char **mapArray, int map_
                 continue;
             for (int k = 0; enemyTemplates[k] != nullptr; k++) {
                 if (enemyTemplates[k]->getChar() == tile) {
-                    activeEnemies.emplace_back(enemyTemplates[k], j + 0.5, i + 0.5, enemyTemplates[k]->getHp());
+                    ActiveEnemy newEnemy(enemyTemplates[k], j + 0.5, i + 0.5, enemyTemplates[k]->getHp());
+                    newEnemy.templateData = enemyTemplates[k];
+                    newEnemy.isAlive = true;
+                    newEnemy.state = 0;
+                    newEnemy.animTimer = 0.0f;
+                    newEnemy.stuckTimer = 0.0f;
+                    newEnemy.wanderRight = false;
+                    newEnemy.ammo = enemyTemplates[k]->getAmmo();
+                    activeEnemies.push_back(newEnemy);
                     mapArray[i][j] = '0';
                     break;
                 }
@@ -336,43 +344,12 @@ std::vector<ActiveEnemy> Game::InitEnemies(Core *core, char **mapArray, int map_
 
 void Game::UpdateEnemies(Core *core, std::vector<ActiveEnemy> &enemies, Player &p, int map_rows, float dt)
 {
-    const double ENEMY_SPEED = 1.5;
-
     for (auto &enemy : enemies) {
         if (!enemy.isAlive)
             continue;
-        enemy.animTimer += dt;
-        if (enemy.state == 1 && enemy.animTimer >= enemy.templateData->getReshootTime()) {
-            enemy.state = 0;
-            enemy.animTimer = 0.0f;
-        }
-        double dx = p.x - enemy.x;
-        double dy = p.y - enemy.y;
-        double distance = sqrt(dx * dx + dy * dy);
-        if (distance > enemy.templateData->getDist() && distance > 0.01) {
-            double dirX = dx / distance;
-            double dirY = dy / distance;
-            double nx = enemy.x + dirX * ENEMY_SPEED * dt;
-            double ny = enemy.y + dirY * ENEMY_SPEED * dt;
-            if (getH(core, (int)nx, (int)enemy.y, map_rows) != 99)
-                enemy.x = nx;
-            if (getH(core, (int)enemy.x, (int)ny, map_rows) != 99)
-                enemy.y = ny;
-            if (enemy.state == 0) {
-                enemy.state = 2;
-            }
-        } else {
-            enemy.attackTimer += dt;
-            if (enemy.attackTimer >= enemy.templateData->getReshootTime()) {
-                p.hp -= enemy.templateData->getDmg();
-                enemy.attackTimer = 0.0f;
-                enemy.state = 1;
-                enemy.animTimer = 0.0f;
-            }
-        }
-        if (enemy.hp <= 0) {
+        core->updateEnemyState(enemy, p, dt, map_rows);
+        if (enemy.hp <= 0)
             enemy.isAlive = false;
-        }
     }
 }
 

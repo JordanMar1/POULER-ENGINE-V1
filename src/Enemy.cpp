@@ -65,6 +65,7 @@ Enemy::Enemy(char **enemyContent)
         if (key == "SP_y") _sprite_y = parse_int_list(val);
         if (key == "SH_AM") _shoot_anim = parse_anim_frames(val);
         if (key == "RD_AM") _reload_anim = parse_anim_frames(val);
+        if (key == "WLK_AM") _walk_anim = parse_anim_frames(val);
     }
 }
 
@@ -84,6 +85,7 @@ std::vector<int> Enemy::getSpriteX() { return _sprite_x; }
 std::vector<int> Enemy::getSpriteY() { return _sprite_y; }
 std::vector<std::pair<int, int>> Enemy::getShootAnim() { return _shoot_anim; }
 std::vector<std::pair<int, int>> Enemy::getReloadAnim() { return _reload_anim; }
+std::vector<std::pair<int, int>> Enemy::getWalkAnim() { return _walk_anim; }
 
 Enemy **enemyBuilder(char ***parsed_file)
 {

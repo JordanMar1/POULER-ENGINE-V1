@@ -46,7 +46,14 @@ int Renderer::getMapHeight(Core* core, int mx, int my, int map_rows) const
     char **map = core->getMaps()->getMapArray();
     int **heatmap = core->getMaps()->getHeatmap();
 
-    if (my < 0 || my >= map_rows || mx < 0 || !map[my] || (size_t)mx >= strlen(map[my]))
+    if (my < 0 || my >= map_rows)
+        return 0;
+    if (!map[my])
+        return 0;
+    if (mx < 0)
+        return 0;
+    size_t len = strlen(map[my]);
+    if ((size_t)mx >= len)
         return 0;
     if (map[my][mx] == 'W') return 99;
     int h = heatmap[my][mx];
@@ -154,6 +161,9 @@ void Renderer::renderColumn(Core* core, int x, const Player& p, int map_rows, in
                     int idx = (y * m_size.x + x) * 4;
                     m_pixels[idx] = m_pixels[idx+1] = m_pixels[idx+2] = (sfUint8)val;
                 }
+                if (curH > lastH) {
+                    m_depthBuffer[x] = std::min(m_depthBuffer[x], dist);
+                }
                 if (curH == 99) {
                     m_depthBuffer[x] = dist;
                     break;
@@ -216,76 +226,89 @@ void Renderer::drawEnemies(sfRenderWindow* window, Core* core, const Player& p,
         double db = (b->x - p.x) * (b->x - p.x) + (b->y - p.y) * (b->y - p.y);
         return da > db;
     });
-
     double invDet = 1.0 / (p.planeX * p.dirY - p.dirX * p.planeY);
     Enemy **templates = core->getEnemies();
-
     for (auto* ePtr : visible) {
         ActiveEnemy &e = *ePtr;
-        double spriteX = e.x - p.x;
-        double spriteY = e.y - p.y;
-
+        double ex = std::isfinite(e.x) ? e.x : 0.0;
+        double ey = std::isfinite(e.y) ? e.y : 0.0;
+        double spriteX = ex - p.x;
+        double spriteY = ey - p.y;
         double transformX = invDet * (p.dirY * spriteX - p.dirX * spriteY);
         double transformY = invDet * (-p.planeY * spriteX + p.planeX * spriteY);
-
         if (transformY <= 0.3) continue;
-
+        if (!std::isfinite(transformX) || !std::isfinite(transformY)) continue;
         int spriteScreenX = (int)((m_size.x / 2.0) * (1 + transformX / transformY));
-
         double heightScale = m_size.y / transformY;
         int spriteHeight = abs((int)heightScale);
         spriteHeight = std::min(spriteHeight, (int)m_size.y * 3);
         int spriteWidth = spriteHeight;
-
         int horizon = (int)(m_size.y * 0.5 + p.pitch);
-        double enemyFootH = (double)getMapHeight(core, (int)e.x, (int)e.y, map_rows);
-
+        double enemyFootH = (double)getMapHeight(core, (int)ex, (int)ey, map_rows);
         int footPx = (int)(horizon - (enemyFootH - p.eyeHeight) * heightScale);
         int drawStartY = footPx - spriteHeight;
-
         int drawStartX = spriteScreenX - spriteWidth / 2;
         int drawEndX   = spriteScreenX + spriteWidth / 2;
-
         int idx = -1;
         if (templates) {
-            for (int k = 0; templates[k] != nullptr; k++) {
+            int max_templates = enemyTextures.size();
+            for (int k = 0; k < max_templates && templates[k] != nullptr; k++) {
                 if (templates[k] == e.templateData) { idx = k; break; }
             }
         }
         if (idx < 0 || idx >= (int)enemyTextures.size()) continue;
         sfTexture* tex = enemyTextures[idx];
         if (!tex) continue;
-
         Enemy *tpl = e.templateData;
         std::vector<int> sprite_x = tpl->getSpriteX();
         std::vector<int> sprite_y = tpl->getSpriteY();
-        std::vector<std::pair<int,int>> shoot_anim = tpl->getShootAnim();
+        std::vector<std::pair<int,int>> shoot_anim  = tpl->getShootAnim();
+        std::vector<std::pair<int,int>> walk_anim   = tpl->getWalkAnim();
+        std::vector<std::pair<int,int>> reload_anim = tpl->getReloadAnim();
 
         int gridX = 0;
         int gridY = 0;
         int default_frame_size = 64;
-
         if (e.state == 1) {
+            float progress = (tpl->getReshootTime() > 0.0f) ? (e.animTimer / tpl->getReshootTime()) : 0.0f;
+            progress = std::max(0.0f, progress);
             if (shoot_anim.empty()) {
-                float progress = (tpl->getReshootTime() > 0.0f) ? (e.animTimer / tpl->getReshootTime()) : 0.0f;
-                gridX = (int)(progress * 4);
-                if (gridX > 3) gridX = 3;
+                gridX = std::max(0, std::min(3, (int)(progress * 4)));
                 gridY = 0;
             } else {
                 int total_frames = shoot_anim.size();
-                float progress = (tpl->getReshootTime() > 0.0f) ? (e.animTimer / tpl->getReshootTime()) : 0.0f;
-                int current_frame = (int)(progress * total_frames);
-                if (current_frame >= total_frames) current_frame = total_frames - 1;
+                int current_frame = std::max(0, std::min(total_frames - 1, (int)(progress * total_frames)));
                 gridX = shoot_anim[current_frame].first;
                 gridY = shoot_anim[current_frame].second;
             }
+        } else if (e.state == 3) {
+            float progress = (tpl->getReloadTime() > 0.0f) ? (e.animTimer / tpl->getReloadTime()) : 0.0f;
+            progress = std::max(0.0f, progress);
+            if (reload_anim.empty()) {
+                gridX = std::max(0, std::min(3, (int)(progress * 4)));
+                gridY = 0;
+            } else {
+                int total_frames = reload_anim.size();
+                int current_frame = std::max(0, std::min(total_frames - 1, (int)(progress * total_frames)));
+                gridX = reload_anim[current_frame].first;
+                gridY = reload_anim[current_frame].second;
+            }
         } else if (e.state == 2) {
-            gridX = (int)(e.animTimer * 6.0f) % 4;
-            gridY = 0;
+            if (walk_anim.empty()) {
+                gridX = std::abs((int)(e.animTimer * 6.0f)) % 4;
+                gridY = 0;
+            } else {
+                int total_frames = walk_anim.size();
+                int current_frame = std::abs((int)(e.animTimer * 6.0f)) % total_frames;
+                gridX = walk_anim[current_frame].first;
+                gridY = walk_anim[current_frame].second;
+            }
         } else {
             gridX = 0;
             gridY = 0;
         }
+        gridX = std::max(0, gridX);
+        gridY = std::max(0, gridY);
 
         int pixel_X_start = 0;
         int pixel_X_end   = 0;

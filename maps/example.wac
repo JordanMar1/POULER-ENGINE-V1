@@ -76,15 +76,15 @@
 :dmg:10:
 :ammo:2:
 :fire_distance:1:
-:hp:20:
+:hp:100:
 :reload_time:2.5:
 :reshoot_time:1.5:
 :char:c:
-:SP_x:0-60-120-180-240-300-360-420-480-540-600-660-720-780-840:
+:SP_x:0-60-120-180-240-300-360-420-480-540-600-660-720-780-840-900:
 :SP_y:0-60:
-:SH_AM:4,0-5,0-6,0-7,0-8,0-9,0-10,0-11,0-12,0-13,0:
-:RD_AM:0,0:
-:WALK_AM:0,0-1,0-2,0-3,0:
+:SH_AM:4,0-5,0-6,0-7,0-8,0-9,0-10,0:
+:RD_AM:0,0-1,0-2,0-3,0:
+:WLK_AM:10,0-11,0-12,0-13,0:
 
 #map:
 :name:Poulertisassion:
@@ -92,13 +92,13 @@
 :type:1:
 :content:
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-W      1                                                    W
-W                                                           W
-W  S                                                        W
-W                                 c                         W
-W                    c                                      W
-W                                                           W
-W                                                           W
+W      1      W                                             W
+W             W                                             W
+W  S          W                                             W
+W             W                   c                         W
+W             W      c                                      W
+W             W                                             W
+W             W                                             W
 W                                                           W
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW

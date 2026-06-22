@@ -17,7 +17,7 @@
 #include "InterfaceItems.hpp"
 #include "Head.hpp"
 #include "Enemy.hpp"
-
+#include "ActiveEnemy.hpp"
 class Core {
     private:
         Window *window;
@@ -30,9 +30,12 @@ class Core {
         Player *player;
         Head *head;
         Enemy **enemies;
+        int getMapHeightForEnemy(int mx, int my, int map_rows) const;
     public:
         Core(Window *window, Menu *menu, GameData *gameData, Settings *settings, std::vector<Weapons *> weapons, Player *player, Head *head, Enemy **enemies) : window(window), menu(menu), gameData(gameData), settings(settings), weapons(weapons), player(player), head(head), enemies(enemies), interfaceItems({}) {};
         ~Core();
+        void updateEnemyState(ActiveEnemy &e, Player &p, float dt, int map_rows);
+        void UpdateEnemies(std::vector<ActiveEnemy> &enemies, Player &p, float dt, Core *core, int map_rows);
         int chooseLevel(void);
         int menu_return(void);
         void setMaps(Maps *maps) { this->maps = maps; }

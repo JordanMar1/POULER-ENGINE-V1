@@ -37,6 +37,7 @@ class Enemy {
         std::vector<int> getSpriteY();
         std::vector<std::pair<int, int>> getShootAnim();
         std::vector<std::pair<int, int>> getReloadAnim();
+        std::vector<std::pair<int,int>> getWalkAnim();
 
     private:
         char _char;
@@ -53,6 +54,7 @@ class Enemy {
         std::vector<int> _sprite_y;
         std::vector<std::pair<int, int>> _shoot_anim;
         std::vector<std::pair<int, int>> _reload_anim;
+        std::vector<std::pair<int,int>> _walk_anim;
 };
 
 Enemy **enemyBuilder(char ***parsed_file);
